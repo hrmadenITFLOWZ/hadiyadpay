@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { cardOptions, CardOption } from '../data/cardOptions';
+import CheckoutModal from './CheckoutModal';
 
 interface CardBuilderProps {
   currentLanguage: string;
@@ -11,14 +12,12 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   const [selectedCard, setSelectedCard] = useState<CardOption>(cardOptions[0]);
   const [recipientName, setRecipientName] = useState('');
   const [senderName, setSenderName] = useState('');
-  const [message, setMessage] = useState(
-    selectedCard.defaultMessage[currentLanguage] || selectedCard.defaultMessage['en']
-  );
+  const [message, setMessage] = useState(selectedCard.defaultMessage['en']);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
-  // Update het bericht automatisch wanneer je van kaart of taal wisselt
   useEffect(() => {
-    setMessage(selectedCard.defaultMessage[currentLanguage] || selectedCard.defaultMessage['en']);
-  }, [selectedCard, currentLanguage]);
+    setMessage(selectedCard.defaultMessage['en']);
+  }, [selectedCard]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-6xl mx-auto p-4">
@@ -26,17 +25,19 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
       <div className="bg-white/80 backdrop-blur-md p-6 rounded-2xl shadow-xl border border-gray-100 flex flex-col gap-6">
         <div>
           <h2 className="text-xl font-bold text-gray-900 mb-1">
-            Craft Your Hadiyad
+            {currentLanguage === 'nl' ? 'Ontwerp je Hadiyad' : 'Craft Your Hadiyad'}
           </h2>
           <p className="text-sm text-gray-600">
-            Kudar farriin qiiro leh oo lama iloobaan ah. Share love back home instantly.
+            {currentLanguage === 'nl'
+              ? 'Verstuur direct liefde naar huis met een persoonlijke groet.'
+              : 'Share love back home instantly with a personalized greeting.'}
           </p>
         </div>
 
         {/* Select Occasion */}
         <div>
           <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
-            SELECT OCCASION ({cardOptions.length} available)
+            {currentLanguage === 'nl' ? `SELECTEER GELEGENHEID (${cardOptions.length})` : `SELECT OCCASION (${cardOptions.length})`}
           </label>
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300">
             {cardOptions.map((card) => {
@@ -66,25 +67,25 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                TO RECIPIENT
+                {currentLanguage === 'nl' ? 'AAN ONTVANGER' : 'TO RECIPIENT'}
               </label>
               <input
                 type="text"
                 value={recipientName}
                 onChange={(e) => setRecipientName(e.target.value)}
-                placeholder="e.g. Hooyo Macaan"
+                placeholder="bijv. Hooyo Macaan"
                 className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-900 bg-gray-50"
               />
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                FROM SENDER
+                {currentLanguage === 'nl' ? 'VAN AFZENDER' : 'FROM SENDER'}
               </label>
               <input
                 type="text"
                 value={senderName}
                 onChange={(e) => setSenderName(e.target.value)}
-                placeholder="e.g. Wiilkaada / Gabadhaada"
+                placeholder="bijv. Wiilkaada"
                 className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-900 bg-gray-50"
               />
             </div>
@@ -92,7 +93,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
           <div>
             <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-              PERSONALIZED MESSAGE
+              {currentLanguage === 'nl' ? 'PERSOONLIJK BERICHT' : 'PERSONALIZED MESSAGE'}
             </label>
             <textarea
               rows={3}
@@ -102,11 +103,12 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             />
           </div>
 
+          {/* Dynamische knop die van kleur wisselt op basis van de geselecteerde kaart */}
           <button
-            onClick={() => alert('Demo action: Hadiyad ready to send!')}
-            className="w-full py-3 px-4 bg-gradient-to-r from-emerald-700 to-emerald-900 hover:from-emerald-800 hover:to-emerald-950 text-white font-medium rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2 text-sm"
+            onClick={() => setIsCheckoutOpen(true)}
+            className={`w-full py-3 px-4 bg-gradient-to-r ${selectedCard.gradient} hover:brightness-110 text-white font-medium rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2 text-sm`}
           >
-            <span>Send Hadiyad & Instant Transfer 🚀</span>
+            <span>{currentLanguage === 'nl' ? 'Send Hadiyad & Instant Transfer 🚀' : 'Send Hadiyad & Instant Transfer 🚀'}</span>
           </button>
         </div>
       </div>
@@ -158,11 +160,24 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
           <div className="text-center mt-4">
             <p className="text-[11px] text-gray-400">
-              Secure financial transfers handled in partnership with licensed payment operators.
+              {currentLanguage === 'nl'
+                ? 'Veilige financiële overmakingen in samenwerking met gelicentieerde partners.'
+                : 'Secure financial transfers handled in partnership with licensed payment operators.'}
             </p>
           </div>
         </div>
       </div>
+
+      {/* Checkout Modal Popup met de benodigde props gekoppeld */}
+      <CheckoutModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        selectedOccasion={selectedCard}
+        recipientName={recipientName}
+        senderName={senderName}
+        message={message}
+        cardPrice={10}
+      />
     </div>
   );
 }
