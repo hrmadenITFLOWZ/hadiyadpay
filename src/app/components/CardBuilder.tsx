@@ -13,7 +13,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   const [recipientName, setRecipientName] = useState('');
   const [senderName, setSenderName] = useState('');
   
-  // Laat het bericht netjes de gekozen taal (of standaard Somalisch/fallback) volgen
   const [message, setMessage] = useState(
     selectedCard.defaultMessage[currentLanguage] || selectedCard.defaultMessage['en']
   );
@@ -26,15 +25,15 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-6xl mx-auto p-4">
       {/* Linkerkolom: Besturing & Selectie */}
-      <div className="bg-white/80 backdrop-blur-md p-6 rounded-2xl shadow-xl border border-gray-100 flex flex-col gap-6">
+      <div className="bg-white/85 backdrop-blur-md p-6 rounded-2xl shadow-2xl border border-gray-100 flex flex-col gap-6">
         <div>
           <h2 className="text-xl font-bold text-gray-900 mb-1">
-            {currentLanguage === 'nl' ? 'Ontwerp je Hadiyad' : 'Craft Your Hadiyad'}
+            {currentLanguage === 'nl' ? 'Ontwerp je Hadiyad ✨' : 'Craft Your Hadiyad ✨'}
           </h2>
           <p className="text-sm text-gray-600">
             {currentLanguage === 'nl'
-              ? 'Verstuur direct liefde naar huis met een persoonlijke groet.'
-              : 'Share love back home instantly with a personalized greeting.'}
+              ? 'Verstuur direct liefde naar huis met een unieke feestelijke groet.'
+              : 'Share love back home instantly with a unique festive greeting.'}
           </p>
         </div>
 
@@ -50,8 +49,8 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 <button
                   key={card.id}
                   onClick={() => setSelectedCard(card)}
-                  className={`flex-shrink-0 text-left p-3 rounded-xl transition-all duration-200 border relative overflow-hidden flex flex-col justify-between w-36 h-24 bg-gradient-to-br ${card.gradient} text-white shadow-md ${
-                    isSelected ? 'ring-4 ring-emerald-500 scale-105' : 'opacity-80 hover:opacity-100'
+                  className={`flex-shrink-0 text-left p-3 rounded-xl transition-all duration-200 border relative overflow-hidden flex flex-col justify-between w-36 h-24 bg-gradient-to-br ${card.gradient} text-white shadow-lg ${
+                    isSelected ? 'ring-4 ring-emerald-400 scale-105' : 'opacity-85 hover:opacity-100'
                   }`}
                 >
                   <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-black/30 backdrop-blur-sm self-start">
@@ -77,7 +76,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 type="text"
                 value={recipientName}
                 onChange={(e) => setRecipientName(e.target.value)}
-                placeholder="bijv. Hooyo Macaan"
+                placeholder={currentLanguage === 'nl' ? 'bijv. Hooyo Macaan 🌸' : 'e.g. Dearest Mother 🌸'}
                 className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-900 bg-gray-50"
               />
             </div>
@@ -89,7 +88,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 type="text"
                 value={senderName}
                 onChange={(e) => setSenderName(e.target.value)}
-                placeholder="bijv. Wiilkaada"
+                placeholder={currentLanguage === 'nl' ? 'bijv. Wiilkaada ✨' : 'e.g. Your Son ✨'}
                 className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-900 bg-gray-50"
               />
             </div>
@@ -107,12 +106,12 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             />
           </div>
 
-          {/* Knop neemt nu dynamisch exact dezelfde gradiënt/kleur aan als de geselecteerde kaart */}
+          {/* Dynamische knop kleurt mee met de geselecteerde kaart */}
           <button
             onClick={() => setIsCheckoutOpen(true)}
-            className={`w-full py-3 px-4 bg-gradient-to-br ${selectedCard.gradient} hover:brightness-110 text-white font-medium rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2 text-sm`}
+            className={`w-full py-3.5 px-4 bg-gradient-to-br ${selectedCard.gradient} hover:brightness-110 text-white font-semibold rounded-xl shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm`}
           >
-            <span>{currentLanguage === 'nl' ? 'Send Hadiyad & Instant Transfer 🚀' : 'Send Hadiyad & Instant Transfer 🚀'}</span>
+            <span>🚀 {currentLanguage === 'nl' ? 'Verstuur Hadiyad & Directe Overmaking' : 'Send Hadiyad & Instant Transfer'}</span>
           </button>
         </div>
       </div>
@@ -124,41 +123,41 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
               <span className="text-xs font-semibold text-gray-500 tracking-wider uppercase">
-                HADIYAD & JOY E-CARD PREVIEW
+                HADIYAD & JOY E-CARD PREVIEW 🎨
               </span>
             </div>
           </div>
 
-          {/* De E-card zelf */}
-          <div className={`w-full p-6 rounded-2xl bg-gradient-to-br ${selectedCard.gradient} text-white shadow-xl flex flex-col justify-between flex-grow my-2 transition-all duration-500`}>
+          {/* De E-card zelf met rijke emoji's */}
+          <div className={`w-full p-6 rounded-2xl bg-gradient-to-br ${selectedCard.gradient} text-white shadow-2xl flex flex-col justify-between flex-grow my-2 transition-all duration-500`}>
             <div className="flex justify-between items-center">
-              <span className="text-[10px] tracking-widest uppercase bg-white/20 px-2.5 py-1 rounded-md backdrop-blur-sm font-bold">
+              <span className="text-[10px] tracking-widest uppercase bg-white/25 px-2.5 py-1 rounded-md backdrop-blur-sm font-bold shadow-sm">
                 HADIYADPAY • {selectedCard.badge[currentLanguage] || selectedCard.badge['en']}
               </span>
-              <span className="text-xs opacity-80">✨</span>
+              <span className="text-sm opacity-90">✨💖</span>
             </div>
 
             <div className="my-6">
               <p className="text-[11px] uppercase tracking-wider opacity-75 mb-1">TO:</p>
               <h3 className="text-lg font-bold tracking-wide drop-shadow">
-                {recipientName ? recipientName : '[Recipient Name]'}
+                {recipientName ? recipientName : '[Recipient Name] 🌸'}
               </h3>
             </div>
 
-            <div className="bg-black/20 backdrop-blur-md p-4 rounded-xl border border-white/10 my-2">
+            <div className="bg-black/25 backdrop-blur-md p-4 rounded-xl border border-white/15 my-2 shadow-inner">
               <p className="text-sm italic font-light leading-relaxed">
                 &ldquo;{message}&rdquo;
               </p>
             </div>
 
-            <div className="mt-6 flex justify-between items-end border-t border-white/10 pt-3">
+            <div className="mt-6 flex justify-between items-end border-t border-white/20 pt-3">
               <div>
                 <p className="text-[10px] uppercase tracking-wider opacity-75">FROM:</p>
                 <p className="text-xs font-bold">
-                  {senderName ? senderName : '[Sender Name]'}
+                  {senderName ? senderName : '[Sender Name] ✨'}
                 </p>
               </div>
-              <span className="text-[10px] opacity-75">MADE WITH ❤️</span>
+              <span className="text-[10px] opacity-80 font-medium">MADE WITH ❤️</span>
             </div>
           </div>
 
