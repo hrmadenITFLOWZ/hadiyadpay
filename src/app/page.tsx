@@ -9,8 +9,8 @@ export default function Home() {
   const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
 
   const subtitles = {
-    en: 'Send celebratory digital greetings paired with instant financial remittances home.',
-    nl: 'Verstuur feestelijke digitale groeten gecombineerd met directe financiële overmakingen naar huis.',
+    en: 'Send personal digital greetings combined with direct financial transfers to loved ones.',
+    nl: 'Verstuur persoonlijke digitale groeten gecombineerd met directe financiële overmakingen naar dierbaren.',
   };
 
   return (

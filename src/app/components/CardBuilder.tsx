@@ -29,7 +29,9 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             {currentLanguage === 'nl' ? 'Ontwerp je Hadiyad ✨' : 'Craft Your Hadiyad ✨'}
           </h2>
           <p className="text-sm text-gray-600">
-            Kudar fariin qiiro leh oo lama ilooban ah. Share love back home instantly.
+            {currentLanguage === 'nl'
+              ? 'Kudar fariin qiiro leh oo lama ilooban ah. Deel direct liefde met dierbaren.'
+              : 'Kudar fariin qiiro leh oo lama ilooban ah. Share love with loved ones instantly.'}
           </p>
         </div>
 
