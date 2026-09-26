@@ -40,7 +40,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
         {/* Select Occasion */}
         <div>
           <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
-            {currentLanguage === 'nl' ? `SELECTEER GELEGENHEID (${cardOptions.length})` : `SELECT OCCASION (${cardOptions.length})`}
+            {currentLanguage === 'nl' ? 'SELECTEER GELEGENHEID' : 'SELECT OCCASION'}
           </label>
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300">
             {cardOptions.map((card) => {
@@ -76,7 +76,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 type="text"
                 value={recipientName}
                 onChange={(e) => setRecipientName(e.target.value)}
-                placeholder={currentLanguage === 'nl' ? 'bijv. Hooyo Macaan 🌸' : 'e.g. Dearest Mother 🌸'}
+                placeholder="Hooyo Macaan 🌸"
                 className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-900 bg-gray-50"
               />
             </div>
@@ -88,7 +88,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 type="text"
                 value={senderName}
                 onChange={(e) => setSenderName(e.target.value)}
-                placeholder={currentLanguage === 'nl' ? 'bijv. Wiilkaada ✨' : 'e.g. Your Son ✨'}
+                placeholder="Wiilkaada / Gabadhada ✨"
                 className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-900 bg-gray-50"
               />
             </div>
@@ -140,7 +140,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             <div className="my-6">
               <p className="text-[11px] uppercase tracking-wider opacity-75 mb-1">TO:</p>
               <h3 className="text-lg font-bold tracking-wide drop-shadow">
-                {recipientName ? recipientName : '[Recipient Name] 🌸'}
+                {recipientName ? recipientName : 'Hooyo Macaan 🌸'}
               </h3>
             </div>
 
@@ -154,7 +154,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
               <div>
                 <p className="text-[10px] uppercase tracking-wider opacity-75">FROM:</p>
                 <p className="text-xs font-bold">
-                  {senderName ? senderName : '[Sender Name] ✨'}
+                  {senderName ? senderName : 'Wiilkaada / Gabadhada ✨'}
                 </p>
               </div>
               <span className="text-[10px] opacity-80 font-medium">MADE WITH ❤️</span>

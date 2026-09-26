@@ -45,18 +45,18 @@ export const cardOptions: CardOption[] = [
   {
     id: 'ciid-1',
     title: {
-      nl: 'Religieus / Eid 🌙',
-      en: 'Religious / Eid 🌙',
+      nl: 'Eid 🌙',
+      en: 'Eid 🌙',
     },
     category: 'religious',
     gradient: 'from-emerald-600 via-teal-700 to-cyan-900',
     badge: {
-      nl: 'CIID ⭐',
-      en: 'CIID ⭐',
+      nl: 'EID ⭐',
+      en: 'EID ⭐',
     },
     defaultMessage: {
-      nl: 'Ciid Mubaarak! 🌙✨ Allah ha naga aqbalo ibadaheena mana wada gaarsiiyo sanad kale oo nabad, caafimaad, iyo barako qabta ah. 🤲⭐🎉',
-      en: 'Ciid Mubaarak! 🌙✨ Allah ha naga aqbalo ibadaheena mana wada gaarsiiyo sanad kale oo nabad, caafimaad, iyo barako qabta ah. 🤲⭐🎉',
+      nl: 'Eid Mubaarak! 🌙✨ Allah ha naga aqbalo ibadaheena mana wada gaarsiiyo sanad kale oo nabad, caafimaad, iyo barako qabta ah. 🤲⭐🎉',
+      en: 'Eid Mubaarak! 🌙✨ Allah ha naga aqbalo ibadaheena mana wada gaarsiiyo sanad kale oo nabad, caafimaad, iyo barako qabta ah. 🤲⭐🎉',
     },
   },
   {
