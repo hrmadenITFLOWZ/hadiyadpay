@@ -23,38 +23,41 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
       <div className="bg-white/80 backdrop-blur-md p-6 rounded-2xl shadow-xl border border-gray-100 flex flex-col gap-6">
         <div>
           <h2 className="text-xl font-bold text-gray-900 mb-1">
-            {currentLanguage === 'nl' ? 'Kies jouw Hadiyad E-card' : 'Choose Your Hadiyad E-Card'}
+            {currentLanguage === 'nl' ? 'Craft Your Hadiyad' : 'Craft Your Hadiyad'}
           </h2>
           <p className="text-sm text-gray-600">
             {currentLanguage === 'nl'
-              ? 'Selecteer een gratis of premium stijlvolle kaart voor jouw moment.'
-              : 'Select a free or premium stylish card for your moment.'}
+              ? 'Kudar farriin qiiro leh oo lama iloobaan ah. Share love back home instantly.'
+              : 'Share love back home instantly.'}
           </p>
         </div>
 
-        {/* Kaartopties Knoppen / Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[320px] overflow-y-auto pr-1">
-          {cardOptions.map((card) => {
-            const isSelected = selectedCard.id === card.id;
-            return (
-              <button
-                key={card.id}
-                onClick={() => setSelectedCard(card)}
-                className={`text-left p-3 rounded-xl transition-all duration-200 border relative overflow-hidden flex flex-col justify-between h-24 bg-gradient-to-r ${card.gradient} text-white shadow-md ${
-                  isSelected ? 'ring-4 ring-emerald-500 scale-[1.02]' : 'opacity-85 hover:opacity-100'
-                }`}
-              >
-                <div className="flex justify-between items-start">
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/40 backdrop-blur-sm tracking-wider uppercase">
+        {/* Select Occasion */}
+        <div>
+          <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+            {currentLanguage === 'nl' ? 'SELECT OCCASION' : 'SELECT OCCASION'}
+          </label>
+          <div className="flex gap-3 overflow-x-auto pb-2">
+            {cardOptions.map((card) => {
+              const isSelected = selectedCard.id === card.id;
+              return (
+                <button
+                  key={card.id}
+                  onClick={() => setSelectedCard(card)}
+                  className={`flex-shrink-0 text-left p-3 rounded-xl transition-all duration-200 border relative overflow-hidden flex flex-col justify-between w-36 h-24 bg-gradient-to-br ${card.gradient} text-white shadow-md ${
+                    isSelected ? 'ring-4 ring-emerald-500 scale-105' : 'opacity-80 hover:opacity-100'
+                  }`}
+                >
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-black/30 backdrop-blur-sm self-start">
                     {card.badge[currentLanguage] || card.badge['en']}
                   </span>
-                </div>
-                <span className="text-xs font-semibold line-clamp-2 drop-shadow">
-                  {card.title[currentLanguage] || card.title['en']}
-                </span>
-              </button>
-            );
-          })}
+                  <span className="text-xs font-semibold line-clamp-2 drop-shadow">
+                    {card.title[currentLanguage] || card.title['en']}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Formulier Velden */}
@@ -62,25 +65,25 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                {currentLanguage === 'nl' ? 'Ontvanger' : 'To Recipient'}
+                {currentLanguage === 'nl' ? 'TO RECIPIENT' : 'TO RECIPIENT'}
               </label>
               <input
                 type="text"
                 value={recipientName}
                 onChange={(e) => setRecipientName(e.target.value)}
-                placeholder={currentLanguage === 'nl' ? 'bijv. Hooyo Macaan' : 'e.g. Dear Mother'}
+                placeholder="e.g. Hooyo Macaan"
                 className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-900 bg-gray-50"
               />
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                {currentLanguage === 'nl' ? 'Afzender' : 'From Sender'}
+                {currentLanguage === 'nl' ? 'FROM SENDER' : 'FROM SENDER'}
               </label>
               <input
                 type="text"
                 value={senderName}
                 onChange={(e) => setSenderName(e.target.value)}
-                placeholder={currentLanguage === 'nl' ? 'bijv. Wiilkaada' : 'e.g. Your Son'}
+                placeholder="e.g. Wiilkaada / Gabadhaada"
                 className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-900 bg-gray-50"
               />
             </div>
@@ -88,7 +91,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
           <div>
             <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-              {currentLanguage === 'nl' ? 'Persoonlijk Bericht' : 'Personalized Message'}
+              {currentLanguage === 'nl' ? 'PERSONALIZED MESSAGE' : 'PERSONALIZED MESSAGE'}
             </label>
             <textarea
               rows={3}
@@ -99,10 +102,10 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
           </div>
 
           <button
-            onClick={() => alert(currentLanguage === 'nl' ? 'Klaar voor betaalintegratie!' : 'Ready for payment integration!')}
+            onClick={() => alert('Demo action')}
             className="w-full py-3 px-4 bg-gradient-to-r from-emerald-700 to-emerald-900 hover:from-emerald-800 hover:to-emerald-950 text-white font-medium rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2 text-sm"
           >
-            <span>{currentLanguage === 'nl' ? 'Verstuur Hadiyad & Instant Transfer 🚀' : 'Send Hadiyad & Instant Transfer 🚀'}</span>
+            <span>{currentLanguage === 'nl' ? 'Send Hadiyad & Instant Transfer 🚀' : 'Send Hadiyad & Instant Transfer 🚀'}</span>
           </button>
         </div>
       </div>
@@ -110,34 +113,26 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
       {/* Rechterkolom: Live Preview */}
       <div className="flex items-center justify-center">
         <div className="w-full max-w-md bg-white p-6 rounded-3xl shadow-2xl border border-gray-100 flex flex-col justify-between min-h-[420px] relative overflow-hidden">
-          {/* Decoratieve top-bar */}
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
               <span className="text-xs font-semibold text-gray-500 tracking-wider uppercase">
-                Hadiyad & Joy Preview
+                HADIYAD & JOY E-CARD PREVIEW
               </span>
             </div>
-            {!selectedCard.isFree && (
-              <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                {selectedCard.badge[currentLanguage] || selectedCard.badge['en']}
-              </span>
-            )}
           </div>
 
-          {/* De E-card zelf met de geselecteerde gradient */}
+          {/* De E-card zelf */}
           <div className={`w-full p-6 rounded-2xl bg-gradient-to-br ${selectedCard.gradient} text-white shadow-xl flex flex-col justify-between flex-grow my-2 transition-all duration-500`}>
             <div className="flex justify-between items-center">
               <span className="text-[10px] tracking-widest uppercase bg-white/20 px-2.5 py-1 rounded-md backdrop-blur-sm font-bold">
-                HadiyadPay • E-Card
+                HADIYADPAY • SALAAM
               </span>
               <span className="text-xs opacity-80">✨</span>
             </div>
 
             <div className="my-6">
-              <p className="text-[11px] uppercase tracking-wider opacity-75 mb-1">
-                {currentLanguage === 'nl' ? 'Aan:' : 'To:'}
-              </p>
+              <p className="text-[11px] uppercase tracking-wider opacity-75 mb-1">TO:</p>
               <h3 className="text-lg font-bold tracking-wide drop-shadow">
                 {recipientName ? recipientName : '[Recipient Name]'}
               </h3>
@@ -151,9 +146,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
             <div className="mt-6 flex justify-between items-end border-t border-white/10 pt-3">
               <div>
-                <p className="text-[10px] uppercase tracking-wider opacity-75">
-                  {currentLanguage === 'nl' ? 'Van:' : 'From:'}
-                </p>
+                <p className="text-[10px] uppercase tracking-wider opacity-75">FROM:</p>
                 <p className="text-xs font-bold">
                   {senderName ? senderName : '[Sender Name]'}
                 </p>
@@ -165,8 +158,8 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
           <div className="text-center mt-4">
             <p className="text-[11px] text-gray-400">
               {currentLanguage === 'nl'
-                ? 'Veilige financiële overboeking gekoppeld aan jouw e-card.'
-                : 'Secure financial transfer linked to your e-card.'}
+                ? 'Secure financial transfers handled in partnership with licensed payment operators.'
+                : 'Secure financial transfers handled in partnership with licensed payment operators.'}
             </p>
           </div>
         </div>
