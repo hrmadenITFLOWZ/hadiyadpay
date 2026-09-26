@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { cardOptions, CardOption } from '../data/cardOptions';
 
 interface CardBuilderProps {
@@ -12,10 +12,13 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   const [recipientName, setRecipientName] = useState('');
   const [senderName, setSenderName] = useState('');
   const [message, setMessage] = useState(
-    currentLanguage === 'nl'
-      ? 'Dhalasho Wacan! 🌸 Waxaan kuu rajeynaysaa caafimaad, barako, iyo sannad ay ka buuxaan farxad iyo guul weyn. 💐✨'
-      : 'Happy Birthday! Wishing you health, blessings, and a year full of joy and great success.'
+    selectedCard.defaultMessage[currentLanguage] || selectedCard.defaultMessage['en']
   );
+
+  // Update het bericht automatisch wanneer je van kaart of taal wisselt
+  useEffect(() => {
+    setMessage(selectedCard.defaultMessage[currentLanguage] || selectedCard.defaultMessage['en']);
+  }, [selectedCard, currentLanguage]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-6xl mx-auto p-4">
@@ -37,7 +40,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
           <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
             {currentLanguage === 'nl' ? 'SELECT OCCASION' : 'SELECT OCCASION'}
           </label>
-          <div className="flex gap-3 overflow-x-auto pb-2">
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300">
             {cardOptions.map((card) => {
               const isSelected = selectedCard.id === card.id;
               return (
@@ -126,7 +129,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
           <div className={`w-full p-6 rounded-2xl bg-gradient-to-br ${selectedCard.gradient} text-white shadow-xl flex flex-col justify-between flex-grow my-2 transition-all duration-500`}>
             <div className="flex justify-between items-center">
               <span className="text-[10px] tracking-widest uppercase bg-white/20 px-2.5 py-1 rounded-md backdrop-blur-sm font-bold">
-                HADIYADPAY • SALAAM
+                HADIYADPAY • {selectedCard.badge[currentLanguage] || selectedCard.badge['en']}
               </span>
               <span className="text-xs opacity-80">✨</span>
             </div>

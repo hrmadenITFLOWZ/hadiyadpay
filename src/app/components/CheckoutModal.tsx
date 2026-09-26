@@ -1,4 +1,4 @@
-'type client';
+'use client';
 
 import { useState } from 'react';
 import { Occasion } from '../data/cardOptions';
@@ -32,7 +32,6 @@ export default function CheckoutModal({
 
   if (!isOpen) return null;
 
-  // Gebruik de echte geselecteerde kaart, met een veilige fallback voor noodgevallen
   const safeOccasion = selectedOccasion || {
     title: 'Hadiyad Card',
     bgGradient: 'from-emerald-600 to-teal-700',
@@ -134,7 +133,7 @@ export default function CheckoutModal({
           </div>
         </div>
 
-        {/* Visuele Weergave Geselecteerde Kaart (Nu dynamisch gekoppeld aan safeOccasion) */}
+        {/* Visuele Weergave Geselecteerde Kaart */}
         <div className="mb-6">
           <p className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-widest mb-2">{ct.selectedCard}</p>
           <div className={`w-full rounded-2xl p-5 text-white bg-gradient-to-br ${safeOccasion.bgGradient} shadow-lg relative overflow-hidden`}>
@@ -235,7 +234,7 @@ export default function CheckoutModal({
             type="button"
             disabled={loading}
             onClick={handleCheckout}
-            className="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-2xl shadow-xl shadow-emerald-600/20 transition-all transform hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+            className={`w-full py-4 bg-gradient-to-br ${safeOccasion.bgGradient} text-white font-bold rounded-2xl shadow-xl transition-all transform hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer`}
           >
             <span>{loading ? 'Processing...' : `${ct.payBtn} (€${totalPayable}) 🚀`}</span>
           </button>
