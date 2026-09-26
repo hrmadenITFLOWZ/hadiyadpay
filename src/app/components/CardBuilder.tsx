@@ -26,19 +26,17 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
       <div className="bg-white/80 backdrop-blur-md p-6 rounded-2xl shadow-xl border border-gray-100 flex flex-col gap-6">
         <div>
           <h2 className="text-xl font-bold text-gray-900 mb-1">
-            {currentLanguage === 'nl' ? 'Craft Your Hadiyad' : 'Craft Your Hadiyad'}
+            Craft Your Hadiyad
           </h2>
           <p className="text-sm text-gray-600">
-            {currentLanguage === 'nl'
-              ? 'Kudar farriin qiiro leh oo lama iloobaan ah. Share love back home instantly.'
-              : 'Share love back home instantly.'}
+            Kudar farriin qiiro leh oo lama iloobaan ah. Share love back home instantly.
           </p>
         </div>
 
         {/* Select Occasion */}
         <div>
           <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
-            {currentLanguage === 'nl' ? 'SELECT OCCASION' : 'SELECT OCCASION'}
+            SELECT OCCASION ({cardOptions.length} available)
           </label>
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300">
             {cardOptions.map((card) => {
@@ -68,7 +66,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                {currentLanguage === 'nl' ? 'TO RECIPIENT' : 'TO RECIPIENT'}
+                TO RECIPIENT
               </label>
               <input
                 type="text"
@@ -80,7 +78,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                {currentLanguage === 'nl' ? 'FROM SENDER' : 'FROM SENDER'}
+                FROM SENDER
               </label>
               <input
                 type="text"
@@ -94,7 +92,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
           <div>
             <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-              {currentLanguage === 'nl' ? 'PERSONALIZED MESSAGE' : 'PERSONALIZED MESSAGE'}
+              PERSONALIZED MESSAGE
             </label>
             <textarea
               rows={3}
@@ -105,10 +103,10 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
           </div>
 
           <button
-            onClick={() => alert('Demo action')}
+            onClick={() => alert('Demo action: Hadiyad ready to send!')}
             className="w-full py-3 px-4 bg-gradient-to-r from-emerald-700 to-emerald-900 hover:from-emerald-800 hover:to-emerald-950 text-white font-medium rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2 text-sm"
           >
-            <span>{currentLanguage === 'nl' ? 'Send Hadiyad & Instant Transfer 🚀' : 'Send Hadiyad & Instant Transfer 🚀'}</span>
+            <span>Send Hadiyad & Instant Transfer 🚀</span>
           </button>
         </div>
       </div>
@@ -160,9 +158,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
           <div className="text-center mt-4">
             <p className="text-[11px] text-gray-400">
-              {currentLanguage === 'nl'
-                ? 'Secure financial transfers handled in partnership with licensed payment operators.'
-                : 'Secure financial transfers handled in partnership with licensed payment operators.'}
+              Secure financial transfers handled in partnership with licensed payment operators.
             </p>
           </div>
         </div>
