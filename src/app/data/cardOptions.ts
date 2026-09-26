@@ -1,53 +1,85 @@
-// src/app/data/cardOptions.ts
-
-export interface Occasion {
+export interface CardOption {
   id: string;
-  title: string;
-  category: string;
-  bgGradient: string;
-  pattern: string;
-  defaultMessage: string;
+  title: Record<string, string>;
+  category: 'birthday' | 'love' | 'wedding' | 'religious' | 'congratulations';
+  gradient: string;
+  badge: Record<string, string>;
+  isFree: boolean;
+  price?: number;
 }
 
-export const OCCASIONS: Occasion[] = [
+export const cardOptions: CardOption[] = [
   {
-    id: 'dhalasho',
-    title: 'Dhalasho Farxad Leh',
-    category: 'Dhalasho • Birthday',
-    bgGradient: 'from-emerald-700 via-teal-800 to-green-900',
-    pattern: '🎂',
-    defaultMessage: 'Dhalasho Wacan! 🌸 Waxaan kuu rajeynayaa caafimaad, barako, iyo sannad ay ka buuxaan farxad iyo guul weyn. 💐✨',
+    id: 'bday-classic',
+    title: {
+      nl: 'Dhalasho - Klassieke Verjaardag',
+      en: 'Birthday - Classic Greeting',
+    },
+    category: 'birthday',
+    gradient: 'from-emerald-800 to-emerald-950',
+    badge: {
+      nl: 'GRATIS',
+      en: 'FREE',
+    },
+    isFree: true,
   },
   {
-    id: 'jacayl',
-    title: 'Jacayl & Xusuus',
-    category: 'Jacayl • Love',
-    bgGradient: 'from-rose-600 via-pink-700 to-red-900',
-    pattern: '💖',
-    defaultMessage: 'Qaaligay, waxaad tahay nolosheyda iyo farxaddayda. 🌹 Adiga ayaan kuu hibeeyay jacaylkan iyo ubaxan quruxda badan. 💐❤️',
+    id: 'bday-gold-luxe',
+    title: {
+      nl: 'Dhalasho - Luxe Gouden Editie',
+      en: 'Birthday - Luxe Gold Edition',
+    },
+    category: 'birthday',
+    gradient: 'from-amber-600 via-yellow-700 to-amber-900',
+    badge: {
+      nl: 'PREMIUM (€ 1,49)',
+      en: 'PREMIUM (€ 1.49)',
+    },
+    isFree: false,
+    price: 1.49,
   },
   {
-    id: 'aroos',
-    title: 'Aroos Wacan & Barako',
-    category: 'Aaroos • Wedding',
-    bgGradient: 'from-amber-600 via-orange-700 to-red-900',
-    pattern: '💍',
-    defaultMessage: 'Hambalyo! 🌷 Waxaan idiin rajeynayaa nolol qoys oo waarta, oo ay ka buuxaan jacayl, ubax iyo barwaaqo. 💐🥂',
+    id: 'love-rose',
+    title: {
+      nl: 'Jacayl - Warme Liefde',
+      en: 'Love - Warm Affection',
+    },
+    category: 'love',
+    gradient: 'from-rose-700 to-pink-950',
+    badge: {
+      nl: 'GRATIS',
+      en: 'FREE',
+    },
+    isFree: true,
   },
   {
-    id: 'taageero',
-    title: 'Taageero Qoys (Remittance)',
-    category: 'Taageero • Support',
-    bgGradient: 'from-indigo-700 via-purple-800 to-slate-900',
-    pattern: '🤝',
-    defaultMessage: 'Walaal, waa yar oo naxariis ah oo aan idiinka soo diray dibadda iyadoo ay weheliso duco iyo ubax. 🙏🌸 Noloshu ha idiin fududaato.',
+    id: 'wedding-aaroos',
+    title: {
+      nl: 'Aaroos - Koninklijk Huwelijk',
+      en: 'Wedding - Royal Celebration',
+    },
+    category: 'wedding',
+    gradient: 'from-teal-700 via-emerald-800 to-cyan-950',
+    badge: {
+      nl: 'PREMIUM (€ 1,49)',
+      en: 'PREMIUM (€ 1.49)',
+    },
+    isFree: false,
+    price: 1.49,
   },
   {
-    id: 'ciid',
-    title: 'Ciid Mubaarak',
-    category: 'Ciid • Celebration',
-    bgGradient: 'from-cyan-600 via-blue-700 to-indigo-900',
-    pattern: '🌙',
-    defaultMessage: 'Ciid Mubaarak! 🌺 Waxaan kuu rajeynayaa maalmo farxad leh adiga iyo qoyskaagaba oo ay buuxiyaan ubax iyo nabad. 🌷✨',
+    id: 'congrats-emerald',
+    title: {
+      nl: 'Barako - Voorspoed & Zegen',
+      en: 'Blessings & Success',
+    },
+    category: 'congratulations',
+    gradient: 'from-emerald-600 via-teal-700 to-green-900',
+    badge: {
+      nl: 'PREMIUM (€ 1,49)',
+      en: 'PREMIUM (€ 1.49)',
+    },
+    isFree: false,
+    price: 1.49,
   },
 ];
