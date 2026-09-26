@@ -13,9 +13,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   const [recipientName, setRecipientName] = useState('');
   const [senderName, setSenderName] = useState('');
   
-  const [message, setMessage] = useState(
-    selectedCard.defaultMessage[currentLanguage] || selectedCard.defaultMessage['en']
-  );
+  const [message, setMessage] = useState(selectedCard.defaultMessage[currentLanguage] || selectedCard.defaultMessage['en']);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   useEffect(() => {
@@ -31,9 +29,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             {currentLanguage === 'nl' ? 'Ontwerp je Hadiyad ✨' : 'Craft Your Hadiyad ✨'}
           </h2>
           <p className="text-sm text-gray-600">
-            {currentLanguage === 'nl'
-              ? 'Verstuur direct liefde naar huis met een unieke feestelijke groet.'
-              : 'Share love back home instantly with a unique festive greeting.'}
+            Kudar fariin qiiro leh oo lama ilooban ah. Share love back home instantly.
           </p>
         </div>
 
@@ -106,7 +102,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             />
           </div>
 
-          {/* Dynamische knop kleurt mee met de geselecteerde kaart */}
           <button
             onClick={() => setIsCheckoutOpen(true)}
             className={`w-full py-3.5 px-4 bg-gradient-to-br ${selectedCard.gradient} hover:brightness-110 text-white font-semibold rounded-xl shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm`}
@@ -128,7 +123,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             </div>
           </div>
 
-          {/* De E-card zelf met rijke emoji's */}
           <div className={`w-full p-6 rounded-2xl bg-gradient-to-br ${selectedCard.gradient} text-white shadow-2xl flex flex-col justify-between flex-grow my-2 transition-all duration-500`}>
             <div className="flex justify-between items-center">
               <span className="text-[10px] tracking-widest uppercase bg-white/25 px-2.5 py-1 rounded-md backdrop-blur-sm font-bold shadow-sm">
