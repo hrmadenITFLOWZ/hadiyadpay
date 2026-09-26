@@ -12,12 +12,16 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   const [selectedCard, setSelectedCard] = useState<CardOption>(cardOptions[0]);
   const [recipientName, setRecipientName] = useState('');
   const [senderName, setSenderName] = useState('');
-  const [message, setMessage] = useState(selectedCard.defaultMessage['en']);
+  
+  // Laat het bericht netjes de gekozen taal (of standaard Somalisch/fallback) volgen
+  const [message, setMessage] = useState(
+    selectedCard.defaultMessage[currentLanguage] || selectedCard.defaultMessage['en']
+  );
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   useEffect(() => {
-    setMessage(selectedCard.defaultMessage['en']);
-  }, [selectedCard]);
+    setMessage(selectedCard.defaultMessage[currentLanguage] || selectedCard.defaultMessage['en']);
+  }, [selectedCard, currentLanguage]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-6xl mx-auto p-4">
@@ -103,10 +107,10 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             />
           </div>
 
-          {/* Dynamische knop die van kleur wisselt op basis van de geselecteerde kaart */}
+          {/* Knop neemt nu dynamisch exact dezelfde gradiënt/kleur aan als de geselecteerde kaart */}
           <button
             onClick={() => setIsCheckoutOpen(true)}
-            className={`w-full py-3 px-4 bg-gradient-to-r ${selectedCard.gradient} hover:brightness-110 text-white font-medium rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2 text-sm`}
+            className={`w-full py-3 px-4 bg-gradient-to-br ${selectedCard.gradient} hover:brightness-110 text-white font-medium rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2 text-sm`}
           >
             <span>{currentLanguage === 'nl' ? 'Send Hadiyad & Instant Transfer 🚀' : 'Send Hadiyad & Instant Transfer 🚀'}</span>
           </button>
@@ -168,7 +172,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
         </div>
       </div>
 
-      {/* Checkout Modal Popup met de benodigde props gekoppeld */}
+      {/* Checkout Modal Popup */}
       <CheckoutModal
         isOpen={isCheckoutOpen}
         onClose={() => setIsCheckoutOpen(false)}
