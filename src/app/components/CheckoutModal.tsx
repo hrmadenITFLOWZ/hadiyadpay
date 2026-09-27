@@ -58,6 +58,15 @@ export default function CheckoutModal({
     pattern: '🎁',
   };
 
+  // Zodra je het veld verlaat (onBlur), vullen we het automatisch aan
+  const handleBlur = (field: 'sender' | 'recipient') => {
+    if (field === 'sender' && mobileNumber) {
+      setMobileNumber(formatPhone(mobileNumber));
+    } else if (field === 'recipient' && recipientPhone) {
+      setRecipientPhone(formatPhone(recipientPhone));
+    }
+  };
+
   const handleWaaFiPayCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -100,7 +109,6 @@ export default function CheckoutModal({
     }
   };
 
-  // Helper voor dynamische randkleur (rood/groen)
   const getInputClass = (val: string) => {
     if (!val) return 'border-gray-300 focus:ring-emerald-500';
     return isValidPhone(val) 
@@ -129,6 +137,7 @@ export default function CheckoutModal({
               required
               value={mobileNumber}
               onChange={(e) => setMobileNumber(e.target.value)}
+              onBlur={() => handleBlur('sender')}
               placeholder="25263XXXXXXX"
               className={`w-full px-3 py-2 border rounded-lg text-sm outline-none transition-all ${getInputClass(mobileNumber)}`}
             />
@@ -141,6 +150,7 @@ export default function CheckoutModal({
               required
               value={recipientPhone}
               onChange={(e) => setRecipientPhone(e.target.value)}
+              onBlur={() => handleBlur('recipient')}
               placeholder="25263XXXXXXX"
               className={`w-full px-3 py-2 border rounded-lg text-sm outline-none transition-all ${getInputClass(recipientPhone)}`}
             />
