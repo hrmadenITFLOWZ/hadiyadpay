@@ -3,13 +3,19 @@ import { NextResponse } from 'next/server';
 
 function formatWaafiPhone(phone: string): string {
   if (!phone) return '';
-  let cleaned = phone.replace(/\D/g, ''); // Verwijder alle niet-cijfers
+  // Verwijder alle spaties, streepjes en plusjes
+  let cleaned = phone.replace(/\D/g, ''); 
+  
+  // Als het begint met een 0 (bijv. 063...), haal de 0 eraf
   if (cleaned.startsWith('0')) {
     cleaned = cleaned.substring(1);
   }
+  
+  // Als het nog geen 252 bevat, voeg het toe
   if (!cleaned.startsWith('252')) {
     cleaned = '252' + cleaned;
   }
+  
   return cleaned;
 }
 
@@ -20,13 +26,17 @@ export async function POST(req: Request) {
 
     const totalAmount = Number(transferAmount || 0) + Number(cardPrice || 0);
     const waafiUrl = 'https://sandbox.waafipay.com/asm';
+    
+    // Hier passen we het nummer aan
     const formattedSenderPhone = formatWaafiPhone(senderPhone);
+    console.log('--- TELEFOONNUMMER CHECK ---');
+    console.log('Origineel:', senderPhone);
+    console.log('Geformatteerd:', formattedSenderPhone);
 
-    // Officiële WAAFiPay API_PURCHASE payload structuur
     const payload = {
       schemaVersion: '1.0',
       requestId: 'REQ_' + Date.now(),
-      timestamp: new Date().toISOString().replace(/T/, ' ').replace(/\..+/, ''), // YYYY-MM-DD HH:mm:ss formaat
+      timestamp: new Date().toISOString().replace(/T/, ' ').replace(/\..+/, ''),
       channelName: 'WEB',
       serviceName: 'API_PURCHASE',
       serviceParams: {
@@ -35,7 +45,7 @@ export async function POST(req: Request) {
         apiKey: process.env.WAAFIPAY_API_KEY || 'key_test',
         paymentMethod: 'MWALLET_ACCOUNT',
         payerInfo: {
-          accountNo: formattedSenderPhone
+          accountNo: formattedSenderPhone // Hier wordt het meegestuurd
         },
         transactionInfo: {
           referenceId: 'REF_' + Date.now(),
@@ -47,7 +57,7 @@ export async function POST(req: Request) {
       }
     };
 
-    console.log('Final WAAFiPay Payload:', JSON.stringify(payload, null, 2));
+    console.log('Te verzenden Payload:', JSON.stringify(payload, null, 2));
 
     const response = await fetch(waafiUrl, {
       method: 'POST',
