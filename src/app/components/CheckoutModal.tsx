@@ -15,7 +15,7 @@ interface CheckoutModalProps {
 
 type Language = 'en' | 'nl';
 
-// Helper om telefoonnummers al in de frontend netjes te formatteren naar 252XXXXXXXXX
+// Helper om telefoonnummers automatisch te formatteren naar 252XXXXXXXXX
 function formatPhone(phone: string): string {
   if (!phone) return '';
   let cleaned = phone.replace(/\D/g, '');
@@ -26,6 +26,12 @@ function formatPhone(phone: string): string {
     cleaned = '252' + cleaned;
   }
   return cleaned;
+}
+
+// Validatie: moet exact 12 cijfers zijn en starten met 252
+function isValidPhone(phone: string): boolean {
+  const formatted = formatPhone(phone);
+  return formatted.length === 12 && formatted.startsWith('252');
 }
 
 export default function CheckoutModal({
@@ -54,14 +60,14 @@ export default function CheckoutModal({
 
   const handleWaaFiPayCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!mobileNumber || !recipientPhone) {
-      alert('Vul beide telefoonnummers in.');
-      return;
-    }
-
-    // Formatteer de nummers direct naar het verplichte 252 formaat
+    
     const formattedSender = formatPhone(mobileNumber);
     const formattedRecipient = formatPhone(recipientPhone);
+
+    if (!isValidPhone(formattedSender) || !isValidPhone(formattedRecipient)) {
+      alert('Controleer de telefoonnummers. Elk nummer moet na opmaak uit 12 cijfers bestaan en starten met 252.');
+      return;
+    }
 
     setLoading(true);
     try {
@@ -94,6 +100,14 @@ export default function CheckoutModal({
     }
   };
 
+  // Helper voor dynamische randkleur (rood/groen)
+  const getInputClass = (val: string) => {
+    if (!val) return 'border-gray-300 focus:ring-emerald-500';
+    return isValidPhone(val) 
+      ? 'border-green-500 ring-1 ring-green-500 bg-green-50/30' 
+      : 'border-red-500 ring-1 ring-red-500 bg-red-50/30';
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative overflow-hidden">
@@ -115,8 +129,8 @@ export default function CheckoutModal({
               required
               value={mobileNumber}
               onChange={(e) => setMobileNumber(e.target.value)}
-              placeholder="63XXXXXXX of 25263XXXXXXX"
-              className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
+              placeholder="25263XXXXXXX"
+              className={`w-full px-3 py-2 border rounded-lg text-sm outline-none transition-all ${getInputClass(mobileNumber)}`}
             />
           </div>
 
@@ -127,8 +141,8 @@ export default function CheckoutModal({
               required
               value={recipientPhone}
               onChange={(e) => setRecipientPhone(e.target.value)}
-              placeholder="63XXXXXXX of 25263XXXXXXX"
-              className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
+              placeholder="25263XXXXXXX"
+              className={`w-full px-3 py-2 border rounded-lg text-sm outline-none transition-all ${getInputClass(recipientPhone)}`}
             />
           </div>
 
@@ -163,7 +177,7 @@ export default function CheckoutModal({
               min="1"
               value={transferAmount}
               onChange={(e) => setTransferAmount(Number(e.target.value))}
-              className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
+              className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none border-gray-300"
             />
           </div>
 
