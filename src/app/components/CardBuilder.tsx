@@ -61,7 +61,19 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   return (
     <div className="w-full max-w-7xl mx-auto p-4 flex flex-col gap-4">
       
-      {/* Deck Switcher Knoppen (GenZ Somali style) */}
+      {/* Geanimeerde CSS voor zoom-effect op de achtergrondfoto's */}
+      <style jsx global>{`
+        @keyframes slowZoom {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.08); }
+          100% { transform: scale(1); }
+        }
+        .animate-slow-zoom {
+          animation: slowZoom 12s infinite ease-in-out;
+        }
+      `}</style>
+
+      {/* Deck Switcher Knoppen (GenZ Somali Style) */}
       <div className="bg-white/80 backdrop-blur-md p-2 rounded-2xl shadow-md border border-gray-100 flex gap-2 max-w-md mx-auto w-full">
         <button
           onClick={() => setActiveDeck('dhaqan')}
@@ -77,11 +89,11 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
           onClick={() => setActiveDeck('cities')}
           className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 relative overflow-hidden ${
             activeDeck === 'cities'
-              ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg scale-[1.02] ring-2 ring-indigo-300 animate-pulse'
+              ? 'bg-gradient-to-r from-amber-600 via-orange-600 to-yellow-600 text-white shadow-lg scale-[1.02] ring-2 ring-amber-300 animate-pulse'
               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
           }`}
         >
-          🏙️ Somali Cities & Glow ({cardOptions.filter(c => c.category === 'cities').length})
+          🌍 Geel iyo Guri Vibes ({cardOptions.filter(c => c.category === 'cities').length})
         </button>
       </div>
 
@@ -101,7 +113,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             </p>
           </div>
 
-          {/* Catalogus Rolledeck (7 Kaarten per deck) */}
+          {/* Catalogus Rolledeck */}
           <div>
             <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">
               {currentLanguage === 'so' ? 'XULO KAARKA WANAAGSAN' : 'CHOOSE YOUR CARD STYLE'}
@@ -109,9 +121,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-h-[340px] overflow-y-auto pr-1">
               {filteredCards.map((card) => {
                 const isSelected = selectedCard.id === card.id;
-                const bgStyle = activeDeck === 'cities' 
-                  ? { backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.85)), url(${card.bgImage})` }
-                  : {};
                 
                 return (
                   <button
@@ -119,13 +128,13 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                     onClick={() => setSelectedCard(card)}
                     className={`text-left p-3 rounded-2xl transition-all duration-300 border relative overflow-hidden flex flex-col justify-between h-32 bg-cover bg-center shadow-md group ${
                       activeDeck === 'dhaqan' ? `bg-gradient-to-br ${card.gradient}` : ''
-                    } ${isSelected ? 'ring-4 ring-emerald-500 scale-105 shadow-xl' : 'opacity-80 hover:opacity-100 hover:scale-[1.02]'}`}
-                    style={bgStyle}
+                    } ${isSelected ? 'ring-4 ring-emerald-500 scale-105 shadow-xl' : 'opacity-85 hover:opacity-100 hover:scale-[1.02]'}`}
+                    style={activeDeck === 'cities' ? { backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.85)), url(${card.bgImage})` } : {}}
                   >
-                    <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-white/30 backdrop-blur-md text-white self-start shadow">
+                    <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-white/30 backdrop-blur-md text-white self-start shadow z-10">
                       {card.badge[currentLanguage as 'so' | 'en'] || card.badge['en']}
                     </span>
-                    <span className="text-xs font-bold text-white line-clamp-2 drop-shadow-md">
+                    <span className="text-xs font-bold text-white line-clamp-2 drop-shadow-md z-10">
                       {card.title[currentLanguage as 'so' | 'en'] || card.title['en']}
                     </span>
                   </button>
@@ -187,7 +196,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
           </div>
         </div>
 
-        {/* Rechterkolom: Live Preview Weergave */}
+        {/* Rechterkolom: Live Preview Weergave met Geanimeerde Achtergrond */}
         <div className="lg:col-span-5 flex flex-col items-center justify-center">
           <div className="w-full max-w-md bg-white p-6 rounded-3xl shadow-2xl border border-gray-100 flex flex-col justify-between min-h-[500px] relative overflow-hidden">
             
@@ -200,18 +209,25 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
               </div>
             </div>
 
-            {/* Visuele Kaart */}
+            {/* Visuele Kaart met Animated Background */}
             <div 
-              className={`w-full p-6 rounded-2xl text-white shadow-2xl flex flex-col justify-between flex-grow my-2 transition-all duration-500 relative overflow-hidden ${
-                activeDeck === 'dhaqan' ? `bg-gradient-to-br ${selectedCard.gradient}` : 'bg-cover bg-center'
+              className={`w-full p-6 rounded-2xl text-white shadow-2xl flex flex-col justify-between flex-grow my-2 transition-all duration-700 relative overflow-hidden ${
+                activeDeck === 'dhaqan' ? `bg-gradient-to-br ${selectedCard.gradient}` : ''
               }`}
-              style={activeDeck === 'cities' ? { backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.85)), url(${selectedCard.bgImage})` } : {}}
             >
+              {/* Als cities actief is, tonen we de geanimeerde achtergrondlaag */}
+              {activeDeck === 'cities' && (
+                <div 
+                  className="absolute inset-0 bg-cover bg-center animate-slow-zoom -z-10 filter brightness-90"
+                  style={{ backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.85)), url(${selectedCard.bgImage})` }}
+                />
+              )}
+
               <div className="flex justify-between items-center z-10">
                 <span className="text-[10px] tracking-widest uppercase bg-black/40 px-3 py-1 rounded-md backdrop-blur-md font-bold border border-white/20">
                   HADIYADPAY • {selectedCard.badge[currentLanguage as 'so' | 'en'] || selectedCard.badge['en']}
                 </span>
-                <span className="text-base animate-bounce">✨💖</span>
+                <span className="text-base animate-bounce">✨🐪</span>
               </div>
 
               <div className="my-6 z-10">

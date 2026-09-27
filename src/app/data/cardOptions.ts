@@ -95,89 +95,96 @@ export const cardOptions: CardOption[] = [
     bgImage: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1000&auto=format&fit=crop'
   },
 
-  // --- DECK 2: Somali Cities & Animated Vibes (7 items) ---
+  // --- DECK 2: Geel iyo Horizon (7 items - African & Somali Vibes) ---
   {
     id: 'mogadishu',
     category: 'cities',
     badge: { so: 'XAMAR', en: 'MOGADISHU' },
-    title: { so: 'Mogadishu Sunset', en: 'Mogadishu Sunset' },
+    title: { so: 'Xamar Cadde Sunset', en: 'Xamar Golden Hour' },
     defaultMessage: {
-      so: 'Salaan diirran oo ka soo jeeda Xamar Cadde, caasimadda quruxda badan. Habeen wacan! 🌇🌊',
-      en: 'Warm greetings straight from Xamar, the beautiful capital city. Good evening!'
+      so: 'Salaan diirran oo ka soo jeeda Xamar Cadde, caasimadda taariikhiga ah. Habeen wacan! 🌇🌊',
+      en: 'Warm greetings straight from Xamar, the historic coastal capital. Good evening!'
     },
-    gradient: 'from-cyan-600 via-sky-600 to-blue-800',
-    bgImage: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1000&auto=format&fit=crop'
+    gradient: 'from-amber-500 via-orange-600 to-yellow-600',
+    // Unieke sfeervolle kust/stad afbeelding
+    bgImage: 'https://images.unsplash.com/photo-1516026662394-266d5b060609?q=80&w=1000&auto=format&fit=crop'
   },
   {
     id: 'hargeisa',
     category: 'cities',
     badge: { so: 'HARGEISA', en: 'HARGEISA' },
-    title: { so: 'Hargeisa Lights', en: 'Hargeisa Heights' },
+    title: { so: 'Naasa Hablood Vibes', en: 'Hargeisa Hills' },
     defaultMessage: {
-      so: 'Hambalyo iyo salaan qaali ah oo ka timid buuraha taariikhiga ah ee Hargeysa. ⛰️✨',
-      en: 'Special greetings and love sent from the historic hills and lights of Hargeisa.'
+      so: 'Hambalyo iyo salaan qaali ah oo ka timid buuraha iyo jawiga degan ee Hargeysa. ⛰️✨',
+      en: 'Special greetings and love sent from the iconic hills and cool breeze of Hargeisa.'
     },
-    gradient: 'from-slate-700 via-indigo-800 to-zinc-900',
-    bgImage: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1000&auto=format&fit=crop'
+    gradient: 'from-emerald-700 via-teal-800 to-slate-900',
+    // Bergachtig landschap vibe
+    bgImage: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1000&auto=format&fit=crop'
   },
   {
     id: 'kismayo',
     category: 'cities',
     badge: { so: 'KISMAYO', en: 'KISMAYO' },
-    title: { so: 'Kismayo Coast', en: 'Tropical Breeze' },
+    title: { so: 'Jubbada Hoose Palms', en: 'Tropical Coast' },
     defaultMessage: {
-      so: 'Dabaylaha qabow ee xeebta Kismaayo iyo jawiga degan. Maalin wacan oo farxad leh! 🌴☀️',
-      en: 'Cool coastal breeze and great vibes from Kismayo. Wishing you a wonderful day!'
+      so: 'Dabaylaha qabow ee xeebta Kismaayo iyo caleemaha timirta. Maalin wacan oo farxad leh! 🌴☀️',
+      en: 'Cool tropical breeze and palm trees from Kismayo. Wishing you a wonderful day!'
     },
-    gradient: 'from-blue-500 via-teal-600 to-slate-900',
-    bgImage: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?q=80&w=1000&auto=format&fit=crop'
+    gradient: 'from-emerald-500 via-green-700 to-teal-950',
+    // Tropische palmen vibe
+    bgImage: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1000&auto=format&fit=crop'
   },
   {
-    id: 'garowe',
+    id: 'geel',
     category: 'cities',
-    badge: { so: 'GAROWE', en: 'GAROWE' },
-    title: { so: 'Garowe Horizon', en: 'Sunrise Glow' },
+    badge: { so: 'GEEL & SAXAR', en: 'NOMADIC VIBES' },
+    title: { so: 'Baadiye & Geel', en: 'Nomadic Horizon' },
     defaultMessage: {
-      so: 'Iftiinka subaxnimo iyo barakada ka socota magaalada nabadda ee Garowe. 🌅💛',
-      en: 'Morning light and blessings coming straight from the peaceful city of Garowe.'
+      so: 'Nolol baadiye, hiddaha iyo dhaqanka suuban ee geelayda. Barako iyo nabad! 🐪🌾',
+      en: 'Pure nomadic heritage and desert horizon vibes. Sending peace and traditional blessings!'
     },
-    gradient: 'from-amber-600 via-orange-600 to-red-900',
-    bgImage: 'https://images.unsplash.com/photo-1533158307587-828f0a76ef46?q=80&w=1000&auto=format&fit=crop'
+    gradient: 'from-yellow-600 via-amber-700 to-stone-900',
+    // Woestijn / Nomaden vibe
+    bgImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=1000&auto=format&fit=crop'
   },
   {
     id: 'bosaso',
     category: 'cities',
     badge: { so: 'BOSASO', en: 'BOSASO' },
-    title: { so: 'Bosaso Port', en: 'Red Sea Vibe' },
+    title: { so: 'Gacanka Cadmeed', en: 'Red Sea Port' },
     defaultMessage: {
-      so: 'Gacanka Cadmeed iyo hawada diirran ee dekadda Bosaso. Xusuus qaas ah! ⚓🌊',
+      so: 'Badda Cas iyo hawada diirran ee dekadda ganacsiga Bosaso. Xusuus qaas ah! ⚓🌊',
       en: 'The Red Sea breeze and warm greetings from the bustling port city of Bosaso.'
     },
-    gradient: 'from-teal-600 via-cyan-700 to-blue-950',
-    bgImage: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1000&auto=format&fit=crop'
+    gradient: 'from-blue-600 via-indigo-700 to-slate-950',
+    // Haven / Zee vibe
+    bgImage: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop'
   },
   {
     id: 'berbera',
     category: 'cities',
     badge: { so: 'BERBERA', en: 'BERBERA' },
-    title: { so: 'Berbera Breeze', en: 'Coastal Nights' },
+    title: { so: 'Berbera Beach Nights', en: 'Coastal Breeze' },
     defaultMessage: {
-      so: 'Xeebta quruxda badan iyo jawiga habeenkii ee Berbera. Nabad iyo caafimaad! 🌴🌙',
-      en: 'The stunning coastline and magical night atmosphere of Berbera. Peace and love!'
+      so: 'Xeebta caanka ah iyo habeenada jawiga macaan leh ee Berbera. Nabad iyo caafimaad! 🌙✨',
+      en: 'The stunning coastline and magical night atmosphere of Berbera beach. Peace and love!'
     },
-    gradient: 'from-sky-600 via-blue-700 to-indigo-950',
-    bgImage: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?q=80&w=1000&auto=format&fit=crop'
+    gradient: 'from-sky-500 via-indigo-600 to-blue-950',
+    // Magische avond / strand vibe
+    bgImage: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?q=80&w=1000&auto=format&fit=crop'
   },
   {
     id: 'galkayo',
     category: 'cities',
-    badge: { so: 'GALKAYO', en: 'GALKAYO' },
-    title: { so: 'Galkayo Pulse', en: 'Heart of Mudug' },
+    badge: { so: 'GALKAYO', en: 'MUDUG PULSE' },
+    title: { so: 'Bartamaha Soomaaliya', en: 'Heart of Mudug' },
     defaultMessage: {
-      so: 'Fariin diirran iyo salaan wadajir ah oo ka timid bartamaha Soomaaliya. Guul! 💫🏙️',
+      so: 'Fariin diirran iyo salaan wadajir ah oo ka timid wadnaha Soomaaliya. Guul iyo barako! 💫🏙️',
       en: 'A warm message and greetings sent straight from the vibrant heart of Mudug.'
     },
-    gradient: 'from-violet-800 via-purple-900 to-slate-950',
-    bgImage: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1000&auto=format&fit=crop'
+    gradient: 'from-purple-700 via-indigo-900 to-zinc-950',
+    // Moderne stedelijke / culturele nacht vibe
+    bgImage: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?q=80&w=1000&auto=format&fit=crop'
   }
 ];
