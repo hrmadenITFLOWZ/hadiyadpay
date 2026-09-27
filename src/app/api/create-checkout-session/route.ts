@@ -9,21 +9,30 @@ export async function POST(req: Request) {
     const totalAmount = Number(transferAmount || 0) + Number(cardPrice || 0);
     const waafiUrl = 'https://sandbox.waafipay.com/asm';
 
+    // WAAFiPay vereist dat telefoonnummers ZONDER de '+' worden aangeleverd (bijv. 25263...)
+    const cleanSenderPhone = senderPhone ? senderPhone.replace('+', '') : '';
+
     const payload = {
       schemaVersion: '1.0',
       requestId: 'REQ_' + Date.now(),
       timestamp: new Date().toISOString(),
-      channel: 'WEB',
+      channelName: 'WEB',
       serviceName: 'API_PURCHASE',
       serviceParams: {
         merchantUid: process.env.WAAFIPAY_MERCHANT_UID || 'merchant_test_id',
         apiUserId: process.env.WAAFIPAY_API_USER_ID || 'user_test_id',
         apiKey: process.env.WAAFIPAY_API_KEY || 'key_test',
         paymentMethod: provider || 'MW_ZAAD',
-        payerPhone: senderPhone, // Dit is nu correct gekoppeld aan de variabele
-        amount: totalAmount.toString(),
-        currency: 'USD',
-        description: `Hadiyad: ${cardTitle} + $${transferAmount} gift`,
+        payerInfo: {
+          accountNo: cleanSenderPhone,
+        },
+        transactionInfo: {
+          referenceId: 'REF_' + Date.now(),
+          invoiceId: 'INV_' + Date.now(),
+          amount: totalAmount.toFixed(2),
+          currency: 'USD',
+          description: `Hadiyad: ${cardTitle} + $${transferAmount} gift`,
+        }
       }
     };
 
@@ -34,16 +43,17 @@ export async function POST(req: Request) {
     });
 
     const data = await response.json();
+    console.log('WAAFiPay Response:', data);
 
-    // WAAFiPay geeft meestal '2001' of een successtatus terug in de respons
-    if (data.responseCode === '2001' || data.errorCode === '0') {
+    // Controleer op succesvolle respons van WAAFiPay (responseCode '2001')
+    if (data.responseCode === '2001') {
       return NextResponse.json({ 
         success: true, 
         message: 'Betaling gestart! Controleer je telefoonscherm.' 
       });
     } else {
       return NextResponse.json(
-        { success: false, error: data.responseMessage || data.errorString || 'Betaling mislukt door provider' }, 
+        { success: false, error: data.responseMsg || 'Betaling mislukt door provider' }, 
         { status: 400 }
       );
     }
