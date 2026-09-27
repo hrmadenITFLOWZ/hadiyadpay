@@ -13,9 +13,11 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   const filteredCards = cardOptions.filter((card) => card.category === activeDeck);
 
   const [selectedCard, setSelectedCard] = useState<CardOption>(filteredCards[0]);
-  const [recipientName, setRecipientName] = useState('');
-  const [senderName, setSenderName] = useState('');
+  
+  const [recipientName, setRecipientName] = useState(selectedCard.defaultRecipient[currentLanguage as 'so' | 'en'] || selectedCard.defaultRecipient['en']);
+  const [senderName, setSenderName] = useState(selectedCard.defaultSender[currentLanguage as 'so' | 'en'] || selectedCard.defaultSender['en']);
   const [message, setMessage] = useState(selectedCard.defaultMessage[currentLanguage as 'so' | 'en'] || selectedCard.defaultMessage['en']);
+  
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   useEffect(() => {
@@ -24,6 +26,8 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   }, [activeDeck]);
 
   useEffect(() => {
+    setRecipientName(selectedCard.defaultRecipient[currentLanguage as 'so' | 'en'] || selectedCard.defaultRecipient['en']);
+    setSenderName(selectedCard.defaultSender[currentLanguage as 'so' | 'en'] || selectedCard.defaultSender['en']);
     setMessage(selectedCard.defaultMessage[currentLanguage as 'so' | 'en'] || selectedCard.defaultMessage['en']);
   }, [selectedCard, currentLanguage]);
 
@@ -32,7 +36,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
       try {
         await navigator.share({
           title: 'HadiyadPay E-Card',
-          text: `E-card ku socota ${recipientName || 'Qaataha'}: "${message}"`,
+          text: `E-card ku socota ${recipientName}: "${message}"`,
           url: window.location.href,
         });
       } catch (err) {
@@ -47,7 +51,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
     alert(currentLanguage === 'so' ? 'Kaarka waa la keydiyey!' : 'Card saved successfully!');
   };
 
-  // Helper voor achtergrondstyling (kleurgradiënt of foto met overlay)
   const getCardStyle = (card: CardOption) => {
     if (card.bgImage) {
       return {
@@ -146,7 +149,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                   type="text"
                   value={recipientName}
                   onChange={(e) => setRecipientName(e.target.value)}
-                  placeholder="Hooyo Macaan 🌸"
                   className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-900 bg-gray-50 font-medium"
                 />
               </div>
@@ -158,7 +160,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                   type="text"
                   value={senderName}
                   onChange={(e) => setSenderName(e.target.value)}
-                  placeholder="Wiilkaada / Gabadhada ✨"
                   className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-900 bg-gray-50 font-medium"
                 />
               </div>
@@ -216,7 +217,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                   {currentLanguage === 'so' ? 'MAGACA QAATAHA:' : 'TO:'}
                 </p>
                 <h3 className="text-xl font-black tracking-wide drop-shadow-md">
-                  {recipientName ? recipientName : 'Hooyo Macaan 🌸'}
+                  {recipientName}
                 </h3>
               </div>
 
@@ -232,7 +233,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                     {currentLanguage === 'so' ? 'MAGACA DIRAHA:' : 'FROM:'}
                   </p>
                   <p className="text-xs font-bold">
-                    {senderName ? senderName : 'Wiilkaada / Gabadhada ✨'}
+                    {senderName}
                   </p>
                 </div>
                 <span className="text-[10px] opacity-90 font-bold bg-white/20 px-2 py-0.5 rounded">HADIYADPAY</span>
