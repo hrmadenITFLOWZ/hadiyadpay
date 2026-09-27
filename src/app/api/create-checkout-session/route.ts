@@ -6,10 +6,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { cardTitle, cardPrice, transferAmount, recipientPhone, senderPhone, provider } = body;
 
-    // Bereken het totale bedrag (kaart + transfer) in USD
-    const totalAmount = Number(transferAmount) + Number(cardPrice);
-
-    // WAAFiPay Sandbox API Endpoint
+    const totalAmount = Number(transferAmount || 0) + Number(cardPrice || 0);
     const waafiUrl = 'https://sandbox.waafipay.com/asm';
 
     const payload = {
@@ -23,7 +20,7 @@ export async function POST(req: Request) {
         apiUserId: process.env.WAAFIPAY_API_USER_ID || 'user_test_id',
         apiKey: process.env.WAAFIPAY_API_KEY || 'key_test',
         paymentMethod: provider || 'MW_ZAAD',
-        payerPhone: senderPhone,
+        payerPhone: senderPhone, // Dit is nu correct gekoppeld aan de variabele
         amount: totalAmount.toString(),
         currency: 'USD',
         description: `Hadiyad: ${cardTitle} + $${transferAmount} gift`,
@@ -38,20 +35,21 @@ export async function POST(req: Request) {
 
     const data = await response.json();
 
-    if (data.responseCode === '2001') {
+    // WAAFiPay geeft meestal '2001' of een successtatus terug in de respons
+    if (data.responseCode === '2001' || data.errorCode === '0') {
       return NextResponse.json({ 
         success: true, 
-        message: 'Controleer je telefoonscherm om de betaling te bevestigen.' 
+        message: 'Betaling gestart! Controleer je telefoonscherm.' 
       });
     } else {
       return NextResponse.json(
-        { success: false, error: data.responseMessage || 'Betaling mislukt' }, 
+        { success: false, error: data.responseMessage || data.errorString || 'Betaling mislukt door provider' }, 
         { status: 400 }
       );
     }
 
   } catch (error: any) {
-    console.error('WAAFiPay Error:', error);
-    return NextResponse.json({ success: false, error: error.message || 'Server fout opgetreden' }, { status: 500 });
+    console.error('WAAFiPay API Error:', error);
+    return NextResponse.json({ success: false, error: error.message || 'Interne serverfout' }, { status: 500 });
   }
 }
