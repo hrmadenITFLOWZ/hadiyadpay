@@ -9,14 +9,19 @@ interface CardBuilderProps {
 }
 
 export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
-  const [selectedCard, setSelectedCard] = useState<CardOption>(cardOptions[0]);
+  const [activeDeck, setActiveDeck] = useState<'dhaqan' | 'cities'>('dhaqan');
+  const filteredCards = cardOptions.filter((card) => card.category === activeDeck);
+
+  const [selectedCard, setSelectedCard] = useState<CardOption>(filteredCards[0]);
   const [recipientName, setRecipientName] = useState('');
   const [senderName, setSenderName] = useState('');
   const [message, setMessage] = useState(selectedCard.defaultMessage[currentLanguage as 'so' | 'en'] || selectedCard.defaultMessage['en']);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  
-  // State om te schakelen tussen het nieuwe design en het klassieke design
-  const [designStyle, setDesignStyle] = useState<'new' | 'classic'>('new');
+
+  useEffect(() => {
+    const newFiltered = cardOptions.filter((c) => c.category === activeDeck);
+    setSelectedCard(newFiltered[0]);
+  }, [activeDeck]);
 
   useEffect(() => {
     setMessage(selectedCard.defaultMessage[currentLanguage as 'so' | 'en'] || selectedCard.defaultMessage['en']);
@@ -42,11 +47,10 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
     alert(currentLanguage === 'so' ? 'Kaarka waa la keydiyey!' : 'Card saved successfully!');
   };
 
-  // Dynamische styling voor de verzendknop op basis van het gekozen design
   const getButtonStyle = () => {
-    if (designStyle === 'new') {
+    if (activeDeck === 'cities') {
       return {
-        backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.6), rgba(0,0,0,0.7)), url(${selectedCard.bgImage})`,
+        backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url(${selectedCard.bgImage})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       };
@@ -57,33 +61,28 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   return (
     <div className="w-full max-w-7xl mx-auto p-4 flex flex-col gap-4">
       
-      {/* Design Switcher Balk */}
-      <div className="bg-white/80 backdrop-blur-md p-3 rounded-2xl shadow-md border border-gray-100 flex items-center justify-between max-w-md mx-auto w-full">
-        <span className="text-xs font-bold text-gray-700 uppercase tracking-wider px-2">
-          {currentLanguage === 'so' ? 'Dooro Naqshada (Design):' : 'Select Design Style:'}
-        </span>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setDesignStyle('new')}
-            className={`px-3 py-1.5 text-xs font-bold rounded-xl transition ${
-              designStyle === 'new'
-                ? 'bg-emerald-600 text-white shadow'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            ✨ New (Photo Theme)
-          </button>
-          <button
-            onClick={() => setDesignStyle('classic')}
-            className={`px-3 py-1.5 text-xs font-bold rounded-xl transition ${
-              designStyle === 'classic'
-                ? 'bg-emerald-600 text-white shadow'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            🏛️ Classic Gradient
-          </button>
-        </div>
+      {/* Deck Switcher Knoppen (GenZ Somali style) */}
+      <div className="bg-white/80 backdrop-blur-md p-2 rounded-2xl shadow-md border border-gray-100 flex gap-2 max-w-md mx-auto w-full">
+        <button
+          onClick={() => setActiveDeck('dhaqan')}
+          className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 ${
+            activeDeck === 'dhaqan'
+              ? 'bg-rose-600 text-white shadow-lg scale-[1.02]'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          }`}
+        >
+          ✨ Dhaqan Vibes ({cardOptions.filter(c => c.category === 'dhaqan').length})
+        </button>
+        <button
+          onClick={() => setActiveDeck('cities')}
+          className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 relative overflow-hidden ${
+            activeDeck === 'cities'
+              ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg scale-[1.02] ring-2 ring-indigo-300 animate-pulse'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          }`}
+        >
+          🏙️ Somali Cities & Glow ({cardOptions.filter(c => c.category === 'cities').length})
+        </button>
       </div>
 
       {/* Hoofdgrid */}
@@ -102,16 +101,16 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             </p>
           </div>
 
-          {/* Catalogus Weergave */}
+          {/* Catalogus Rolledeck (7 Kaarten per deck) */}
           <div>
             <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">
-              {currentLanguage === 'so' ? 'DOORO MUNAASABADA & QAABKA' : 'SELECT OCCASION & STYLE'}
+              {currentLanguage === 'so' ? 'XULO KAARKA WANAAGSAN' : 'CHOOSE YOUR CARD STYLE'}
             </label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {cardOptions.map((card) => {
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-h-[340px] overflow-y-auto pr-1">
+              {filteredCards.map((card) => {
                 const isSelected = selectedCard.id === card.id;
-                const bgStyle = designStyle === 'new' 
-                  ? { backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.8)), url(${card.bgImage})` }
+                const bgStyle = activeDeck === 'cities' 
+                  ? { backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.85)), url(${card.bgImage})` }
                   : {};
                 
                 return (
@@ -119,7 +118,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                     key={card.id}
                     onClick={() => setSelectedCard(card)}
                     className={`text-left p-3 rounded-2xl transition-all duration-300 border relative overflow-hidden flex flex-col justify-between h-32 bg-cover bg-center shadow-md group ${
-                      designStyle === 'classic' ? `bg-gradient-to-br ${card.gradient}` : ''
+                      activeDeck === 'dhaqan' ? `bg-gradient-to-br ${card.gradient}` : ''
                     } ${isSelected ? 'ring-4 ring-emerald-500 scale-105 shadow-xl' : 'opacity-80 hover:opacity-100 hover:scale-[1.02]'}`}
                     style={bgStyle}
                   >
@@ -179,7 +178,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             <button
               onClick={() => setIsCheckoutOpen(true)}
               className={`w-full py-4 px-4 font-bold rounded-2xl shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-base text-white hover:brightness-110 border border-white/20 ${
-                designStyle === 'classic' ? `bg-gradient-to-r ${selectedCard.gradient}` : ''
+                activeDeck === 'dhaqan' ? `bg-gradient-to-r ${selectedCard.gradient}` : ''
               }`}
               style={getButtonStyle()}
             >
@@ -201,18 +200,18 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
               </div>
             </div>
 
-            {/* Visuele Kaart (Past zich aan op basis van designStyle) */}
+            {/* Visuele Kaart */}
             <div 
               className={`w-full p-6 rounded-2xl text-white shadow-2xl flex flex-col justify-between flex-grow my-2 transition-all duration-500 relative overflow-hidden ${
-                designStyle === 'classic' ? `bg-gradient-to-br ${selectedCard.gradient}` : 'bg-cover bg-center'
+                activeDeck === 'dhaqan' ? `bg-gradient-to-br ${selectedCard.gradient}` : 'bg-cover bg-center'
               }`}
-              style={designStyle === 'new' ? { backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.85)), url(${selectedCard.bgImage})` } : {}}
+              style={activeDeck === 'cities' ? { backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.85)), url(${selectedCard.bgImage})` } : {}}
             >
               <div className="flex justify-between items-center z-10">
                 <span className="text-[10px] tracking-widest uppercase bg-black/40 px-3 py-1 rounded-md backdrop-blur-md font-bold border border-white/20">
                   HADIYADPAY • {selectedCard.badge[currentLanguage as 'so' | 'en'] || selectedCard.badge['en']}
                 </span>
-                <span className="text-base">✨💖</span>
+                <span className="text-base animate-bounce">✨💖</span>
               </div>
 
               <div className="my-6 z-10">
@@ -252,7 +251,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 📥 {currentLanguage === 'so' ? 'Soo Degso Kaarka' : 'Download Card'}
               </button>
               <button
-                onClick= {handleShare}
+                onClick={handleShare}
                 className="py-2.5 px-3 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm"
               >
                 🔗 {currentLanguage === 'so' ? 'La Wadaag' : 'Share Card'}
