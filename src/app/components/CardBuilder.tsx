@@ -42,6 +42,18 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
     alert(currentLanguage === 'so' ? 'Kaarka waa la keydiyey!' : 'Card saved successfully!');
   };
 
+  // Dynamische styling voor de verzendknop op basis van het gekozen design
+  const getButtonStyle = () => {
+    if (designStyle === 'new') {
+      return {
+        backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.6), rgba(0,0,0,0.7)), url(${selectedCard.bgImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      };
+    }
+    return {};
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto p-4 flex flex-col gap-4">
       
@@ -166,7 +178,10 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
             <button
               onClick={() => setIsCheckoutOpen(true)}
-              className={`w-full py-4 px-4 bg-gradient-to-r ${selectedCard.gradient} hover:brightness-110 text-white font-bold rounded-2xl shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-base`}
+              className={`w-full py-4 px-4 font-bold rounded-2xl shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-base text-white hover:brightness-110 border border-white/20 ${
+                designStyle === 'classic' ? `bg-gradient-to-r ${selectedCard.gradient}` : ''
+              }`}
+              style={getButtonStyle()}
             >
               <span>🚀 {currentLanguage === 'so' ? 'Dir Hadiyad iyo Xawilaad Degdeg ah' : 'Send Hadiyad & Instant Transfer'}</span>
             </button>
@@ -237,7 +252,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 📥 {currentLanguage === 'so' ? 'Soo Degso Kaarka' : 'Download Card'}
               </button>
               <button
-                onClick={handleShare}
+                onClick= {handleShare}
                 className="py-2.5 px-3 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm"
               >
                 🔗 {currentLanguage === 'so' ? 'La Wadaag' : 'Share Card'}
