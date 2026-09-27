@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 function formatWaafiPhone(phone: string): string {
   if (!phone) return '';
-  let cleaned = phone.replace(/\D/g, '');
+  let cleaned = phone.replace(/\D/g, ''); // Verwijder alle niet-cijfers
   if (cleaned.startsWith('0')) {
     cleaned = cleaned.substring(1);
   }
@@ -16,24 +16,24 @@ function formatWaafiPhone(phone: string): string {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { cardTitle, cardPrice, transferAmount, senderPhone, provider } = body;
+    const { cardTitle, cardPrice, transferAmount, senderPhone } = body;
 
     const totalAmount = Number(transferAmount || 0) + Number(cardPrice || 0);
     const waafiUrl = 'https://sandbox.waafipay.com/asm';
     const formattedSenderPhone = formatWaafiPhone(senderPhone);
 
-    // Volgens de officiële WAAFiPay API structuur voor API_PURCHASE
+    // Officiële WAAFiPay API_PURCHASE payload structuur
     const payload = {
       schemaVersion: '1.0',
       requestId: 'REQ_' + Date.now(),
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString().replace(/T/, ' ').replace(/\..+/, ''), // YYYY-MM-DD HH:mm:ss formaat
       channelName: 'WEB',
       serviceName: 'API_PURCHASE',
       serviceParams: {
         merchantUid: process.env.WAAFIPAY_MERCHANT_UID || 'merchant_test_id',
         apiUserId: process.env.WAAFIPAY_API_USER_ID || 'user_test_id',
         apiKey: process.env.WAAFIPAY_API_KEY || 'key_test',
-        paymentMethod: provider === 'edahab' ? 'MW_EDAHAB' : 'MW_ZAAD',
+        paymentMethod: 'MWALLET_ACCOUNT',
         payerInfo: {
           accountNo: formattedSenderPhone
         },
@@ -47,7 +47,7 @@ export async function POST(req: Request) {
       }
     };
 
-    console.log('Verzonden Payload naar WAAFiPay:', JSON.stringify(payload, null, 2));
+    console.log('Final WAAFiPay Payload:', JSON.stringify(payload, null, 2));
 
     const response = await fetch(waafiUrl, {
       method: 'POST',
