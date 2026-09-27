@@ -15,6 +15,19 @@ interface CheckoutModalProps {
 
 type Language = 'en' | 'nl';
 
+// Helper om telefoonnummers al in de frontend netjes te formatteren naar 252XXXXXXXXX
+function formatPhone(phone: string): string {
+  if (!phone) return '';
+  let cleaned = phone.replace(/\D/g, '');
+  if (cleaned.startsWith('0')) {
+    cleaned = cleaned.substring(1);
+  }
+  if (!cleaned.startsWith('252')) {
+    cleaned = '252' + cleaned;
+  }
+  return cleaned;
+}
+
 export default function CheckoutModal({
   selectedOccasion,
   recipientName,
@@ -46,6 +59,10 @@ export default function CheckoutModal({
       return;
     }
 
+    // Formatteer de nummers direct naar het verplichte 252 formaat
+    const formattedSender = formatPhone(mobileNumber);
+    const formattedRecipient = formatPhone(recipientPhone);
+
     setLoading(true);
     try {
       const response = await fetch('/api/create-checkout-session', {
@@ -55,8 +72,8 @@ export default function CheckoutModal({
           cardTitle: safeOccasion.title,
           cardPrice: cardPrice,
           transferAmount: transferAmount,
-          recipientPhone: recipientPhone,
-          senderPhone: mobileNumber,
+          recipientPhone: formattedRecipient,
+          senderPhone: formattedSender,
           provider: provider === 'zaad' ? 'MW_ZAAD' : 'MW_EDAHAB',
         }),
       });
@@ -98,7 +115,7 @@ export default function CheckoutModal({
               required
               value={mobileNumber}
               onChange={(e) => setMobileNumber(e.target.value)}
-              placeholder="+25263XXXXXXX"
+              placeholder="63XXXXXXX of 25263XXXXXXX"
               className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
             />
           </div>
@@ -110,7 +127,7 @@ export default function CheckoutModal({
               required
               value={recipientPhone}
               onChange={(e) => setRecipientPhone(e.target.value)}
-              placeholder="+25263XXXXXXX"
+              placeholder="63XXXXXXX of 25263XXXXXXX"
               className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
             />
           </div>
