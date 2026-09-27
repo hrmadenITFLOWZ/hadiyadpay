@@ -50,18 +50,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   return (
     <div className="w-full max-w-7xl mx-auto p-4 flex flex-col gap-4">
       
-      {/* CSS Animatie voor Ken Burns / Slow Zoom */}
-      <style jsx global>{`
-        @keyframes slowZoom {
-          0% { transform: scale(1); }
-          50% { transform: scale(1.08); }
-          100% { transform: scale(1); }
-        }
-        .animate-slow-zoom {
-          animation: slowZoom 14s infinite ease-in-out;
-        }
-      `}</style>
-
       {/* Deck Switcher Knoppen */}
       <div className="bg-white/80 backdrop-blur-md p-2 rounded-2xl shadow-md border border-gray-100 flex gap-2 max-w-md mx-auto w-full">
         <button
@@ -76,7 +64,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
         </button>
         <button
           onClick={() => setActiveDeck('cities')}
-          className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 relative overflow-hidden ${
+          className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 ${
             activeDeck === 'cities'
               ? 'bg-gradient-to-r from-amber-600 via-orange-600 to-yellow-600 text-white shadow-lg scale-[1.02] ring-2 ring-amber-300'
               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -120,7 +108,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                     }`}
                     style={{
                       backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.85)), url(${card.bgImage})`,
-                      backgroundColor: '#1f2937' // Fallback kleur tegen grijze vlakken
+                      backgroundColor: '#1f2937'
                     }}
                   >
                     <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-white/30 backdrop-blur-md text-white self-start shadow z-10">
@@ -189,7 +177,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
           </div>
         </div>
 
-        {/* Rechterkolom: Live Preview Weergave met Geanimeerde Zoom */}
+        {/* Rechterkolom: Live Preview Weergave */}
         <div className="lg:col-span-5 flex flex-col items-center justify-center">
           <div className="w-full max-w-md bg-white p-6 rounded-3xl shadow-2xl border border-gray-100 flex flex-col justify-between min-h-[500px] relative overflow-hidden">
             
@@ -202,22 +190,19 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
               </div>
             </div>
 
-            {/* Visuele Kaart met Achtergrond en Zoom Animatie */}
-            <div className="w-full p-6 rounded-2xl text-white shadow-2xl flex flex-col justify-between flex-grow my-2 relative overflow-hidden bg-gray-900">
-              
-              {/* Geanimeerde en ingezette achtergrondfoto */}
-              <div 
-                className="absolute inset-0 bg-cover bg-center animate-slow-zoom filter brightness-90 z-0"
-                style={{ 
-                  backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.85)), url(${selectedCard.bgImage})` 
-                }}
-              />
-
+            {/* Visuele Kaart met Achtergrondfoto */}
+            <div 
+              className="w-full p-6 rounded-2xl text-white shadow-2xl flex flex-col justify-between flex-grow my-2 relative overflow-hidden bg-cover bg-center transition-all duration-500"
+              style={{
+                backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.85)), url(${selectedCard.bgImage})`,
+                backgroundColor: '#1f2937'
+              }}
+            >
               <div className="flex justify-between items-center z-10">
                 <span className="text-[10px] tracking-widest uppercase bg-black/40 px-3 py-1 rounded-md backdrop-blur-md font-bold border border-white/20">
                   HADIYADPAY • {selectedCard.badge[currentLanguage as 'so' | 'en'] || selectedCard.badge['en']}
                 </span>
-                <span className="text-base animate-bounce">✨🐪</span>
+                <span className="text-base animate-bounce">✨</span>
               </div>
 
               <div className="my-6 z-10">

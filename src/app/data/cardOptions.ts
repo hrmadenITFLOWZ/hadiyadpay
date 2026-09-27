@@ -9,7 +9,7 @@ export interface CardOption {
 }
 
 export const cardOptions: CardOption[] = [
-  // --- DECK 1: Dhaqan Vibes (7 items) ---
+  // --- DECK 1: Dhaqan Vibes (Originele ontwerpen met sfeervolle foto's) ---
   {
     id: 'dhalasho',
     category: 'dhaqan',
@@ -95,7 +95,7 @@ export const cardOptions: CardOption[] = [
     bgImage: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1000&auto=format&fit=crop'
   },
 
-  // --- DECK 2: Geel iyo Guri Vibes (7 items - Met diep warme Afrikaanse tinten) ---
+  // --- DECK 2: Geel iyo Guri Vibes (Met strakke diepe sfeer en unieke landschappen) ---
   {
     id: 'mogadishu',
     category: 'cities',
