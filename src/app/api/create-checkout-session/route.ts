@@ -22,8 +22,8 @@ export async function POST(req: Request) {
         merchantUid: process.env.WAAFIPAY_MERCHANT_UID || 'merchant_test_id',
         apiUserId: process.env.WAAFIPAY_API_USER_ID || 'user_test_id',
         apiKey: process.env.WAAFIPAY_API_KEY || 'key_test',
-        paymentMethod: provider || 'MW_ZAAD', // Bepaalt de provider (bijv. ZAAD of EVC Plus)
-        payerPhone: senderPhone, // Het nummer van de afzender die de betaling goedkeurt
+        paymentMethod: provider || 'MW_ZAAD',
+        payerPhone: senderPhone,
         amount: totalAmount.toString(),
         currency: 'USD',
         description: `Hadiyad: ${cardTitle} + $${transferAmount} gift`,
@@ -38,7 +38,6 @@ export async function POST(req: Request) {
 
     const data = await response.json();
 
-    // WAAFiPay geeft 2001 terug als de USSD push naar de telefoon is gestuurd
     if (data.responseCode === '2001') {
       return NextResponse.json({ 
         success: true, 
