@@ -4,43 +4,44 @@ export interface CardOption {
   badge: { so: string; en: string };
   title: { so: string; en: string };
   defaultMessage: { so: string; en: string };
-  gradient: string;
+  gradient?: string;
+  bgImage?: string;
 }
 
 export const cardOptions: CardOption[] = [
-  // --- DECK 1: Dhaqan Vibes (Originele vrolijke kleuren & emoji's) ---
+  // --- DECK 1: Dhaqan Vibes (Warme, rustige kleuren met rijke emoji-titels) ---
   {
     id: 'dhalasho',
     category: 'dhaqan',
     badge: { so: 'DHALASHO', en: 'BIRTHDAY' },
-    title: { so: 'Dhalasho Wacan 🎉', en: 'Birthday Celebration 🎉' },
+    title: { so: 'Dhalasho Wacan 🎉✨', en: 'Birthday Celebration 🎉✨' },
     defaultMessage: {
       so: 'Waxaan kuu rajeynayaa caafimaad, barako, iyo sannad kale oo ay ka buuxaan farxad, qosol, iyo guul weyn. 🎉✨',
       en: 'Wishing you health, blessings, and another year filled with happiness, laughter, and great success.'
     },
-    gradient: 'linear-gradient(135deg, #ec4899 0%, #f43f5e 50%, #e11d48 100%)'
+    gradient: 'linear-gradient(135deg, #be185d 0%, #9f1239 100%)'
   },
   {
     id: 'aroos',
     category: 'dhaqan',
     badge: { so: 'AROOS', en: 'WEDDING' },
-    title: { so: 'Xaflada Arooska 💍', en: 'Wedding & Union 💍' },
+    title: { so: 'Xaflada Arooska 💍🕊️', en: 'Wedding & Union 💍🕊️' },
     defaultMessage: {
       so: 'Hambalyo arooska ku saabsan! Allah idinka yeero kuwii isu waara ee hela guri barako leh. 💍🕊️',
       en: 'Congratulations on your wedding! May Allah bless your union and fill your home with peace and joy.'
     },
-    gradient: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 50%, #d97706 100%)'
+    gradient: 'linear-gradient(135deg, #b45309 0%, #78350f 100%)'
   },
   {
     id: 'eid',
     category: 'dhaqan',
     badge: { so: 'EID', en: 'EID' },
-    title: { so: 'Eid Mubarak 🌙', en: 'Eid Mubarak 🌙' },
+    title: { so: 'Eid Mubarak 🌙⭐', en: 'Eid Mubarak 🌙⭐' },
     defaultMessage: {
       so: 'Eid Mubaarak! Waxaan kuu rajeynayaa adiga iyo qoyskaagaba nabad, caafimaad, iyo barako badan. 🌙⭐',
       en: 'Eid Mubarak! May this joyous occasion bring peace, happiness, and prosperity to your family.'
     },
-    gradient: 'linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%)'
+    gradient: 'linear-gradient(135deg, #047857 0%, #065f46 100%)'
   },
   {
     id: 'taageero',
@@ -51,43 +52,43 @@ export const cardOptions: CardOption[] = [
       so: 'Waan kugula jirbaa mar walba. Ha welwelin, si adag u soco oo guushu waa kuu dhowdahay! 💪',
       en: 'I am always supporting you. Keep your head up, stay strong, and success is right around the corner!'
     },
-    gradient: 'linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #2563eb 100%)'
+    gradient: 'linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%)'
   },
   {
     id: 'guul',
     category: 'dhaqan',
     badge: { so: 'GUUL', en: 'SUCCESS' },
-    title: { so: 'Qalinjabin & Guul 🎓', en: 'Graduation & Success 🎓' },
+    title: { so: 'Qalinjabin & Guul 🎓🚀', en: 'Graduation & Success 🎓🚀' },
     defaultMessage: {
       so: 'Hambalyo heerkan sare aad ka gaartay! Waxaan kuu rajeynayaa mustaqbal ifaya iyo guulo waaweyn. 🎓🚀',
       en: 'Congratulations on your incredible achievement! Wishing you a bright future and endless successes.'
     },
-    gradient: 'linear-gradient(135deg, #a855f7 0%, #c084fc 50%, #9333ea 100%)'
+    gradient: 'linear-gradient(135deg, #6b21a8 0%, #581c87 100%)'
   },
   {
     id: 'mahadcelin',
     category: 'dhaqan',
     badge: { so: 'MAHAD', en: 'THANKS' },
-    title: { so: 'Mahadcelin Wacan 🙏', en: 'Heartfelt Thanks 🙏' },
+    title: { so: 'Mahadcelin Wacan 🙏💛', en: 'Heartfelt Thanks 🙏💛' },
     defaultMessage: {
       so: 'Waan ka mahadcelinayaa garab istaaggaaga iyo wanaaggaaga joogtada ah. Alle ha ku xafido! 🙏💛',
       en: 'Thank you so much for your constant support and kindness. May God protect you!'
     },
-    gradient: 'linear-gradient(135deg, #eab308 0%, #f59e0b 50%, #ca8a04 100%)'
+    gradient: 'linear-gradient(135deg, #b45309 0%, #92400e 100%)'
   },
   {
     id: 'barako',
     category: 'dhaqan',
     badge: { so: 'BARAKO', en: 'BLESSINGS' },
-    title: { so: 'Barako & Nabad 🌟', en: 'Blessings & Peace 🌟' },
+    title: { so: 'Barako & Nabad 🌟🤲', en: 'Blessings & Peace 🌟🤲' },
     defaultMessage: {
       so: 'Maalintaan qiimaha badan waxaa ka buuxa duco iyo barako adiga iyo reerkaagaba ku socota. 🌟🤲',
       en: 'Sending you prayers and blessings for a peaceful and joyous day ahead for you and your family.'
     },
-    gradient: 'linear-gradient(135deg, #14b8a6 0%, #06b6d4 50%, #0d9488 100%)'
+    gradient: 'linear-gradient(135deg, #0f766e 0%, #115e59 100%)'
   },
 
-  // --- DECK 2: Geel iyo Guri Vibes (Super popping, helder & energieke animatie kleuren) ---
+  // --- DECK 2: Geel iyo Guri Vibes (Realistische, sfeervolle landschappen en steden) ---
   {
     id: 'mogadishu',
     category: 'cities',
@@ -97,7 +98,7 @@ export const cardOptions: CardOption[] = [
       so: 'Salaan diirran oo ka soo jeeda Xamar Cadde, caasimadda taariikhiga ah. Habeen wacan! 🌇🌊',
       en: 'Warm greetings straight from Xamar, the historic coastal capital. Good evening!'
     },
-    gradient: 'linear-gradient(135deg, #ff7e5f 0%, #feb47b 50%, #ff512f 100%)'
+    bgImage: 'https://images.unsplash.com/photo-1516026662394-266d5b060609?q=80&w=1000&auto=format&fit=crop'
   },
   {
     id: 'hargeisa',
@@ -108,7 +109,7 @@ export const cardOptions: CardOption[] = [
       so: 'Hambalyo iyo salaan qaali ah oo ka timid buuraha iyo jawiga degan ee Hargeysa. ⛰️✨',
       en: 'Special greetings and love sent from the iconic hills and cool breeze of Hargeisa.'
     },
-    gradient: 'linear-gradient(135deg, #0ba360 0%, #3cba92 50%, #00b09b 100%)'
+    bgImage: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1000&auto=format&fit=crop'
   },
   {
     id: 'kismayo',
@@ -119,7 +120,7 @@ export const cardOptions: CardOption[] = [
       so: 'Dabaylaha qabow ee xeebta Kismaayo iyo caleemaha timirta. Maalin wacan oo farxad leh! 🌴☀️',
       en: 'Cool tropical breeze and palm trees from Kismayo. Wishing you a wonderful day!'
     },
-    gradient: 'linear-gradient(135deg, #11998e 0%, #38ef7d 50%, #00b09b 100%)'
+    bgImage: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1000&auto=format&fit=crop'
   },
   {
     id: 'geel',
@@ -130,7 +131,7 @@ export const cardOptions: CardOption[] = [
       so: 'Nolol baadiye, hiddaha iyo dhaqanka suuban ee geelayda. Barako iyo nabad! 🐪🌾',
       en: 'Pure nomadic heritage and desert horizon vibes. Sending peace and traditional blessings!'
     },
-    gradient: 'linear-gradient(135deg, #f7b733 0%, #fc4a1a 50%, #f7971e 100%)'
+    bgImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=1000&auto=format&fit=crop'
   },
   {
     id: 'bosaso',
@@ -141,7 +142,7 @@ export const cardOptions: CardOption[] = [
       so: 'Badda Cas iyo hawada diirran ee dekadda ganacsiga Bosaso. Xusuus qaas ah! ⚓🌊',
       en: 'The Red Sea breeze and warm greetings from the bustling port city of Bosaso.'
     },
-    gradient: 'linear-gradient(135deg, #00c6ff 0%, #0072ff 50%, #00d2ff 100%)'
+    bgImage: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop'
   },
   {
     id: 'berbera',
@@ -152,7 +153,7 @@ export const cardOptions: CardOption[] = [
       so: 'Xeebta caanka ah iyo habeenada jawiga macaan leh ee Berbera. Nabad iyo caafimaad! 🌙✨',
       en: 'The stunning coastline and magical night atmosphere of Berbera beach. Peace and love!'
     },
-    gradient: 'linear-gradient(135deg, #2af598 0%, #009efd 50%, #00c6ff 100%)'
+    bgImage: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?q=80&w=1000&auto=format&fit=crop'
   },
   {
     id: 'galkayo',
@@ -163,6 +164,6 @@ export const cardOptions: CardOption[] = [
       so: 'Fariin diirran iyo salaan wadajir ah oo ka timid wadnaha Soomaaliya. Guul iyo barako! 💫🏙️',
       en: 'A warm message and greetings sent straight from the vibrant heart of Mudug.'
     },
-    gradient: 'linear-gradient(135deg, #b224ef 0%, #7579ff 50%, #ff758c 100%)'
+    bgImage: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?q=80&w=1000&auto=format&fit=crop'
   }
 ];

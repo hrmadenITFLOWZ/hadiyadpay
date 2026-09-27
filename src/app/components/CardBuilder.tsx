@@ -47,6 +47,21 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
     alert(currentLanguage === 'so' ? 'Kaarka waa la keydiyey!' : 'Card saved successfully!');
   };
 
+  // Helper voor achtergrondstyling (kleurgradiënt of foto met overlay)
+  const getCardStyle = (card: CardOption) => {
+    if (card.bgImage) {
+      return {
+        backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.8)), url(${card.bgImage})`,
+        backgroundColor: '#1f2937',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
+      };
+    }
+    return {
+      background: card.gradient || '#be185d'
+    };
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto p-4 flex flex-col gap-4">
       
@@ -66,7 +81,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
           onClick={() => setActiveDeck('cities')}
           className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 ${
             activeDeck === 'cities'
-              ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500 text-white shadow-lg scale-[1.02] ring-2 ring-amber-300'
+              ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-lg scale-[1.02] ring-2 ring-amber-300'
               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
           }`}
         >
@@ -106,9 +121,9 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                     className={`text-left p-3 rounded-2xl transition-all duration-300 border relative overflow-hidden flex flex-col justify-between h-32 shadow-md group ${
                       isSelected ? 'ring-4 ring-emerald-500 scale-105 shadow-xl z-10' : 'opacity-90 hover:opacity-100 hover:scale-[1.02]'
                     }`}
-                    style={{ background: card.gradient }}
+                    style={getCardStyle(card)}
                   >
-                    <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-white/30 backdrop-blur-md text-white self-start shadow z-10">
+                    <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-black/30 backdrop-blur-md text-white self-start shadow z-10">
                       {card.badge[currentLanguage as 'so' | 'en'] || card.badge['en']}
                     </span>
                     <span className="text-xs font-bold text-white line-clamp-2 drop-shadow-md z-10">
@@ -164,9 +179,9 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             <button
               onClick={() => setIsCheckoutOpen(true)}
               className="w-full py-4 px-4 font-bold rounded-2xl shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-base text-white hover:brightness-110 border border-white/20"
-              style={{ background: selectedCard.gradient }}
+              style={getCardStyle(selectedCard)}
             >
-              <span>🚀 {currentLanguage === 'so' ? 'Dir Hadiyad iyo Xawilaad Degdeg ah' : 'Send Hadiyad & Instant Transfer'}</span>
+              <span className="z-10">🚀 {currentLanguage === 'so' ? 'Dir Hadiyad iyo Xawilaad Degdeg ah' : 'Send Hadiyad & Instant Transfer'}</span>
             </button>
           </div>
         </div>
@@ -184,13 +199,13 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
               </div>
             </div>
 
-            {/* Visuele Kaart met Stralende Gradiënt */}
+            {/* Visuele Kaart */}
             <div 
               className="w-full p-6 rounded-2xl text-white shadow-2xl flex flex-col justify-between flex-grow my-2 relative overflow-hidden transition-all duration-500"
-              style={{ background: selectedCard.gradient }}
+              style={getCardStyle(selectedCard)}
             >
               <div className="flex justify-between items-center z-10">
-                <span className="text-[10px] tracking-widest uppercase bg-black/20 px-3 py-1 rounded-md backdrop-blur-md font-bold border border-white/20">
+                <span className="text-[10px] tracking-widest uppercase bg-black/30 px-3 py-1 rounded-md backdrop-blur-md font-bold border border-white/20">
                   HADIYADPAY • {selectedCard.badge[currentLanguage as 'so' | 'en'] || selectedCard.badge['en']}
                 </span>
                 <span className="text-base animate-bounce">✨</span>
@@ -205,7 +220,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 </h3>
               </div>
 
-              <div className="bg-black/20 backdrop-blur-md p-4 rounded-xl border border-white/20 my-2 shadow-inner z-10">
+              <div className="bg-black/30 backdrop-blur-md p-4 rounded-xl border border-white/20 my-2 shadow-inner z-10">
                 <p className="text-sm italic font-light leading-relaxed">
                   &ldquo;{message}&rdquo;
                 </p>
