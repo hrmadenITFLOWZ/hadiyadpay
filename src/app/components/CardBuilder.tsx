@@ -47,21 +47,10 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
     alert(currentLanguage === 'so' ? 'Kaarka waa la keydiyey!' : 'Card saved successfully!');
   };
 
-  const getButtonStyle = () => {
-    if (activeDeck === 'cities') {
-      return {
-        backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url(${selectedCard.bgImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      };
-    }
-    return {};
-  };
-
   return (
     <div className="w-full max-w-7xl mx-auto p-4 flex flex-col gap-4">
       
-      {/* Geanimeerde CSS voor zoom-effect op de achtergrondfoto's */}
+      {/* CSS Animatie voor Ken Burns / Slow Zoom */}
       <style jsx global>{`
         @keyframes slowZoom {
           0% { transform: scale(1); }
@@ -69,11 +58,11 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
           100% { transform: scale(1); }
         }
         .animate-slow-zoom {
-          animation: slowZoom 12s infinite ease-in-out;
+          animation: slowZoom 14s infinite ease-in-out;
         }
       `}</style>
 
-      {/* Deck Switcher Knoppen (GenZ Somali Style) */}
+      {/* Deck Switcher Knoppen */}
       <div className="bg-white/80 backdrop-blur-md p-2 rounded-2xl shadow-md border border-gray-100 flex gap-2 max-w-md mx-auto w-full">
         <button
           onClick={() => setActiveDeck('dhaqan')}
@@ -89,7 +78,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
           onClick={() => setActiveDeck('cities')}
           className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 relative overflow-hidden ${
             activeDeck === 'cities'
-              ? 'bg-gradient-to-r from-amber-600 via-orange-600 to-yellow-600 text-white shadow-lg scale-[1.02] ring-2 ring-amber-300 animate-pulse'
+              ? 'bg-gradient-to-r from-amber-600 via-orange-600 to-yellow-600 text-white shadow-lg scale-[1.02] ring-2 ring-amber-300'
               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
           }`}
         >
@@ -100,7 +89,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
       {/* Hoofdgrid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full">
         
-        {/* Linkerkolom: Besturing & Formulier */}
+        {/* Linkerkolom: Besturing & Kaartselectie */}
         <div className="lg:col-span-7 bg-white/90 backdrop-blur-md p-6 rounded-3xl shadow-2xl border border-gray-100 flex flex-col gap-6">
           <div>
             <h2 className="text-2xl font-black text-gray-900 mb-1">
@@ -113,7 +102,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             </p>
           </div>
 
-          {/* Catalogus Rolledeck */}
+          {/* Catalogus Selector */}
           <div>
             <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">
               {currentLanguage === 'so' ? 'XULO KAARKA WANAAGSAN' : 'CHOOSE YOUR CARD STYLE'}
@@ -127,9 +116,12 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                     key={card.id}
                     onClick={() => setSelectedCard(card)}
                     className={`text-left p-3 rounded-2xl transition-all duration-300 border relative overflow-hidden flex flex-col justify-between h-32 bg-cover bg-center shadow-md group ${
-                      activeDeck === 'dhaqan' ? `bg-gradient-to-br ${card.gradient}` : ''
-                    } ${isSelected ? 'ring-4 ring-emerald-500 scale-105 shadow-xl' : 'opacity-85 hover:opacity-100 hover:scale-[1.02]'}`}
-                    style={activeDeck === 'cities' ? { backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.85)), url(${card.bgImage})` } : {}}
+                      isSelected ? 'ring-4 ring-emerald-500 scale-105 shadow-xl z-10' : 'opacity-90 hover:opacity-100 hover:scale-[1.02]'
+                    }`}
+                    style={{
+                      backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.85)), url(${card.bgImage})`,
+                      backgroundColor: '#1f2937' // Fallback kleur tegen grijze vlakken
+                    }}
                   >
                     <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-white/30 backdrop-blur-md text-white self-start shadow z-10">
                       {card.badge[currentLanguage as 'so' | 'en'] || card.badge['en']}
@@ -186,17 +178,18 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
             <button
               onClick={() => setIsCheckoutOpen(true)}
-              className={`w-full py-4 px-4 font-bold rounded-2xl shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-base text-white hover:brightness-110 border border-white/20 ${
-                activeDeck === 'dhaqan' ? `bg-gradient-to-r ${selectedCard.gradient}` : ''
-              }`}
-              style={getButtonStyle()}
+              className="w-full py-4 px-4 font-bold rounded-2xl shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-base text-white hover:brightness-110 border border-white/20 bg-cover bg-center relative overflow-hidden"
+              style={{
+                backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url(${selectedCard.bgImage})`,
+                backgroundColor: '#111827'
+              }}
             >
-              <span>🚀 {currentLanguage === 'so' ? 'Dir Hadiyad iyo Xawilaad Degdeg ah' : 'Send Hadiyad & Instant Transfer'}</span>
+              <span className="z-10">🚀 {currentLanguage === 'so' ? 'Dir Hadiyad iyo Xawilaad Degdeg ah' : 'Send Hadiyad & Instant Transfer'}</span>
             </button>
           </div>
         </div>
 
-        {/* Rechterkolom: Live Preview Weergave met Geanimeerde Achtergrond */}
+        {/* Rechterkolom: Live Preview Weergave met Geanimeerde Zoom */}
         <div className="lg:col-span-5 flex flex-col items-center justify-center">
           <div className="w-full max-w-md bg-white p-6 rounded-3xl shadow-2xl border border-gray-100 flex flex-col justify-between min-h-[500px] relative overflow-hidden">
             
@@ -209,19 +202,16 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
               </div>
             </div>
 
-            {/* Visuele Kaart met Animated Background */}
-            <div 
-              className={`w-full p-6 rounded-2xl text-white shadow-2xl flex flex-col justify-between flex-grow my-2 transition-all duration-700 relative overflow-hidden ${
-                activeDeck === 'dhaqan' ? `bg-gradient-to-br ${selectedCard.gradient}` : ''
-              }`}
-            >
-              {/* Als cities actief is, tonen we de geanimeerde achtergrondlaag */}
-              {activeDeck === 'cities' && (
-                <div 
-                  className="absolute inset-0 bg-cover bg-center animate-slow-zoom -z-10 filter brightness-90"
-                  style={{ backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.85)), url(${selectedCard.bgImage})` }}
-                />
-              )}
+            {/* Visuele Kaart met Achtergrond en Zoom Animatie */}
+            <div className="w-full p-6 rounded-2xl text-white shadow-2xl flex flex-col justify-between flex-grow my-2 relative overflow-hidden bg-gray-900">
+              
+              {/* Geanimeerde en ingezette achtergrondfoto */}
+              <div 
+                className="absolute inset-0 bg-cover bg-center animate-slow-zoom filter brightness-90 z-0"
+                style={{ 
+                  backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.85)), url(${selectedCard.bgImage})` 
+                }}
+              />
 
               <div className="flex justify-between items-center z-10">
                 <span className="text-[10px] tracking-widest uppercase bg-black/40 px-3 py-1 rounded-md backdrop-blur-md font-bold border border-white/20">
@@ -239,7 +229,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 </h3>
               </div>
 
-              <div className="bg-black/40 backdrop-blur-md p-4 rounded-xl border border-white/20 my-2 shadow-inner z-10">
+              <div className="bg-black/50 backdrop-blur-md p-4 rounded-xl border border-white/20 my-2 shadow-inner z-10">
                 <p className="text-sm italic font-light leading-relaxed">
                   &ldquo;{message}&rdquo;
                 </p>

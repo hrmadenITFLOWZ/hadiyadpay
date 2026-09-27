@@ -26,9 +26,9 @@ export const cardOptions: CardOption[] = [
     id: 'aroos',
     category: 'dhaqan',
     badge: { so: 'AROOS', en: 'WEDDING' },
-    title: { so: 'Xaflada Aroosaka', en: 'Wedding & Union' },
+    title: { so: 'Xaflada Arooska', en: 'Wedding & Union' },
     defaultMessage: {
-      so: 'Hambalyo arooska ku saabsan! Allah idinka yeero kuwii isu waara ee hela gurio barako leh. 💍🕊️',
+      so: 'Hambalyo arooska ku saabsan! Allah idinka yeero kuwii isu waara ee hela guri barako leh. 💍🕊️',
       en: 'Congratulations on your wedding! May Allah bless your union and fill your home with peace and joy.'
     },
     gradient: 'from-amber-600 via-orange-500 to-yellow-600',
@@ -95,7 +95,7 @@ export const cardOptions: CardOption[] = [
     bgImage: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1000&auto=format&fit=crop'
   },
 
-  // --- DECK 2: Geel iyo Horizon (7 items - African & Somali Vibes) ---
+  // --- DECK 2: Geel iyo Guri Vibes (7 items - Met diep warme Afrikaanse tinten) ---
   {
     id: 'mogadishu',
     category: 'cities',
@@ -105,8 +105,7 @@ export const cardOptions: CardOption[] = [
       so: 'Salaan diirran oo ka soo jeeda Xamar Cadde, caasimadda taariikhiga ah. Habeen wacan! 🌇🌊',
       en: 'Warm greetings straight from Xamar, the historic coastal capital. Good evening!'
     },
-    gradient: 'from-amber-500 via-orange-600 to-yellow-600',
-    // Unieke sfeervolle kust/stad afbeelding
+    gradient: 'from-amber-600 via-orange-600 to-red-700',
     bgImage: 'https://images.unsplash.com/photo-1516026662394-266d5b060609?q=80&w=1000&auto=format&fit=crop'
   },
   {
@@ -118,8 +117,7 @@ export const cardOptions: CardOption[] = [
       so: 'Hambalyo iyo salaan qaali ah oo ka timid buuraha iyo jawiga degan ee Hargeysa. ⛰️✨',
       en: 'Special greetings and love sent from the iconic hills and cool breeze of Hargeisa.'
     },
-    gradient: 'from-emerald-700 via-teal-800 to-slate-900',
-    // Bergachtig landschap vibe
+    gradient: 'from-emerald-700 via-teal-800 to-cyan-900',
     bgImage: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1000&auto=format&fit=crop'
   },
   {
@@ -131,8 +129,7 @@ export const cardOptions: CardOption[] = [
       so: 'Dabaylaha qabow ee xeebta Kismaayo iyo caleemaha timirta. Maalin wacan oo farxad leh! 🌴☀️',
       en: 'Cool tropical breeze and palm trees from Kismayo. Wishing you a wonderful day!'
     },
-    gradient: 'from-emerald-500 via-green-700 to-teal-950',
-    // Tropische palmen vibe
+    gradient: 'from-emerald-600 via-green-800 to-teal-950',
     bgImage: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1000&auto=format&fit=crop'
   },
   {
@@ -145,7 +142,6 @@ export const cardOptions: CardOption[] = [
       en: 'Pure nomadic heritage and desert horizon vibes. Sending peace and traditional blessings!'
     },
     gradient: 'from-yellow-600 via-amber-700 to-stone-900',
-    // Woestijn / Nomaden vibe
     bgImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=1000&auto=format&fit=crop'
   },
   {
@@ -157,8 +153,7 @@ export const cardOptions: CardOption[] = [
       so: 'Badda Cas iyo hawada diirran ee dekadda ganacsiga Bosaso. Xusuus qaas ah! ⚓🌊',
       en: 'The Red Sea breeze and warm greetings from the bustling port city of Bosaso.'
     },
-    gradient: 'from-blue-600 via-indigo-700 to-slate-950',
-    // Haven / Zee vibe
+    gradient: 'from-blue-600 via-indigo-800 to-slate-950',
     bgImage: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop'
   },
   {
@@ -170,8 +165,7 @@ export const cardOptions: CardOption[] = [
       so: 'Xeebta caanka ah iyo habeenada jawiga macaan leh ee Berbera. Nabad iyo caafimaad! 🌙✨',
       en: 'The stunning coastline and magical night atmosphere of Berbera beach. Peace and love!'
     },
-    gradient: 'from-sky-500 via-indigo-600 to-blue-950',
-    // Magische avond / strand vibe
+    gradient: 'from-sky-600 via-blue-800 to-indigo-950',
     bgImage: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?q=80&w=1000&auto=format&fit=crop'
   },
   {
@@ -184,7 +178,6 @@ export const cardOptions: CardOption[] = [
       en: 'A warm message and greetings sent straight from the vibrant heart of Mudug.'
     },
     gradient: 'from-purple-700 via-indigo-900 to-zinc-950',
-    // Moderne stedelijke / culturele nacht vibe
     bgImage: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?q=80&w=1000&auto=format&fit=crop'
   }
 ];
