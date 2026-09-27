@@ -12,176 +12,253 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   const [selectedCard, setSelectedCard] = useState<CardOption>(cardOptions[0]);
   const [recipientName, setRecipientName] = useState('');
   const [senderName, setSenderName] = useState('');
-  
-  const [message, setMessage] = useState(selectedCard.defaultMessage[currentLanguage] || selectedCard.defaultMessage['en']);
+  const [message, setMessage] = useState(selectedCard.defaultMessage[currentLanguage as 'so' | 'en'] || selectedCard.defaultMessage['en']);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  
+  // State om te schakelen tussen het nieuwe design en het klassieke design
+  const [designStyle, setDesignStyle] = useState<'new' | 'classic'>('new');
 
   useEffect(() => {
-    setMessage(selectedCard.defaultMessage[currentLanguage] || selectedCard.defaultMessage['en']);
+    setMessage(selectedCard.defaultMessage[currentLanguage as 'so' | 'en'] || selectedCard.defaultMessage['en']);
   }, [selectedCard, currentLanguage]);
 
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'HadiyadPay E-Card',
+          text: `E-card ku socota ${recipientName || 'Qaataha'}: "${message}"`,
+          url: window.location.href,
+        });
+      } catch (err) {
+        console.log('Error sharing:', err);
+      }
+    } else {
+      alert(currentLanguage === 'so' ? 'Linkiga waa la guuriyey!' : 'Link copied to clipboard!');
+    }
+  };
+
+  const handleDownload = () => {
+    alert(currentLanguage === 'so' ? 'Kaarka waa la keydiyey!' : 'Card saved successfully!');
+  };
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-6xl mx-auto p-4">
-      {/* Linkerkolom: Besturing & Selectie */}
-      <div className="bg-white/85 backdrop-blur-md p-6 rounded-2xl shadow-2xl border border-gray-100 flex flex-col gap-6">
-        <div>
-          <h2 className="text-xl font-bold text-gray-900 mb-1">
-            {currentLanguage === 'so' ? 'Naqshadee Hadiyadadaada ✨' : 'Craft Your Hadiyad ✨'}
-          </h2>
-          <p className="text-sm text-gray-600">
-            {currentLanguage === 'so'
-              ? 'Ku dar fariin qiiro leh oo lama ilooban ah. La wadaag jacaylka kuwa aad jeceshahay si degdeg ah.'
-              : 'Kudar fariin qiiro leh oo lama ilooban ah. Share love with loved ones instantly.'}
-          </p>
-        </div>
-
-        {/* Select Occasion */}
-        <div>
-          <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
-            {currentLanguage === 'so' ? 'DOORO MUNAASABADA' : 'SELECT OCCASION'}
-          </label>
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300">
-            {cardOptions.map((card) => {
-              const isSelected = selectedCard.id === card.id;
-              return (
-                <button
-                  key={card.id}
-                  onClick={() => setSelectedCard(card)}
-                  className={`flex-shrink-0 text-left p-3 rounded-xl transition-all duration-200 border relative overflow-hidden flex flex-col justify-between w-36 h-24 bg-gradient-to-br ${card.gradient} text-white shadow-lg ${
-                    isSelected ? 'ring-4 ring-emerald-400 scale-105' : 'opacity-85 hover:opacity-100'
-                  }`}
-                >
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-black/30 backdrop-blur-sm self-start">
-                    {card.badge[currentLanguage] || card.badge['en']}
-                  </span>
-                  <span className="text-xs font-semibold line-clamp-2 drop-shadow">
-                    {card.title[currentLanguage] || card.title['en']}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Formulier Velden */}
-        <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                {currentLanguage === 'so' ? 'MAGACA QAATAHA' : 'TO RECIPIENT'}
-              </label>
-              <input
-                type="text"
-                value={recipientName}
-                onChange={(e) => setRecipientName(e.target.value)}
-                placeholder="Hooyo Macaan 🌸"
-                className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-900 bg-gray-50"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                {currentLanguage === 'so' ? 'MAGACA DIRAHA' : 'FROM SENDER'}
-              </label>
-              <input
-                type="text"
-                value={senderName}
-                onChange={(e) => setSenderName(e.target.value)}
-                placeholder="Wiilkaada / Gabadhada ✨"
-                className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-900 bg-gray-50"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-              {currentLanguage === 'so' ? 'FARRIINTA GAARKA AH' : 'PERSONALIZED MESSAGE'}
-            </label>
-            <textarea
-              rows={3}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-900 bg-gray-50"
-            />
-          </div>
-
+    <div className="w-full max-w-7xl mx-auto p-4 flex flex-col gap-4">
+      
+      {/* Design Switcher Balk */}
+      <div className="bg-white/80 backdrop-blur-md p-3 rounded-2xl shadow-md border border-gray-100 flex items-center justify-between max-w-md mx-auto w-full">
+        <span className="text-xs font-bold text-gray-700 uppercase tracking-wider px-2">
+          {currentLanguage === 'so' ? 'Dooro Naqshada (Design):' : 'Select Design Style:'}
+        </span>
+        <div className="flex gap-2">
           <button
-            onClick={() => setIsCheckoutOpen(true)}
-            className={`w-full py-3.5 px-4 bg-gradient-to-br ${selectedCard.gradient} hover:brightness-110 text-white font-semibold rounded-xl shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm`}
+            onClick={() => setDesignStyle('new')}
+            className={`px-3 py-1.5 text-xs font-bold rounded-xl transition ${
+              designStyle === 'new'
+                ? 'bg-emerald-600 text-white shadow'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
           >
-            <span>🚀 {currentLanguage === 'so' ? 'Dir Hadiyad iyo Xawilaad Degdeg ah' : 'Send Hadiyad & Instant Transfer'}</span>
+            ✨ New (Photo Theme)
+          </button>
+          <button
+            onClick={() => setDesignStyle('classic')}
+            className={`px-3 py-1.5 text-xs font-bold rounded-xl transition ${
+              designStyle === 'classic'
+                ? 'bg-emerald-600 text-white shadow'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            🏛️ Classic Gradient
           </button>
         </div>
       </div>
 
-      {/* Rechterkolom: Live Preview */}
-      <div className="flex items-center justify-center">
-        <div className="w-full max-w-md bg-white p-6 rounded-3xl shadow-2xl border border-gray-100 flex flex-col justify-between min-h-[420px] relative overflow-hidden">
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span className="text-xs font-semibold text-gray-500 tracking-wider uppercase">
-                HADIYAD & JOY E-CARD PREVIEW 🎨
-              </span>
-            </div>
-          </div>
-
-          <div className={`w-full p-6 rounded-2xl bg-gradient-to-br ${selectedCard.gradient} text-white shadow-2xl flex flex-col justify-between flex-grow my-2 transition-all duration-500`}>
-            <div className="flex justify-between items-center">
-              <span className="text-[10px] tracking-widest uppercase bg-white/25 px-2.5 py-1 rounded-md backdrop-blur-sm font-bold shadow-sm">
-                HADIYADPAY • {selectedCard.badge[currentLanguage] || selectedCard.badge['en']}
-              </span>
-              <span className="text-sm opacity-90">✨💖</span>
-            </div>
-
-            <div className="my-6">
-              <p className="text-[11px] uppercase tracking-wider opacity-75 mb-1">
-                {currentLanguage === 'so' ? 'QAATAHA:' : 'TO:'}
-              </p>
-              <h3 className="text-lg font-bold tracking-wide drop-shadow">
-                {recipientName ? recipientName : 'Hooyo Macaan 🌸'}
-              </h3>
-            </div>
-
-            <div className="bg-black/25 backdrop-blur-md p-4 rounded-xl border border-white/15 my-2 shadow-inner">
-              <p className="text-sm italic font-light leading-relaxed">
-                &ldquo;{message}&rdquo;
-              </p>
-            </div>
-
-            <div className="mt-6 flex justify-between items-end border-t border-white/20 pt-3">
-              <div>
-                <p className="text-[11px] uppercase tracking-wider opacity-75">
-                  {currentLanguage === 'so' ? 'DIRAHA:' : 'FROM:'}
-                </p>
-                <p className="text-xs font-bold">
-                  {senderName ? senderName : 'Wiilkaada / Gabadhada ✨'}
-                </p>
-              </div>
-              <span className="text-[10px] opacity-80 font-medium">MADE WITH ❤️</span>
-            </div>
-          </div>
-
-          <div className="text-center mt-4">
-            <p className="text-[11px] text-gray-400">
+      {/* Hoofdgrid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full">
+        
+        {/* Linkerkolom: Besturing & Formulier */}
+        <div className="lg:col-span-7 bg-white/90 backdrop-blur-md p-6 rounded-3xl shadow-2xl border border-gray-100 flex flex-col gap-6">
+          <div>
+            <h2 className="text-2xl font-black text-gray-900 mb-1">
+              {currentLanguage === 'so' ? 'Naqshadee Hadiyadadaada ✨' : 'Craft Your Hadiyad ✨'}
+            </h2>
+            <p className="text-sm text-gray-600">
               {currentLanguage === 'so'
-                ? 'Xawilaadaha lacagta ee nabdoon waxaa lagu fuliyaa iyadoo la kaashanaysa shirkado bixiye oo sharciaysan.'
-                : 'Secure financial transfers handled in partnership with licensed payment operators.'}
+                ? 'Xulo qaabka kaarka, ku dar fariin qiiro leh oo u dir si degdeg ah.'
+                : 'Choose a card style, add a heartfelt message, and send instantly.'}
             </p>
           </div>
-        </div>
-      </div>
 
-      {/* Checkout Modal Popup */}
-      <CheckoutModal
-        isOpen={isCheckoutOpen}
-        onClose={() => setIsCheckoutOpen(false)}
-        selectedOccasion={selectedCard}
-        recipientName={recipientName}
-        senderName={senderName}
-        message={message}
-        cardPrice={10}
-        initialLanguage={currentLanguage}
-      />
+          {/* Catalogus Weergave */}
+          <div>
+            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">
+              {currentLanguage === 'so' ? 'DOORO MUNAASABADA & QAABKA' : 'SELECT OCCASION & STYLE'}
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {cardOptions.map((card) => {
+                const isSelected = selectedCard.id === card.id;
+                const bgStyle = designStyle === 'new' 
+                  ? { backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.8)), url(${card.bgImage})` }
+                  : {};
+                
+                return (
+                  <button
+                    key={card.id}
+                    onClick={() => setSelectedCard(card)}
+                    className={`text-left p-3 rounded-2xl transition-all duration-300 border relative overflow-hidden flex flex-col justify-between h-32 bg-cover bg-center shadow-md group ${
+                      designStyle === 'classic' ? `bg-gradient-to-br ${card.gradient}` : ''
+                    } ${isSelected ? 'ring-4 ring-emerald-500 scale-105 shadow-xl' : 'opacity-80 hover:opacity-100 hover:scale-[1.02]'}`}
+                    style={bgStyle}
+                  >
+                    <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-white/30 backdrop-blur-md text-white self-start shadow">
+                      {card.badge[currentLanguage as 'so' | 'en'] || card.badge['en']}
+                    </span>
+                    <span className="text-xs font-bold text-white line-clamp-2 drop-shadow-md">
+                      {card.title[currentLanguage as 'so' | 'en'] || card.title['en']}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Form Velden */}
+          <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                  {currentLanguage === 'so' ? 'MAGACA QAATAHA' : 'RECIPIENT NAME'}
+                </label>
+                <input
+                  type="text"
+                  value={recipientName}
+                  onChange={(e) => setRecipientName(e.target.value)}
+                  placeholder="Hooyo Macaan 🌸"
+                  className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-900 bg-gray-50 font-medium"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                  {currentLanguage === 'so' ? 'MAGACA DIRAHA' : 'SENDER NAME'}
+                </label>
+                <input
+                  type="text"
+                  value={senderName}
+                  onChange={(e) => setSenderName(e.target.value)}
+                  placeholder="Wiilkaada / Gabadhada ✨"
+                  className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-900 bg-gray-50 font-medium"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                {currentLanguage === 'so' ? 'FARRIINTA GAARKA AH' : 'PERSONALIZED MESSAGE'}
+              </label>
+              <textarea
+                rows={3}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-900 bg-gray-50 font-medium"
+              />
+            </div>
+
+            <button
+              onClick={() => setIsCheckoutOpen(true)}
+              className={`w-full py-4 px-4 bg-gradient-to-r ${selectedCard.gradient} hover:brightness-110 text-white font-bold rounded-2xl shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-base`}
+            >
+              <span>🚀 {currentLanguage === 'so' ? 'Dir Hadiyad iyo Xawilaad Degdeg ah' : 'Send Hadiyad & Instant Transfer'}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Rechterkolom: Live Preview Weergave */}
+        <div className="lg:col-span-5 flex flex-col items-center justify-center">
+          <div className="w-full max-w-md bg-white p-6 rounded-3xl shadow-2xl border border-gray-100 flex flex-col justify-between min-h-[500px] relative overflow-hidden">
+            
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span className="text-xs font-bold text-gray-500 tracking-wider uppercase">
+                  LIVE E-CARD PREVIEW 🎨
+                </span>
+              </div>
+            </div>
+
+            {/* Visuele Kaart (Past zich aan op basis van designStyle) */}
+            <div 
+              className={`w-full p-6 rounded-2xl text-white shadow-2xl flex flex-col justify-between flex-grow my-2 transition-all duration-500 relative overflow-hidden ${
+                designStyle === 'classic' ? `bg-gradient-to-br ${selectedCard.gradient}` : 'bg-cover bg-center'
+              }`}
+              style={designStyle === 'new' ? { backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.85)), url(${selectedCard.bgImage})` } : {}}
+            >
+              <div className="flex justify-between items-center z-10">
+                <span className="text-[10px] tracking-widest uppercase bg-black/40 px-3 py-1 rounded-md backdrop-blur-md font-bold border border-white/20">
+                  HADIYADPAY • {selectedCard.badge[currentLanguage as 'so' | 'en'] || selectedCard.badge['en']}
+                </span>
+                <span className="text-base">✨💖</span>
+              </div>
+
+              <div className="my-6 z-10">
+                <p className="text-[10px] uppercase tracking-wider opacity-85 mb-1 font-semibold">
+                  {currentLanguage === 'so' ? 'MAGACA QAATAHA:' : 'TO:'}
+                </p>
+                <h3 className="text-xl font-black tracking-wide drop-shadow-md">
+                  {recipientName ? recipientName : 'Hooyo Macaan 🌸'}
+                </h3>
+              </div>
+
+              <div className="bg-black/40 backdrop-blur-md p-4 rounded-xl border border-white/20 my-2 shadow-inner z-10">
+                <p className="text-sm italic font-light leading-relaxed">
+                  &ldquo;{message}&rdquo;
+                </p>
+              </div>
+
+              <div className="mt-6 flex justify-between items-end border-t border-white/20 pt-3 z-10">
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider opacity-85 font-semibold">
+                    {currentLanguage === 'so' ? 'MAGACA DIRAHA:' : 'FROM:'}
+                  </p>
+                  <p className="text-xs font-bold">
+                    {senderName ? senderName : 'Wiilkaada / Gabadhada ✨'}
+                  </p>
+                </div>
+                <span className="text-[10px] opacity-90 font-bold bg-white/20 px-2 py-0.5 rounded">HADIYADPAY</span>
+              </div>
+            </div>
+
+            {/* Download & Share Knoppen */}
+            <div className="grid grid-cols-2 gap-3 mt-4">
+              <button
+                onClick={handleDownload}
+                className="py-2.5 px-3 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm"
+              >
+                📥 {currentLanguage === 'so' ? 'Soo Degso Kaarka' : 'Download Card'}
+              </button>
+              <button
+                onClick={handleShare}
+                className="py-2.5 px-3 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm"
+              >
+                🔗 {currentLanguage === 'so' ? 'La Wadaag' : 'Share Card'}
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Checkout Modal Popup */}
+        <CheckoutModal
+          isOpen={isCheckoutOpen}
+          onClose={() => setIsCheckoutOpen(false)}
+          selectedOccasion={selectedCard}
+          recipientName={recipientName}
+          senderName={senderName}
+          message={message}
+          cardPrice={10}
+          initialLanguage={currentLanguage}
+        />
+      </div>
     </div>
   );
 }

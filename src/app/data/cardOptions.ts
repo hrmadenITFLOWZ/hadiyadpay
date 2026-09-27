@@ -1,130 +1,55 @@
 export interface CardOption {
   id: string;
-  title: Record<string, string>;
-  category: 'birthday' | 'love' | 'wedding' | 'religious' | 'congratulations' | 'family' | 'ramadan' | 'success';
+  title: { so: string; en: string };
+  badge: { so: string; en: string };
   gradient: string;
-  badge: Record<string, string>;
-  defaultMessage: Record<string, string>;
+  bgImage: string;
+  defaultMessage: { so: string; en: string };
 }
 
 export const cardOptions: CardOption[] = [
   {
-    id: 'birthday-1',
-    title: {
-      nl: 'Verjaardag 🎂',
-      en: 'Birthday 🎂',
-    },
-    category: 'birthday',
-    gradient: 'from-pink-600 via-rose-600 to-red-700',
-    badge: {
-      nl: 'DHALASHO 🎉',
-      en: 'DHALASHO 🎉',
-    },
+    id: 'dhalasho',
+    title: { so: 'Dhalasho Wacan', en: 'Birthday Celebration' },
+    badge: { so: 'DHALASHO 🎂', en: 'BIRTHDAY 🎂' },
+    gradient: 'from-rose-600 via-pink-600 to-red-700',
+    bgImage: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80',
     defaultMessage: {
-      nl: 'Dhalasho Wacan! 🌸🎂 Waxaan kuu rajeynaysaa caafimaad, barako, iyo sannad kale oo ay ka buuxaan farxad, qosol, iyo guul weyn. 💐✨🎈',
-      en: 'Dhalasho Wacan! 🌸🎂 Waxaan kuu rajeynaysaa caafimaad, barako, iyo sannad kale oo ay ka buuxaan farxad, qosol, iyo guul weyn. 💐✨🎈',
+      so: 'Waxaan kuu rajeynayaa caafimaad, barako, iyo sannad kale oo ay ka buuxaan farxad, qosol, iyo guul weyn. 🎉✨',
+      en: 'Wishing you health, blessings, and another year filled with joy, laughter, and great success. 🎉✨',
     },
   },
   {
-    id: 'wedding-1',
-    title: {
-      nl: 'Bruiloft 💍',
-      en: 'Wedding 💍',
-    },
-    category: 'wedding',
-    gradient: 'from-orange-600 via-amber-600 to-yellow-700',
-    badge: {
-      nl: 'AROOS 🕊️',
-      en: 'AROOS 🕊️',
-    },
+    id: 'aroos',
+    title: { so: 'Xaflada Aroosaka', en: 'Wedding & Union' },
+    badge: { so: 'AROOS 💍', en: 'WEDDING 💍' },
+    gradient: 'from-amber-600 via-orange-600 to-yellow-700',
+    bgImage: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80',
     defaultMessage: {
-      nl: 'Ilaahay ha idinku barakeeyo, hana isu kiin dhowro oo jacayl nabad qabta idin siiyo. Aroos mubaarak oo ay ka buuxdo barwaaqo! 💍🕊️💐❤️',
-      en: 'Ilaahay ha idinku barakeeyo, hana isu kiin dhowro oo jacayl nabad qabta idin siiyo. Aroos mubaarak oo ay ka buuxdo barwaaqo! 💍🕊️💐❤️',
+      so: 'Hambalyo arooska ku saabsan! Allaha idinka yeero kuwii isu waara ee hela gurio barako leh. 💍🕊️',
+      en: 'Congratulations on your wedding! May Allah bless your union with endless happiness and prosperity. 💍🕊️',
     },
   },
   {
-    id: 'ciid-1',
-    title: {
-      nl: 'Eid 🌙',
-      en: 'Eid 🌙',
-    },
-    category: 'religious',
-    gradient: 'from-emerald-600 via-teal-700 to-cyan-900',
-    badge: {
-      nl: 'EID ⭐',
-      en: 'EID ⭐',
-    },
+    id: 'eid',
+    title: { so: 'Ciid Mubarak', en: 'Eid Mubarak' },
+    badge: { so: 'CIID 🌙', en: 'EID 🌙' },
+    gradient: 'from-emerald-700 via-teal-700 to-cyan-800',
+    bgImage: 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&w=800&q=80',
     defaultMessage: {
-      nl: 'Eid Mubaarak! 🌙✨ Allah ha naga aqbalo ibadaheena mana wada gaarsiiyo sanad kale oo nabad, caafimaad, iyo barako qabta ah. 🤲⭐🎉',
-      en: 'Eid Mubaarak! 🌙✨ Allah ha naga aqbalo ibadaheena mana wada gaarsiiyo sanad kale oo nabad, caafimaad, iyo barako qabta ah. 🤲⭐🎉',
+      so: 'Ciid Mubarak! Allaha naga aqbal adeecadeena asagana ha ina barakeeyo sanadaha soo socda. 🌙⭐',
+      en: 'Eid Mubarak! May this joyous occasion bring peace, happiness, and prosperity to your family. 🌙⭐',
     },
   },
   {
-    id: 'ramadan-1',
-    title: {
-      nl: 'Ramadan 🌙',
-      en: 'Ramadan 🌙',
-    },
-    category: 'ramadan',
-    gradient: 'from-indigo-900 via-purple-800 to-slate-900',
-    badge: {
-      nl: 'RAMADAAN 🤲',
-      en: 'RAMADAAN 🤲',
-    },
+    id: 'taageero',
+    title: { so: 'Taageero & Dhiirigelin', en: 'Support & Encouragement' },
+    badge: { so: 'TAAGEERO 💪', en: 'SUPPORT 💪' },
+    gradient: 'from-purple-700 via-indigo-700 to-blue-800',
+    bgImage: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80',
     defaultMessage: {
-      nl: 'Ramadaan Kariim! 🌙🕌 Bisha barakeysan ee Ramadaan ha idinku soo aado nabad, cafis, ducada la aqbalay, iyo iimaan buuxa. 🤲📿✨',
-      en: 'Ramadaan Kariim! 🌙🕌 Bisha barakeysan ee Ramadaan ha idinku soo aado nabad, cafis, ducada la aqbalay, iyo iimaan buuxa. 🤲📿✨',
-    },
-  },
-  {
-    id: 'hooyo-1',
-    title: {
-      nl: 'Familie / Moeder ❤️',
-      en: 'Family / Mother ❤️',
-    },
-    category: 'family',
-    gradient: 'from-red-600 via-rose-700 to-pink-800',
-    badge: {
-      nl: 'HOOYO 🌹',
-      en: 'HOOYO 🌹',
-    },
-    defaultMessage: {
-      nl: 'Hooyo macaaneey, waxaad tahay nolosheena, tiirkeena iyo naxariisteena. Ilaahay cimrigaaga ha dheereeyo oo caafimaad iyo qoys farxad leh ha ku siiyo! ❤️🌹🥰',
-      en: 'Hooyo macaaneey, waxaad tahay nolosheena, tiirkeena iyo naxariisteena. Ilaahay cimrigaaga ha dheereeyo oo caafimaad iyo qoys farxad leh ha ku siiyo! ❤️🌹🥰',
-    },
-  },
-  {
-    id: 'support-1',
-    title: {
-      nl: 'Ondersteuning 💸',
-      en: 'Support 💸',
-    },
-    category: 'congratulations',
-    gradient: 'from-purple-600 via-indigo-700 to-blue-900',
-    badge: {
-      nl: 'TAAGEERO 🤝',
-      en: 'TAAGEERO 🤝',
-    },
-    defaultMessage: {
-      nl: 'Waxyar oo jacayl, duco, iyo taageero maaliyadeed ah oo ka yimid dibadda. Adeer/Eedoow ha idinku anfaco oo dhibka ha idinka saaro! 💸🤝🤗🌟',
-      en: 'Waxyar oo jacayl, duco, iyo taageero maaliyadeed ah oo ka yimid dibadda. Adeer/Eedoow ha idinku anfaco oo dhibka ha idinka saaro! 💸🤝🤗🌟',
-    },
-  },
-  {
-    id: 'success-1',
-    title: {
-      nl: 'Succes / Diploma 🎓',
-      en: 'Success / Graduation 🎓',
-    },
-    category: 'success',
-    gradient: 'from-blue-600 via-sky-700 to-indigo-900',
-    badge: {
-      nl: 'GUUL 🏆',
-      en: 'GUUL 🏆',
-    },
-    defaultMessage: {
-      nl: 'Hambalyo weyn! 🎓🎉 Waxaan kuu rajeynayaa guulo hor leh iyo in dadaalkaaga midhihiisa aad gurato. Aad ayaan kuugu hanweynahay! 🌟🚀💪',
-      en: 'Hambalyo weyn! 🎓🎉 Waxaan kuu rajeynayaa guulo hor leh iyo in dadaalkaaga midhihiisa aad gurato. Aad ayaan kuugu hanweynahay! 🌟🚀💪',
+      so: 'Waan kugula jiraa xilli kasta. Adkeysi iyo guul baan kuu rajeynayaa! 💪✨',
+      en: 'Standing with you every step of the way. Wishing you strength and success! 💪✨',
     },
   },
 ];
