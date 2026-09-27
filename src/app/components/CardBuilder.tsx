@@ -66,7 +66,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
           onClick={() => setActiveDeck('cities')}
           className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 ${
             activeDeck === 'cities'
-              ? 'bg-gradient-to-r from-amber-600 via-orange-600 to-yellow-600 text-white shadow-lg scale-[1.02] ring-2 ring-amber-300'
+              ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500 text-white shadow-lg scale-[1.02] ring-2 ring-amber-300'
               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
           }`}
         >
@@ -103,13 +103,10 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                   <button
                     key={card.id}
                     onClick={() => setSelectedCard(card)}
-                    className={`text-left p-3 rounded-2xl transition-all duration-300 border relative overflow-hidden flex flex-col justify-between h-32 bg-cover bg-center shadow-md group ${
+                    className={`text-left p-3 rounded-2xl transition-all duration-300 border relative overflow-hidden flex flex-col justify-between h-32 shadow-md group ${
                       isSelected ? 'ring-4 ring-emerald-500 scale-105 shadow-xl z-10' : 'opacity-90 hover:opacity-100 hover:scale-[1.02]'
                     }`}
-                    style={{
-                      backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.85)), url(${card.bgImage})`,
-                      backgroundColor: '#1f2937'
-                    }}
+                    style={{ background: card.gradient }}
                   >
                     <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-white/30 backdrop-blur-md text-white self-start shadow z-10">
                       {card.badge[currentLanguage as 'so' | 'en'] || card.badge['en']}
@@ -166,13 +163,10 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
             <button
               onClick={() => setIsCheckoutOpen(true)}
-              className="w-full py-4 px-4 font-bold rounded-2xl shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-base text-white hover:brightness-110 border border-white/20 bg-cover bg-center relative overflow-hidden"
-              style={{
-                backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url(${selectedCard.bgImage})`,
-                backgroundColor: '#111827'
-              }}
+              className="w-full py-4 px-4 font-bold rounded-2xl shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-base text-white hover:brightness-110 border border-white/20"
+              style={{ background: selectedCard.gradient }}
             >
-              <span className="z-10">🚀 {currentLanguage === 'so' ? 'Dir Hadiyad iyo Xawilaad Degdeg ah' : 'Send Hadiyad & Instant Transfer'}</span>
+              <span>🚀 {currentLanguage === 'so' ? 'Dir Hadiyad iyo Xawilaad Degdeg ah' : 'Send Hadiyad & Instant Transfer'}</span>
             </button>
           </div>
         </div>
@@ -190,23 +184,20 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
               </div>
             </div>
 
-            {/* Visuele Kaart met Achtergrondfoto */}
+            {/* Visuele Kaart met Stralende Gradiënt */}
             <div 
-              className="w-full p-6 rounded-2xl text-white shadow-2xl flex flex-col justify-between flex-grow my-2 relative overflow-hidden bg-cover bg-center transition-all duration-500"
-              style={{
-                backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.85)), url(${selectedCard.bgImage})`,
-                backgroundColor: '#1f2937'
-              }}
+              className="w-full p-6 rounded-2xl text-white shadow-2xl flex flex-col justify-between flex-grow my-2 relative overflow-hidden transition-all duration-500"
+              style={{ background: selectedCard.gradient }}
             >
               <div className="flex justify-between items-center z-10">
-                <span className="text-[10px] tracking-widest uppercase bg-black/40 px-3 py-1 rounded-md backdrop-blur-md font-bold border border-white/20">
+                <span className="text-[10px] tracking-widest uppercase bg-black/20 px-3 py-1 rounded-md backdrop-blur-md font-bold border border-white/20">
                   HADIYADPAY • {selectedCard.badge[currentLanguage as 'so' | 'en'] || selectedCard.badge['en']}
                 </span>
                 <span className="text-base animate-bounce">✨</span>
               </div>
 
               <div className="my-6 z-10">
-                <p className="text-[10px] uppercase tracking-wider opacity-85 mb-1 font-semibold">
+                <p className="text-[10px] uppercase tracking-wider opacity-90 mb-1 font-semibold">
                   {currentLanguage === 'so' ? 'MAGACA QAATAHA:' : 'TO:'}
                 </p>
                 <h3 className="text-xl font-black tracking-wide drop-shadow-md">
@@ -214,7 +205,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 </h3>
               </div>
 
-              <div className="bg-black/50 backdrop-blur-md p-4 rounded-xl border border-white/20 my-2 shadow-inner z-10">
+              <div className="bg-black/20 backdrop-blur-md p-4 rounded-xl border border-white/20 my-2 shadow-inner z-10">
                 <p className="text-sm italic font-light leading-relaxed">
                   &ldquo;{message}&rdquo;
                 </p>
@@ -222,7 +213,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
               <div className="mt-6 flex justify-between items-end border-t border-white/20 pt-3 z-10">
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider opacity-85 font-semibold">
+                  <p className="text-[10px] uppercase tracking-wider opacity-90 font-semibold">
                     {currentLanguage === 'so' ? 'MAGACA DIRAHA:' : 'FROM:'}
                   </p>
                   <p className="text-xs font-bold">
