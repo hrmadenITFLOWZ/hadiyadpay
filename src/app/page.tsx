@@ -3,21 +3,32 @@
 import { useState } from 'react';
 import CardBuilder from './components/CardBuilder';
 
-type Language = 'en' | 'nl';
+type Language = 'so' | 'en';
 
 export default function Home() {
-  const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
+  // SO ingesteld als standaardtaal
+  const [currentLanguage, setCurrentLanguage] = useState<Language>('so');
 
   const subtitles = {
+    so: 'Dir salaamo dhijitaal ah oo shaqsi ah oo ay ku lammaan yihiin xawilaado lacagideed oo toos ah kuwa aad jeceshahay.',
     en: 'Send personal digital greetings combined with direct financial transfers to loved ones.',
-    nl: 'Verstuur persoonlijke digitale groeten gecombineerd met directe financiële overmakingen naar dierbaren.',
   };
 
   return (
     <main className="min-h-screen text-gray-900 selection:bg-emerald-500 selection:text-white pb-16 relative overflow-x-hidden">
-      {/* Taalselectie knoppen in de rechterbovenhoek (alleen EN en NL) */}
+      {/* Taalselectie knoppen in de rechterbovenhoek (SO als eerste, dan EN) */}
       <div className="absolute top-6 right-6 z-20">
         <div className="flex bg-black/10 backdrop-blur-md p-1 rounded-xl text-xs font-bold border border-black/10 shadow-sm">
+          <button
+            onClick={() => setCurrentLanguage('so')}
+            className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+              currentLanguage === 'so'
+                ? 'bg-emerald-700 text-white shadow-md'
+                : 'text-gray-700 hover:text-black'
+            }`}
+          >
+            SO
+          </button>
           <button
             onClick={() => setCurrentLanguage('en')}
             className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
@@ -27,16 +38,6 @@ export default function Home() {
             }`}
           >
             EN
-          </button>
-          <button
-            onClick={() => setCurrentLanguage('nl')}
-            className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
-              currentLanguage === 'nl'
-                ? 'bg-emerald-700 text-white shadow-md'
-                : 'text-gray-700 hover:text-black'
-            }`}
-          >
-            NL
           </button>
         </div>
       </div>
