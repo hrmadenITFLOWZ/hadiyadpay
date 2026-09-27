@@ -1,169 +1,133 @@
 'use client';
 
-import { useState } from 'react';
-import { Occasion } from '../data/cardOptions';
+import React, { useState } from 'react';
+import { CardOption } from '../data/cardOptions';
 
 interface CheckoutModalProps {
-  selectedOccasion?: Occasion;
+  isOpen: boolean;
+  onClose: () => void;
+  selectedOccasion: CardOption;
   recipientName: string;
   senderName: string;
   message: string;
   cardPrice: number;
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-type Language = 'en' | 'nl';
-
-// Helper om telefoonnummers automatisch te formatteren naar 252XXXXXXXXX
-function formatPhone(phone: string): string {
-  if (!phone) return '';
-  let cleaned = phone.replace(/\D/g, '');
-  if (cleaned.startsWith('0')) {
-    cleaned = cleaned.substring(1);
-  }
-  if (!cleaned.startsWith('252')) {
-    cleaned = '252' + cleaned;
-  }
-  return cleaned;
-}
-
-// Validatie: moet exact 12 cijfers zijn en starten met 252
-function isValidPhone(phone: string): boolean {
-  const formatted = formatPhone(phone);
-  return formatted.length === 12 && formatted.startsWith('252');
+  initialLanguage?: string;
 }
 
 export default function CheckoutModal({
+  isOpen,
+  onClose,
   selectedOccasion,
   recipientName,
   senderName,
   message,
   cardPrice,
-  isOpen,
-  onClose,
+  initialLanguage = 'so',
 }: CheckoutModalProps) {
-  const [lang, setLang] = useState<Language>('en');
-  const [mobileNumber, setMobileNumber] = useState('');
+  const [senderPhone, setSenderPhone] = useState('');
   const [recipientPhone, setRecipientPhone] = useState('');
   const [provider, setProvider] = useState<'zaad' | 'edahab'>('zaad');
-  const [transferAmount, setTransferAmount] = useState<number>(20);
-  const [loading, setLoading] = useState(false);
+  const [amount, setAmount] = useState('20');
 
   if (!isOpen) return null;
 
-  const safeOccasion = selectedOccasion || {
-    title: 'Hadiyad Card',
-    bgGradient: 'from-emerald-600 to-teal-700',
-    pattern: '🎁',
+  const numericAmount = parseFloat(amount) || 0;
+  const total = cardPrice + numericAmount;
+
+  const lang = initialLanguage === 'so' || initialLanguage === 'en' ? initialLanguage : 'en';
+
+  // Meertalige teksten voor de modal
+  const content = {
+    so: {
+      title: 'Dhammee Hadiyadadaada',
+      subtitle: 'Kaga bixi taleefanka gacanta oo u dir lacagta isla markiiba.',
+      senderPhone: 'LAMBARKAAGA (BIXIYAHA)',
+      recipientPhone: 'LAMBARKA QAATAHA',
+      provider: 'XULO SHIRKADDA LACAGTA',
+      amount: 'LACAGTA LA DIRAYO ($)',
+      cardCost: 'Qiimaha Kaarka:',
+      total: 'Wadarta Guud:',
+      buttonText: (val: number) => `Bixi $${val} iyo Dir`,
+      alert: 'Codsiga xawilaada waa la diray!',
+    },
+    en: {
+      title: 'Complete Your Hadiyad',
+      subtitle: 'Pay via mobile money and send funds instantly.',
+      senderPhone: 'YOUR PHONE NUMBER (SENDER)',
+      recipientPhone: 'RECIPIENT PHONE NUMBER',
+      provider: 'SELECT PROVIDER',
+      amount: 'TRANSFER AMOUNT ($)',
+      cardCost: 'Card Fee:',
+      total: 'Total:',
+      buttonText: (val: number) => `Pay $${val} & Send`,
+      alert: 'Transfer request sent!',
+    },
   };
 
-  // Zodra je het veld verlaat (onBlur), vullen we het automatisch aan
-  const handleBlur = (field: 'sender' | 'recipient') => {
-    if (field === 'sender' && mobileNumber) {
-      setMobileNumber(formatPhone(mobileNumber));
-    } else if (field === 'recipient' && recipientPhone) {
-      setRecipientPhone(formatPhone(recipientPhone));
-    }
-  };
-
-  const handleWaaFiPayCheckout = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const formattedSender = formatPhone(mobileNumber);
-    const formattedRecipient = formatPhone(recipientPhone);
-
-    if (!isValidPhone(formattedSender) || !isValidPhone(formattedRecipient)) {
-      alert('Controleer de telefoonnummers. Elk nummer moet na opmaak uit 12 cijfers bestaan en starten met 252.');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await fetch('/api/create-checkout-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          cardTitle: safeOccasion.title,
-          cardPrice: cardPrice,
-          transferAmount: transferAmount,
-          recipientPhone: formattedRecipient,
-          senderPhone: formattedSender,
-          provider: provider === 'zaad' ? 'MW_ZAAD' : 'MW_EDAHAB',
-        }),
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        alert(data.message);
-        onClose();
-      } else {
-        alert('Fout: ' + (data.error || 'Er ging iets mis'));
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Er is een netwerkfout opgetreden.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getInputClass = (val: string) => {
-    if (!val) return 'border-gray-300 focus:ring-emerald-500';
-    return isValidPhone(val) 
-      ? 'border-green-500 ring-1 ring-green-500 bg-green-50/30' 
-      : 'border-red-500 ring-1 ring-red-500 bg-red-50/30';
-  };
+  const t = content[lang as 'so' | 'en'] || content.en;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative overflow-hidden">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold"
-        >
-          &times;
-        </button>
-
-        <h3 className="text-xl font-bold text-gray-800 mb-1">Voltooi je Hadiyad</h3>
-        <p className="text-xs text-gray-500 mb-4">Betaal via mobiel en stuur direct geld mee.</p>
-
-        <form onSubmit={handleWaaFiPayCheckout} className="space-y-4">
+      <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-gray-100 overflow-hidden relative animate-in fade-in zoom-in duration-200">
+        
+        {/* Header */}
+        <div className="flex justify-between items-center p-6 border-b border-gray-100">
           <div>
-            <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Jouw Telefoonnummer (Betaler)</label>
+            <h3 className="text-xl font-black text-gray-900">{t.title}</h3>
+            <p className="text-xs text-gray-500 mt-0.5">{t.subtitle}</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="p-6 flex flex-col gap-4 max-h-[75vh] overflow-y-auto">
+          
+          {/* Sender Phone */}
+          <div>
+            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+              {t.senderPhone}
+            </label>
             <input
               type="text"
-              required
-              value={mobileNumber}
-              onChange={(e) => setMobileNumber(e.target.value)}
-              onBlur={() => handleBlur('sender')}
+              value={senderPhone}
+              onChange={(e) => setSenderPhone(e.target.value)}
               placeholder="25263XXXXXXX"
-              className={`w-full px-3 py-2 border rounded-lg text-sm outline-none transition-all ${getInputClass(mobileNumber)}`}
+              className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 text-gray-900 font-medium"
             />
           </div>
 
+          {/* Recipient Phone */}
           <div>
-            <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Telefoonnummer Ontvanger</label>
+            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+              {t.recipientPhone}
+            </label>
             <input
               type="text"
-              required
               value={recipientPhone}
               onChange={(e) => setRecipientPhone(e.target.value)}
-              onBlur={() => handleBlur('recipient')}
               placeholder="25263XXXXXXX"
-              className={`w-full px-3 py-2 border rounded-lg text-sm outline-none transition-all ${getInputClass(recipientPhone)}`}
+              className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 text-gray-900 font-medium"
             />
           </div>
 
+          {/* Provider Selection */}
           <div>
-            <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Kies Provider</label>
-            <div className="grid grid-cols-2 gap-2">
+            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+              {t.provider}
+            </label>
+            <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setProvider('zaad')}
-                className={`py-2 text-sm font-semibold rounded-lg border ${
-                  provider === 'zaad' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-gray-50 text-gray-700'
+                className={`py-3 px-4 rounded-xl text-xs font-bold border transition ${
+                  provider === 'zaad'
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-md'
+                    : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
                 }`}
               >
                 ZAAD (Telesom)
@@ -171,8 +135,10 @@ export default function CheckoutModal({
               <button
                 type="button"
                 onClick={() => setProvider('edahab')}
-                className={`py-2 text-sm font-semibold rounded-lg border ${
-                  provider === 'edahab' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-gray-50 text-gray-700'
+                className={`py-3 px-4 rounded-xl text-xs font-bold border transition ${
+                  provider === 'edahab'
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-md'
+                    : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
                 }`}
               >
                 E-Dahab (Somafone)
@@ -180,30 +146,43 @@ export default function CheckoutModal({
             </div>
           </div>
 
+          {/* Transfer Amount */}
           <div>
-            <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Te verzenden bedrag ($)</label>
+            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+              {t.amount}
+            </label>
             <input
               type="number"
-              min="1"
-              value={transferAmount}
-              onChange={(e) => setTransferAmount(Number(e.target.value))}
-              className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none border-gray-300"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 text-gray-900 font-medium"
             />
           </div>
 
-          <div className="pt-2 border-t text-xs text-gray-500 flex justify-between">
-            <span>Kaartkosten: ${cardPrice}</span>
-            <span className="font-bold text-gray-800">Totaal: ${cardPrice + Number(transferAmount)}</span>
+          {/* Cost breakdown */}
+          <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 flex flex-col gap-2 text-xs text-gray-600 mt-2">
+            <div className="flex justify-between">
+              <span>{t.cardCost}</span>
+              <span className="font-semibold text-gray-900">${cardPrice}</span>
+            </div>
+            <div className="flex justify-between border-t border-gray-200 pt-2 text-sm font-bold text-gray-900">
+              <span>{t.total}</span>
+              <span>${total}</span>
+            </div>
           </div>
 
+          {/* Action Button */}
           <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl transition duration-200 shadow-md disabled:opacity-50 text-sm"
+            onClick={() => {
+              alert(t.alert);
+              onClose();
+            }}
+            className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl shadow-xl transition duration-200 mt-2 text-sm flex items-center justify-center gap-2"
           >
-            {loading ? 'Bezig met verwerken...' : `Betaal $${cardPrice + Number(transferAmount)} & Verstuur`}
+            <span>{t.buttonText(total)}</span>
           </button>
-        </form>
+
+        </div>
       </div>
     </div>
   );
