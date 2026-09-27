@@ -9,7 +9,6 @@ export async function POST(req: Request) {
     const totalAmount = Number(transferAmount || 0) + Number(cardPrice || 0);
     const waafiUrl = 'https://sandbox.waafipay.com/asm';
 
-    // WAAFiPay vereist dat telefoonnummers ZONDER de '+' worden aangeleverd (bijv. 25263...)
     const cleanSenderPhone = senderPhone ? senderPhone.replace('+', '') : '';
 
     const payload = {
@@ -19,7 +18,7 @@ export async function POST(req: Request) {
       channelName: 'WEB',
       serviceName: 'API_PURCHASE',
       serviceParams: {
-        merchantUid: process.env.WAAFIPAY_MERCHANT_UID || 'merchant_test_id',
+        merchantUid: process.of?.WAAFIPAY_MERCHANT_UID || 'merchant_test_id',
         apiUserId: process.env.WAAFIPAY_API_USER_ID || 'user_test_id',
         apiKey: process.env.WAAFIPAY_API_KEY || 'key_test',
         paymentMethod: provider || 'MW_ZAAD',
@@ -43,17 +42,21 @@ export async function POST(req: Request) {
     });
 
     const data = await response.json();
-    console.log('WAAFiPay Response:', data);
+    console.log('WAAFiPay Response Full:', data);
 
-    // Controleer op succesvolle respons van WAAFiPay (responseCode '2001')
+    // Stuur de exacte responseMessage of errorCode mee terug naar de frontend
     if (data.responseCode === '2001') {
       return NextResponse.json({ 
         success: true, 
-        message: 'Betaling gestart! Controleer je telefoonscherm.' 
+        message: 'Betaling gestart!' 
       });
     } else {
       return NextResponse.json(
-        { success: false, error: data.responseMsg || 'Betaling mislukt door provider' }, 
+        { 
+          success: false, 
+          error: data.responseMessage || data.error || 'Onbekende fout van WAAFiPay',
+          fullResponse: data 
+        }, 
         { status: 400 }
       );
     }
