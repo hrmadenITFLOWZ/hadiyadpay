@@ -26,11 +26,11 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
       <div className="bg-white/85 backdrop-blur-md p-6 rounded-2xl shadow-2xl border border-gray-100 flex flex-col gap-6">
         <div>
           <h2 className="text-xl font-bold text-gray-900 mb-1">
-            {currentLanguage === 'nl' ? 'Ontwerp je Hadiyad ✨' : 'Craft Your Hadiyad ✨'}
+            {currentLanguage === 'so' ? 'Naqshadee Hadiyadadaada ✨' : 'Craft Your Hadiyad ✨'}
           </h2>
           <p className="text-sm text-gray-600">
-            {currentLanguage === 'nl'
-              ? 'Kudar fariin qiiro leh oo lama ilooban ah. Deel direct liefde met dierbaren.'
+            {currentLanguage === 'so'
+              ? 'Ku dar fariin qiiro leh oo lama ilooban ah. La wadaag jacaylka kuwa aad jeceshahay si degdeg ah.'
               : 'Kudar fariin qiiro leh oo lama ilooban ah. Share love with loved ones instantly.'}
           </p>
         </div>
@@ -38,7 +38,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
         {/* Select Occasion */}
         <div>
           <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
-            {currentLanguage === 'nl' ? 'SELECTEER GELEGENHEID' : 'SELECT OCCASION'}
+            {currentLanguage === 'so' ? 'DOORO MUNAASABADA' : 'SELECT OCCASION'}
           </label>
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300">
             {cardOptions.map((card) => {
@@ -68,7 +68,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                {currentLanguage === 'nl' ? 'AAN ONTVANGER' : 'TO RECIPIENT'}
+                {currentLanguage === 'so' ? 'QAATAHA (TO RECIPIENT)' : 'TO RECIPIENT'}
               </label>
               <input
                 type="text"
@@ -80,7 +80,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-                {currentLanguage === 'nl' ? 'VAN AFZENDER' : 'FROM SENDER'}
+                {currentLanguage === 'so' ? 'DIRQAHA (FROM SENDER)' : 'FROM SENDER'}
               </label>
               <input
                 type="text"
@@ -94,7 +94,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
           <div>
             <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-              {currentLanguage === 'nl' ? 'PERSOONLIJK BERICHT' : 'PERSONALIZED MESSAGE'}
+              {currentLanguage === 'so' ? 'FARRIINTA GAARKA AH' : 'PERSONALIZED MESSAGE'}
             </label>
             <textarea
               rows={3}
@@ -108,7 +108,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             onClick={() => setIsCheckoutOpen(true)}
             className={`w-full py-3.5 px-4 bg-gradient-to-br ${selectedCard.gradient} hover:brightness-110 text-white font-semibold rounded-xl shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm`}
           >
-            <span>🚀 {currentLanguage === 'nl' ? 'Verstuur Hadiyad & Directe Overmaking' : 'Send Hadiyad & Instant Transfer'}</span>
+            <span>🚀 {currentLanguage === 'so' ? 'Dir Hadiyad & Xawilaad Degdeg ah' : 'Send Hadiyad & Instant Transfer'}</span>
           </button>
         </div>
       </div>
@@ -134,7 +134,9 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             </div>
 
             <div className="my-6">
-              <p className="text-[11px] uppercase tracking-wider opacity-75 mb-1">TO:</p>
+              <p className="text-[11px] uppercase tracking-wider opacity-75 mb-1">
+                {currentLanguage === 'so' ? 'KU SOO COCTA (TO):' : 'TO:'}
+              </p>
               <h3 className="text-lg font-bold tracking-wide drop-shadow">
                 {recipientName ? recipientName : 'Hooyo Macaan 🌸'}
               </h3>
@@ -148,7 +150,9 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
             <div className="mt-6 flex justify-between items-end border-t border-white/20 pt-3">
               <div>
-                <p className="text-[10px] uppercase tracking-wider opacity-75">FROM:</p>
+                <p className="text-[11px] uppercase tracking-wider opacity-75">
+                  {currentLanguage === 'so' ? 'KA SOO DIRAY (FROM):' : 'FROM:'}
+                </p>
                 <p className="text-xs font-bold">
                   {senderName ? senderName : 'Wiilkaada / Gabadhada ✨'}
                 </p>
@@ -159,8 +163,8 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
           <div className="text-center mt-4">
             <p className="text-[11px] text-gray-400">
-              {currentLanguage === 'nl'
-                ? 'Veilige financiële overmakingen in samenwerking met gelicentieerde partners.'
+              {currentLanguage === 'so'
+                ? 'Xawilaadaha lacagta ee nabdoon waxaa lagu fuliyaa iyadoo la kaashanaysa shirkado bixiye oo sharciaysan.'
                 : 'Secure financial transfers handled in partnership with licensed payment operators.'}
             </p>
           </div>
@@ -176,6 +180,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
         senderName={senderName}
         message={message}
         cardPrice={10}
+        initialLanguage={currentLanguage === 'so' ? 'so' : 'en'}
       />
     </div>
   );
