@@ -14,9 +14,18 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
   const [selectedCard, setSelectedCard] = useState<CardOption>(filteredCards[0]);
   
-  const [recipientName, setRecipientName] = useState(selectedCard.defaultRecipient[currentLanguage as 'so' | 'en'] || selectedCard.defaultRecipient['en']);
-  const [senderName, setSenderName] = useState(selectedCard.defaultSender[currentLanguage as 'so' | 'en'] || selectedCard.defaultSender['en']);
-  const [message, setMessage] = useState(selectedCard.defaultMessage[currentLanguage as 'so' | 'en'] || selectedCard.defaultMessage['en']);
+  // Veilige taalcontrole helper
+  const langKey = (currentLanguage === 'so' ? 'so' : 'en') as 'so' | 'en';
+
+  const [recipientName, setRecipientName] = useState(
+    selectedCard.defaultRecipient[langKey] || selectedCard.defaultRecipient['en']
+  );
+  const [senderName, setSenderName] = useState(
+    selectedCard.defaultSender[langKey] || selectedCard.defaultSender['en']
+  );
+  const [message, setMessage] = useState(
+    selectedCard.defaultMessage[langKey] || selectedCard.defaultMessage['en']
+  );
   
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [imageScale, setImageScale] = useState<number>(1);
@@ -26,16 +35,20 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
+  // Update geselecteerde kaart als het deck verandert
   useEffect(() => {
     const newFiltered = cardOptions.filter((c) => c.category === activeDeck);
-    setSelectedCard(newFiltered[0]);
+    if (newFiltered.length > 0) {
+      setSelectedCard(newFiltered[0]);
+    }
   }, [activeDeck]);
 
+  // Update standaardteksten als de kaart of taal verandert
   useEffect(() => {
-    setRecipientName(selectedCard.defaultRecipient[currentLanguage as 'so' | 'en'] || selectedCard.defaultRecipient['en']);
-    setSenderName(selectedCard.defaultSender[currentLanguage as 'so' | 'en'] || selectedCard.defaultSender['en']);
-    setMessage(selectedCard.defaultMessage[currentLanguage as 'so' | 'en'] || selectedCard.defaultMessage['en']);
-  }, [selectedCard, currentLanguage]);
+    setRecipientName(selectedCard.defaultRecipient[langKey] || selectedCard.defaultRecipient['en']);
+    setSenderName(selectedCard.defaultSender[langKey] || selectedCard.defaultSender['en']);
+    setMessage(selectedCard.defaultMessage[langKey] || selectedCard.defaultMessage['en']);
+  }, [selectedCard, langKey]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -48,6 +61,12 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleRemoveImage = () => {
+    setUploadedImage(null);
+    setImageScale(1);
+    setImagePos({ x: 0, y: 0 });
   };
 
   const handleWheel = (e: React.WheelEvent) => {
@@ -97,8 +116,8 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
     const baseUrl = window.location.origin + window.location.pathname;
     const shareUrl = `${baseUrl}?card=${cardPayloadId}`;
     
-    const shareTitle = currentLanguage === 'so' ? 'HadiyadPay Kaarka Salaanta' : 'HadiyadPay E-Card';
-    const shareText = currentLanguage === 'so'
+    const shareTitle = langKey === 'so' ? 'HadiyadPay Kaarka Salaanta' : 'HadiyadPay E-Card';
+    const shareText = langKey === 'so'
       ? `Waa lagusoo diray HadiyadPay kaar gaar ah oo ku socota ${recipientName}! 🎁 Riix halkan si aad u aragto kaarkaaga:`
       : `You've received a special HadiyadPay e-card for ${recipientName}! 🎁 Click here to view your card:`;
 
@@ -118,7 +137,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
     try {
       await navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
       alert(
-        currentLanguage === 'so'
+        langKey === 'so'
           ? 'Linkiga waxaa la guuriyey klembord-ka!'
           : 'Link copied to clipboard!'
       );
@@ -128,7 +147,8 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   };
 
   const handleDownload = () => {
-    alert(currentLanguage === 'so' ? 'Kaarka waa la keydiyey!' : 'Card saved successfully!');
+    // Hier kun je eventueel html2canvas integreren, voor nu een nette melding
+    alert(langKey === 'so' ? 'Kaarka waa la keydiyey!' : 'Card saved successfully!');
   };
 
   const getCardStyle = (card: CardOption) => {
@@ -179,10 +199,10 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
         <div className="lg:col-span-7 bg-white/90 backdrop-blur-md p-6 rounded-3xl shadow-2xl border border-gray-100 flex flex-col gap-6">
           <div>
             <h2 className="text-2xl font-black text-gray-900 mb-1">
-              {currentLanguage === 'so' ? 'Naqshadee Hadiyadadaada ✨' : 'Craft Your Hadiyad ✨'}
+              {langKey === 'so' ? 'Naqshadee Hadiyadadaada ✨' : 'Craft Your Hadiyad ✨'}
             </h2>
             <p className="text-sm text-gray-600">
-              {currentLanguage === 'so'
+              {langKey === 'so'
                 ? 'Xulo qaabka kaarka, ku dar fariin qiiro leh oo u dir si degdeg ah.'
                 : 'Choose a card style, add a heartfelt message, and send instantly.'}
             </p>
@@ -190,7 +210,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
           <div>
             <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">
-              {currentLanguage === 'so' ? 'XULO KAARKA WANAAGSAN' : 'CHOOSE YOUR CARD STYLE'}
+              {langKey === 'so' ? 'XULO KAARKA WANAAGSAN' : 'CHOOSE YOUR CARD STYLE'}
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-h-[340px] overflow-y-auto pr-1">
               {filteredCards.map((card) => {
@@ -206,10 +226,10 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                     style={getCardStyle(card)}
                   >
                     <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-black/30 backdrop-blur-md text-white self-start shadow z-10">
-                      {card.badge[currentLanguage as 'so' | 'en'] || card.badge['en']}
+                      {card.badge[langKey] || card.badge['en']}
                     </span>
                     <span className="text-xs font-bold text-white line-clamp-2 drop-shadow-md z-10">
-                      {card.title[currentLanguage as 'so' | 'en'] || card.title['en']}
+                      {card.title[langKey] || card.title['en']}
                     </span>
                   </button>
                 );
@@ -221,7 +241,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                  {currentLanguage === 'so' ? 'MAGACA QAATAHA' : 'RECIPIENT NAME'}
+                  {langKey === 'so' ? 'MAGACA QAATAHA' : 'RECIPIENT NAME'}
                 </label>
                 <input
                   type="text"
@@ -232,7 +252,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                  {currentLanguage === 'so' ? 'MAGACA DIRAHA' : 'SENDER NAME'}
+                  {langKey === 'so' ? 'MAGACA DIRAHA' : 'SENDER NAME'}
                 </label>
                 <input
                   type="text"
@@ -245,7 +265,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
             <div>
               <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                {currentLanguage === 'so' ? 'FARRIINTA GAARKA AH' : 'PERSONALIZED MESSAGE'}
+                {langKey === 'so' ? 'FARRIINTA GAARKA AH' : 'PERSONALIZED MESSAGE'}
               </label>
               <textarea
                 rows={3}
@@ -256,9 +276,19 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                {currentLanguage === 'so' ? 'KU DAR SAWIR GAAR AH (IKHTIYAARI)' : 'ADD PERSONAL PHOTO (OPTIONAL)'}
-              </label>
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+                  {langKey === 'so' ? 'KU DAR SAWIR GAAR AH (IKHTIYAARI)' : 'ADD PERSONAL PHOTO (OPTIONAL)'}
+                </label>
+                {uploadedImage && (
+                  <button 
+                    onClick={handleRemoveImage}
+                    className="text-xs text-rose-600 hover:text-rose-800 font-semibold cursor-pointer"
+                  >
+                    {langKey === 'so' ? 'Tirtir sawirka' : 'Remove photo'}
+                  </button>
+                )}
+              </div>
               <input
                 type="file"
                 accept="image/*"
@@ -272,7 +302,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
               className="w-full py-4 px-4 font-bold rounded-2xl shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-base text-white hover:brightness-110 border border-white/20 cursor-pointer"
               style={getCardStyle(selectedCard)}
             >
-              <span className="z-10">🚀 {currentLanguage === 'so' ? 'Dir Hadiyad iyo Xawilaad Degdeg ah' : 'Send Hadiyad & Instant Transfer'}</span>
+              <span className="z-10">🚀 {langKey === 'so' ? 'Dir Hadiyad iyo Xawilaad Degdeg ah' : 'Send Hadiyad & Instant Transfer'}</span>
             </button>
           </div>
         </div>
@@ -296,7 +326,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             >
               <div className="flex justify-between items-center z-10">
                 <span className="text-[10px] tracking-widest uppercase bg-black/30 px-3 py-1 rounded-md backdrop-blur-md font-bold border border-white/20">
-                  HADIYADPAY • {selectedCard.badge[currentLanguage as 'so' | 'en'] || selectedCard.badge['en']}
+                  HADIYADPAY • {selectedCard.badge[langKey] || selectedCard.badge['en']}
                 </span>
                 <span className="text-base animate-bounce">✨</span>
               </div>
@@ -327,7 +357,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
               <div className="my-4 z-10">
                 <p className="text-[10px] uppercase tracking-wider opacity-90 mb-1 font-semibold">
-                  {currentLanguage === 'so' ? 'MAGACA QAATAHA:' : 'TO:'}
+                  {langKey === 'so' ? 'MAGACA QAATAHA:' : 'TO:'}
                 </p>
                 <h3 className="text-xl font-black tracking-wide drop-shadow-md">
                   {recipientName}
@@ -343,7 +373,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
               <div className="mt-6 flex justify-between items-end border-t border-white/20 pt-3 z-10">
                 <div>
                   <p className="text-[10px] uppercase tracking-wider opacity-90 font-semibold">
-                    {currentLanguage === 'so' ? 'MAGACA DIRAHA:' : 'FROM:'}
+                    {langKey === 'so' ? 'MAGACA DIRAHA:' : 'FROM:'}
                   </p>
                   <p className="text-xs font-bold">
                     {senderName}
@@ -358,13 +388,13 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 onClick={handleDownload}
                 className="py-2.5 px-3 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
               >
-                📥 {currentLanguage === 'so' ? 'Soo Degso Kaarka' : 'Download Card'}
+                📥 {langKey === 'so' ? 'Soo Degso Kaarka' : 'Download Card'}
               </button>
               <button
                 onClick={handleShare}
                 className="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-600/30 cursor-pointer"
               >
-                🔗 {currentLanguage === 'so' ? 'La Wadaag' : 'Share Card'}
+                🔗 {langKey === 'so' ? 'La Wadaag' : 'Share Card'}
               </button>
             </div>
 

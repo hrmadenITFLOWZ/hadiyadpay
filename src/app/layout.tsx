@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     siteName: 'HadiyadPay',
     images: [
       {
-        url: '/images/og-cover.jpg',
+        url: '/images/logo.jpg',
         width: 1200,
         height: 630,
         alt: 'HadiyadPay Logo Preview',
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'HadiyadPay | Personalized Digital Greetings',
     description: 'Create and send thoughtful, customized digital greeting cards and celebratory moments to your loved ones.',
-    images: ['https://www.hadiyadpay.com/images/og-cover.jpg'],
+    images: ['https://www.hadiyadpay.com/images/logo.jpg'],
   },
 };
 
@@ -40,9 +40,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Extra meta tags voor directe social media / WhatsApp previews */}
-        <meta property="og:image" content="https://www.hadiyadpay.com/images/og-cover.jpg" />
-        <meta property="og:image:secure_url" content="https://www.hadiyadpay.com/images/og-cover.jpg" />
+        <meta property="og:image" content="https://www.hadiyadpay.com/images/logo.jpg" />
+        <meta property="og:image:secure_url" content="https://www.hadiyadpay.com/images/logo.jpg" />
         <meta property="og:image:type" content="image/jpeg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />

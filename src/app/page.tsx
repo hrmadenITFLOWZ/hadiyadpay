@@ -22,7 +22,15 @@ export default function Home() {
     }
   };
 
-  // Dynamisch de paginatitel en meta-beschrijving aanpassen aan de gekozen taal
+  useEffect(() => {
+    // Controleer of er via de URL een taalvoorkeur is meegegeven, anders standaard EN of SO
+    const params = new URLSearchParams(window.location.search);
+    const langParam = params.get('lang') as Language;
+    if (langParam === 'so' || langParam === 'en') {
+      setCurrentLanguage(langParam);
+    }
+  }, []);
+
   useEffect(() => {
     document.title = content[currentLanguage].title;
     let metaDesc = document.querySelector('meta[name="description"]');
@@ -34,12 +42,10 @@ export default function Home() {
   return (
     <main className="min-h-screen text-gray-900 selection:bg-emerald-500 selection:text-white pb-16 relative overflow-x-hidden">
       
-      {/* Ontvanger Kaart Modal ingepakt in Suspense */}
       <Suspense fallback={null}>
         <ReceivedCardModal currentLanguage={currentLanguage} />
       </Suspense>
 
-      {/* Taalselectie knoppen in de rechterbovenhoek */}
       <div className="absolute top-6 right-6 z-20">
         <div className="flex bg-black/10 backdrop-blur-md p-1 rounded-xl text-xs font-bold border border-black/10 shadow-sm">
           <button
@@ -65,17 +71,12 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Gecentreerde Header bovenaan met Logo */}
       <header className="max-w-4xl mx-auto px-4 pt-10 pb-6 text-center">
         <div className="flex items-center justify-center gap-3">
           <img 
-            src="/images/og-cover.jpg" 
+            src="/images/logo.jpg" 
             alt="HadiyadPay Logo" 
-            className="w-12 h-12 rounded-full object-cover shadow-md border border-gray-300"
-            onError={(e) => {
-              // Fallback als de browser 'og-cover.jpg' niet direct kan laden
-              console.error("Logo kon niet worden geladen op het opgegeven pad.");
-            }}
+            className="w-12 h-12 rounded-full object-cover shadow-md border border-gray-300 bg-white"
           />
           <h1 className="text-2xl font-black tracking-wider text-gray-900">
             HadiyadPay
@@ -86,7 +87,6 @@ export default function Home() {
         </p>
       </header>
 
-      {/* Hoofdsectie */}
       <div className="mt-2">
         <CardBuilder currentLanguage={currentLanguage} />
       </div>
