@@ -93,9 +93,22 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   const handleShare = async () => {
     const uniqueCardId = 'card_' + Math.random().toString(36).substring(2, 9);
     
-    // We coderen korte, schone parameters zodat de link kort blijft én voor iedereen werkt
+    const cardPayload = {
+      cardId: selectedCard.id,
+      to: recipientName,
+      from: senderName,
+      msg: message,
+      image: uploadedImage,
+      imageScale: imageScale,
+      imagePos: imagePos,
+    };
+
+    // Sla op in localStorage zodat de app het kan inladen
+    localStorage.setItem(uniqueCardId, JSON.stringify(cardPayload));
+
+    // Super korte link met alleen de ID en de stijl!
     const baseUrl = window.location.origin + window.location.pathname;
-    const shareUrl = `${baseUrl}?card=${uniqueCardId}&to=${encodeURIComponent(recipientName)}&from=${encodeURIComponent(senderName)}&msg=${encodeURIComponent(message)}&style=${selectedCard.id}&lang=so`;
+    const shareUrl = `${baseUrl}?card=${uniqueCardId}&style=${selectedCard.id}`;
     
     const shareTitle = 'HadiyadPay Kaarka Salaanta';
     const shareText = `Waa lagusoo diray HadiyadPay kaar gaar ah oo ku socota ${recipientName}! 🎁 Riix halkan si aad u aragto kaarkaaga:`;

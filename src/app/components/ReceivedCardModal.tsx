@@ -14,19 +14,19 @@ export default function ReceivedCardModal({ currentLanguage: parentLanguage }: R
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const cardId = params.get('card');
-    const to = params.get('to');
-    const from = params.get('from');
-    const msg = params.get('msg');
-    const style = params.get('style');
 
-    if (cardId && to && from && msg) {
-      setCardData({
-        cardId: style || 'dhaqan-1',
-        to: decodeURIComponent(to),
-        from: decodeURIComponent(from),
-        msg: decodeURIComponent(msg),
-      });
-      setIsOpen(true);
+    if (cardId) {
+      // Haal de opgeslagen kaartgegevens op uit localStorage
+      const savedData = localStorage.getItem(cardId);
+      if (savedData) {
+        try {
+          const parsed = JSON.parse(savedData);
+          setCardData(parsed);
+          setIsOpen(true);
+        } catch (e) {
+          console.error('Fout bij laden kaartdata', e);
+        }
+      }
     }
   }, []);
 
@@ -86,6 +86,20 @@ export default function ReceivedCardModal({ currentLanguage: parentLanguage }: R
             </span>
             <span className="text-base animate-bounce">✨</span>
           </div>
+
+          {cardData.image && (
+            <div className="my-3 rounded-xl overflow-hidden shadow-md h-32 border border-white/20 z-10 relative bg-black/50 flex items-center justify-center">
+              <img 
+                src={cardData.image} 
+                alt="Received" 
+                className="absolute max-w-none pointer-events-none"
+                style={{
+                  transform: `translate(${cardData.imagePos?.x || 0}px, ${cardData.imagePos?.y || 0}px) scale(${cardData.imageScale || 1})`,
+                  transformOrigin: 'center center',
+                }}
+              />
+            </div>
+          )}
 
           <div className="my-3 z-10">
             <p className="text-[10px] uppercase tracking-wider opacity-90 mb-1 font-semibold">
