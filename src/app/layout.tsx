@@ -15,10 +15,10 @@ export const metadata: Metadata = {
     siteName: 'HadiyadPay',
     images: [
       {
-        url: '/images/og-cover.png',
+        url: '/images/logo.jpg',
         width: 1200,
         height: 630,
-        alt: 'HadiyadPay Preview',
+        alt: 'HadiyadPay Logo Preview',
       },
     ],
     locale: 'so_SO',
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'HadiyadPay | Personalized Digital Greetings',
     description: 'Create and send thoughtful, customized digital greeting cards and celebratory moments to your loved ones.',
-    images: ['/images/og-cover.png'],
+    images: ['/images/logo.jpg'],
   },
 };
 

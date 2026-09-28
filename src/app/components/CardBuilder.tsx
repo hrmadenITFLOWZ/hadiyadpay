@@ -18,7 +18,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   const [senderName, setSenderName] = useState(selectedCard.defaultSender[currentLanguage as 'so' | 'en'] || selectedCard.defaultSender['en']);
   const [message, setMessage] = useState(selectedCard.defaultMessage[currentLanguage as 'so' | 'en'] || selectedCard.defaultMessage['en']);
   
-  // States voor foto, zoom en vrije X/Y positie
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [imageScale, setImageScale] = useState<number>(1);
   const [imagePos, setImagePos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -38,7 +37,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
     setMessage(selectedCard.defaultMessage[currentLanguage as 'so' | 'en'] || selectedCard.defaultMessage['en']);
   }, [selectedCard, currentLanguage]);
 
-  // Handler voor foto-upload
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -76,7 +74,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
     setIsDragging(false);
   };
 
-  // Professionele korte link generatie inclusief opslag van zoom, positie en foto
+  // Deel-functie met dynamische taalondersteuning (Somalisch of Engels)
   const handleShare = async () => {
     const cardPayloadId = 'card_' + Math.random().toString(36).substring(2, 9);
     
@@ -99,9 +97,9 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
     const baseUrl = window.location.origin + window.location.pathname;
     const shareUrl = `${baseUrl}?card=${cardPayloadId}`;
     
-    const shareTitle = 'HadiyadPay E-Card';
+    const shareTitle = currentLanguage === 'so' ? 'HadiyadPay Kaarka Salaanta' : 'HadiyadPay E-Card';
     const shareText = currentLanguage === 'so'
-      ? `Waa lagusoo diray HadiyadPay gaar ah oo ku socota ${recipientName}! 🎁 Riix halkan si aad u aragto kaarkaaga:`
+      ? `Waa lagusoo diray HadiyadPay kaar gaar ah oo ku socota ${recipientName}! 🎁 Riix halkan si aad u aragto kaarkaaga:`
       : `You've received a special HadiyadPay e-card for ${recipientName}! 🎁 Click here to view your card:`;
 
     if (navigator.share) {
@@ -121,8 +119,8 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
       await navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
       alert(
         currentLanguage === 'so'
-          ? 'Linkiga nadiifka ah waxaa la guuriyey klembord-ka!'
-          : 'Clean, short link copied to clipboard!'
+          ? 'Linkiga waxaa la guuriyey klembord-ka!'
+          : 'Link copied to clipboard!'
       );
     } catch (clipboardErr) {
       prompt('Kopieer link:', shareUrl);
@@ -177,7 +175,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
       {/* Hoofdgrid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full">
         
-        {/* Linkerkolom: Besturing & Kaartselectie */}
+        {/* Linkerkolom */}
         <div className="lg:col-span-7 bg-white/90 backdrop-blur-md p-6 rounded-3xl shadow-2xl border border-gray-100 flex flex-col gap-6">
           <div>
             <h2 className="text-2xl font-black text-gray-900 mb-1">
@@ -190,7 +188,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             </p>
           </div>
 
-          {/* Catalogus Selector */}
           <div>
             <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">
               {currentLanguage === 'so' ? 'XULO KAARKA WANAAGSAN' : 'CHOOSE YOUR CARD STYLE'}
@@ -220,7 +217,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             </div>
           </div>
 
-          {/* Form Velden */}
           <div className="flex flex-col gap-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -259,7 +255,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
               />
             </div>
 
-            {/* Foto Upload Veld */}
             <div>
               <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
                 {currentLanguage === 'so' ? 'KU DAR SAWIR GAAR AH (IKHTIYAARI)' : 'ADD PERSONAL PHOTO (OPTIONAL)'}
@@ -270,16 +265,11 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 onChange={handleImageUpload}
                 className="w-full text-xs text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-rose-50 file:text-rose-700 hover:file:bg-rose-100 cursor-pointer bg-gray-50 border border-gray-200 rounded-xl"
               />
-              {uploadedImage && (
-                <p className="text-[11px] text-emerald-600 font-medium mt-1.5">
-                  💡 {currentLanguage === 'so' ? 'Jiid sawirka si aad u badasho booska, ama adeegso muiswielka si aad u soo dhoweyso/fogeyso.' : 'Tip: Click and drag the photo to reposition, or use your mouse scroll to zoom in/out!'}
-                </p>
-              )}
             </div>
 
             <button
               onClick={() => setIsCheckoutOpen(true)}
-              className="w-full py-4 px-4 font-bold rounded-2xl shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-base text-white hover:brightness-110 border border-white/20"
+              className="w-full py-4 px-4 font-bold rounded-2xl shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-base text-white hover:brightness-110 border border-white/20 cursor-pointer"
               style={getCardStyle(selectedCard)}
             >
               <span className="z-10">🚀 {currentLanguage === 'so' ? 'Dir Hadiyad iyo Xawilaad Degdeg ah' : 'Send Hadiyad & Instant Transfer'}</span>
@@ -287,7 +277,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
           </div>
         </div>
 
-        {/* Rechterkolom: Live Preview Weergave */}
+        {/* Rechterkolom */}
         <div className="lg:col-span-5 flex flex-col items-center justify-center">
           <div className="w-full max-w-md bg-white p-6 rounded-3xl shadow-2xl border border-gray-100 flex flex-col justify-between min-h-[500px] relative overflow-hidden">
             
@@ -300,7 +290,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
               </div>
             </div>
 
-            {/* Visuele Kaart */}
             <div 
               className="w-full p-6 rounded-2xl text-white shadow-2xl flex flex-col justify-between flex-grow my-2 relative overflow-hidden transition-all duration-500"
               style={getCardStyle(selectedCard)}
@@ -312,7 +301,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 <span className="text-base animate-bounce">✨</span>
               </div>
 
-              {/* Interactief Foto Kader */}
               {uploadedImage && (
                 <div 
                   className="my-3 rounded-xl overflow-hidden shadow-md h-36 border border-white/20 z-10 relative bg-black/50 cursor-grab active:cursor-grabbing select-none flex items-center justify-center"
@@ -365,7 +353,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
               </div>
             </div>
 
-            {/* Download & Share Knoppen */}
             <div className="grid grid-cols-2 gap-3 mt-4">
               <button
                 onClick={handleDownload}
@@ -375,7 +362,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
               </button>
               <button
                 onClick={handleShare}
-                className="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                className="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-600/30 cursor-pointer"
               >
                 🔗 {currentLanguage === 'so' ? 'La Wadaag' : 'Share Card'}
               </button>
@@ -384,7 +371,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
           </div>
         </div>
 
-        {/* Checkout Modal Popup */}
         <CheckoutModal
           isOpen={isCheckoutOpen}
           onClose={() => setIsCheckoutOpen(false)}
