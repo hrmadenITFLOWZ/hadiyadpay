@@ -7,15 +7,15 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "HadiyadPay | Personalized Digital Greetings",
   description: "Create and send thoughtful, customized digital greeting cards and celebratory moments to your loved ones.",
-  metadataBase: new URL('https://hadiyadpay.com'),
+  metadataBase: new URL('https://www.hadiyadpay.com'),
   openGraph: {
     title: 'HadiyadPay | Personalized Digital Greetings & E-Cards',
     description: 'Create and send thoughtful, customized digital greeting cards and celebratory moments to your loved ones.',
-    url: 'https://hadiyadpay.com',
+    url: 'https://www.hadiyadpay.com',
     siteName: 'HadiyadPay',
     images: [
       {
-        url: '/images/logo.jpg',
+        url: '/images/og-cover.jpg',
         width: 1200,
         height: 630,
         alt: 'HadiyadPay Logo Preview',
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'HadiyadPay | Personalized Digital Greetings',
     description: 'Create and send thoughtful, customized digital greeting cards and celebratory moments to your loved ones.',
-    images: ['/images/logo.jpg'],
+    images: ['https://www.hadiyadpay.com/images/og-cover.jpg'],
   },
 };
 

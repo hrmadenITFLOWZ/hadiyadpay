@@ -52,7 +52,7 @@ export default function Home() {
       <header className="max-w-4xl mx-auto px-4 pt-10 pb-6 text-center">
         <div className="flex items-center justify-center gap-3">
           <img 
-            src="/images/logo.jpg" 
+            src="/images/og-cover.jpg" 
             alt="HadiyadPay Logo" 
             className="w-12 h-12 rounded-full object-cover shadow-md border border-gray-300"
           />
