@@ -18,6 +18,9 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   const [senderName, setSenderName] = useState(selectedCard.defaultSender[currentLanguage as 'so' | 'en'] || selectedCard.defaultSender['en']);
   const [message, setMessage] = useState(selectedCard.defaultMessage[currentLanguage as 'so' | 'en'] || selectedCard.defaultMessage['en']);
   
+  // Nieuwe state voor de geuploade foto
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   useEffect(() => {
@@ -30,6 +33,18 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
     setSenderName(selectedCard.defaultSender[currentLanguage as 'so' | 'en'] || selectedCard.defaultSender['en']);
     setMessage(selectedCard.defaultMessage[currentLanguage as 'so' | 'en'] || selectedCard.defaultMessage['en']);
   }, [selectedCard, currentLanguage]);
+
+  // Handler voor foto-upload
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUploadedImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -69,7 +84,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
     <div className="w-full max-w-7xl mx-auto p-4 flex flex-col gap-4">
       
       {/* Deck Switcher Knoppen */}
-      <div className="bg-white/80 backdrop-blur-md p-2 rounded-2xl shadow-md border border-gray-100 flex gap-2 max-w-md mx-auto w-full">
+      <div className="bg-white/85 backdrop-blur-md p-2 rounded-2xl shadow-md border border-gray-100 flex gap-2 max-w-md mx-auto w-full">
         <button
           onClick={() => setActiveDeck('dhaqan')}
           className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 ${
@@ -177,6 +192,19 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
               />
             </div>
 
+            {/* Foto Upload Veld toegevoegd */}
+            <div>
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                {currentLanguage === 'so' ? 'KU DAR SAWIR GAAR AH (IKHTIYAARI)' : 'ADD PERSONAL PHOTO (OPTIONAL)'}
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="w-full text-xs text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-rose-50 file:text-rose-700 hover:file:bg-rose-100 cursor-pointer bg-gray-50 border border-gray-200 rounded-xl"
+              />
+            </div>
+
             <button
               onClick={() => setIsCheckoutOpen(true)}
               className="w-full py-4 px-4 font-bold rounded-2xl shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-base text-white hover:brightness-110 border border-white/20"
@@ -212,7 +240,14 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 <span className="text-base animate-bounce">✨</span>
               </div>
 
-              <div className="my-6 z-10">
+              {/* Geüploade foto weergave op de kaart */}
+              {uploadedImage && (
+                <div className="my-3 rounded-xl overflow-hidden shadow-md max-h-36 border border-white/20 z-10">
+                  <img src={uploadedImage} alt="Preview" className="w-full h-full object-cover" />
+                </div>
+              )}
+
+              <div className="my-4 z-10">
                 <p className="text-[10px] uppercase tracking-wider opacity-90 mb-1 font-semibold">
                   {currentLanguage === 'so' ? 'MAGACA QAATAHA:' : 'TO:'}
                 </p>
