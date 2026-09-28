@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { cardOptions, CardOption } from '../data/cardOptions';
 import CheckoutModal from './CheckoutModal';
 
@@ -18,10 +18,12 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   const [senderName, setSenderName] = useState(selectedCard.defaultSender[currentLanguage as 'so' | 'en'] || selectedCard.defaultSender['en']);
   const [message, setMessage] = useState(selectedCard.defaultMessage[currentLanguage as 'so' | 'en'] || selectedCard.defaultMessage['en']);
   
-  // States voor foto en aanpassingen (zoom & positie)
+  // States voor foto, zoom en vrije X/Y positie
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [imageZoom, setImageZoom] = useState<number>(1);
-  const [imagePosY, setImagePosY] = useState<number>(50);
+  const [imageScale, setImageScale] = useState<number>(1);
+  const [imagePos, setImagePos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [dragStart, setDragStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
@@ -43,11 +45,37 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setUploadedImage(reader.result as string);
-        setImageZoom(1); // Reset zoom bij nieuwe foto
-        setImagePosY(50); // Reset positie bij nieuwe foto
+        setImageScale(1); // Reset zoom
+        setImagePos({ x: 0, y: 0 }); // Reset positie
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  // Muiswiel zoom functionaliteit
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const zoomFactor = e.deltaY < 0 ? 0.1 : -0.1;
+    setImageScale((prev) => Math.min(Math.max(0.5, prev + zoomFactor), 3));
+  };
+
+  // Drag & drop handlers voor het verplaatsen van de afbeelding
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - imagePos.x, y: e.clientY - imagePos.y });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    setImagePos({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y,
+    });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
   };
 
   const handleShare = async () => {
@@ -207,41 +235,12 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 onChange={handleImageUpload}
                 className="w-full text-xs text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-rose-50 file:text-rose-700 hover:file:bg-rose-100 cursor-pointer bg-gray-50 border border-gray-200 rounded-xl"
               />
+              {uploadedImage && (
+                <p className="text-[11px] text-emerald-600 font-medium mt-1.5">
+                  💡 {currentLanguage === 'so' ? 'Jiid sawirka si aad u badasho booska, ama adeegso muiswielka si aad u soo dhoweyso/fogeyso.' : 'Tip: Click and drag the photo to reposition, or use your mouse scroll to zoom in/out!'}
+                </p>
+              )}
             </div>
-
-            {/* Extra Regelaars om de foto aan te passen (Zoom & Positie) */}
-            {uploadedImage && (
-              <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 flex flex-col gap-3">
-                <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">
-                  {currentLanguage === 'so' ? 'Hagaaji Sawirka (Zoom & Positie)' : 'Adjust Photo (Zoom & Position)'}
-                </span>
-                
-                <div className="flex items-center gap-3">
-                  <span className="text-[11px] font-semibold text-gray-500 w-16">Zoom:</span>
-                  <input
-                    type="range"
-                    min="1"
-                    max="2.5"
-                    step="0.1"
-                    value={imageZoom}
-                    onChange={(e) => setImageZoom(parseFloat(e.target.value))}
-                    className="w-full accent-rose-600 cursor-pointer"
-                  />
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <span className="text-[11px] font-semibold text-gray-500 w-16">Positie:</span>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={imagePosY}
-                    onChange={(e) => setImagePosY(parseInt(e.target.value))}
-                    className="w-full accent-rose-600 cursor-pointer"
-                  />
-                </div>
-              </div>
-            )}
 
             <button
               onClick={() => setIsCheckoutOpen(true)}
@@ -278,18 +277,28 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 <span className="text-base animate-bounce">✨</span>
               </div>
 
-              {/* Geüploade foto met dynamische zoom en positie */}
+              {/* Interactief Foto Kader (Drag & Zoom met muis) */}
               {uploadedImage && (
-                <div className="my-3 rounded-xl overflow-hidden shadow-md h-36 border border-white/20 z-10 relative bg-black/40">
+                <div 
+                  className="my-3 rounded-xl overflow-hidden shadow-md h-36 border border-white/20 z-10 relative bg-black/50 cursor-grab active:cursor-grabbing select-none"
+                  onWheel={handleWheel}
+                  onMouseDown={handleMouseDown}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                  onMouseLeave={handleMouseUp}
+                >
                   <img 
                     src={uploadedImage} 
                     alt="Preview" 
-                    className="w-full h-full object-cover transition-transform duration-75"
+                    className="absolute max-w-none pointer-events-none"
                     style={{
-                      objectPosition: `center ${imagePosY}%`,
-                      transform: `scale(${imageZoom})`
+                      transform: `translate(${imagePos.x}px, ${imagePos.y}px) scale(${imageScale})`,
+                      transformOrigin: 'center center',
                     }}
                   />
+                  <div className="absolute bottom-1 right-1 bg-black/60 text-[9px] px-1.5 py-0.5 rounded text-white/80 pointer-events-none backdrop-blur-sm">
+                    🔍 Drag & Scroll
+                  </div>
                 </div>
               )}
 
