@@ -76,7 +76,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
     setIsDragging(false);
   };
 
-  // Professionele korte link generatie met opslag van foto en details
+  // Professionele korte link generatie inclusief opslag van zoom, positie en foto
   const handleShare = async () => {
     const cardPayloadId = 'card_' + Math.random().toString(36).substring(2, 9);
     
@@ -86,9 +86,10 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
       from: senderName,
       msg: message,
       image: uploadedImage,
+      imageScale: imageScale,
+      imagePos: imagePos,
     };
 
-    // Sla tijdelijk op in localStorage zodat de link kort blijft
     try {
       localStorage.setItem(cardPayloadId, JSON.stringify(cardDataToSave));
     } catch (e) {
@@ -120,8 +121,8 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
       await navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
       alert(
         currentLanguage === 'so'
-          ? 'Linkiga nadiifka ah waxaa la guuriyey klembord-ka! Hadda waa mid gaaban oo xirfad leh.'
-          : 'Clean, short link copied to clipboard! Ready to share.'
+          ? 'Linkiga nadiifka ah waxaa la guuriyey klembord-ka!'
+          : 'Clean, short link copied to clipboard!'
       );
     } catch (clipboardErr) {
       prompt('Kopieer link:', shareUrl);
@@ -314,7 +315,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
               {/* Interactief Foto Kader */}
               {uploadedImage && (
                 <div 
-                  className="my-3 rounded-xl overflow-hidden shadow-md h-36 border border-white/20 z-10 relative bg-black/50 cursor-grab active:cursor-grabbing select-none"
+                  className="my-3 rounded-xl overflow-hidden shadow-md h-36 border border-white/20 z-10 relative bg-black/50 cursor-grab active:cursor-grabbing select-none flex items-center justify-center"
                   onWheel={handleWheel}
                   onMouseDown={handleMouseDown}
                   onMouseMove={handleMouseMove}
@@ -330,7 +331,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                       transformOrigin: 'center center',
                     }}
                   />
-                  <div className="absolute bottom-1 right-1 bg-black/60 text-[9px] px-1.5 py-0.5 rounded text-white/80 pointer-events-none backdrop-blur-sm">
+                  <div className="absolute bottom-1 right-1 bg-black/60 text-[9px] px-1.5 py-0.5 rounded text-white/80 pointer-events-none backdrop-blur-sm z-20">
                     🔍 Drag & Scroll
                   </div>
                 </div>

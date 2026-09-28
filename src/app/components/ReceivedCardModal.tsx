@@ -17,6 +17,8 @@ export default function ReceivedCardModal({ currentLanguage }: ReceivedCardModal
     from: string;
     msg: string;
     image: string | null;
+    imageScale: number;
+    imagePos: { x: number; y: number };
     cardObj: any;
   } | null>(null);
 
@@ -24,7 +26,6 @@ export default function ReceivedCardModal({ currentLanguage }: ReceivedCardModal
     const cardKey = searchParams.get('card');
 
     if (cardKey) {
-      // Probeer de gegevens op te halen uit localStorage
       const savedDataJson = localStorage.getItem(cardKey);
       if (savedDataJson) {
         try {
@@ -36,6 +37,8 @@ export default function ReceivedCardModal({ currentLanguage }: ReceivedCardModal
             from: parsed.from,
             msg: parsed.msg,
             image: parsed.image || null,
+            imageScale: parsed.imageScale || 1,
+            imagePos: parsed.imagePos || { x: 0, y: 0 },
             cardObj: foundCard,
           });
           setIsOpen(true);
@@ -69,7 +72,8 @@ export default function ReceivedCardModal({ currentLanguage }: ReceivedCardModal
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-fadeIn">
-      <div className="bg-gray-900 border border-white/10 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl flex flex-col items-center relative text-white max-h-[90vh] overflow-y-auto">
+      {/* Kaart modal iets ruimer gemaakt (max-w-xl i.p.v. max-w-lg) voor perfecte weergave */}
+      <div className="bg-gray-900 border border-white/10 rounded-3xl p-6 sm:p-10 max-w-xl w-full shadow-2xl flex flex-col items-center relative text-white max-h-[95vh] overflow-y-auto">
         
         {/* Header Badge */}
         <div className="text-center mb-6">
@@ -84,9 +88,9 @@ export default function ReceivedCardModal({ currentLanguage }: ReceivedCardModal
           </p>
         </div>
 
-        {/* De Volledige Grote Kaart Weergave */}
+        {/* De Kaart Weergave */}
         <div 
-          className="w-full p-6 sm:p-8 rounded-2xl text-white shadow-2xl flex flex-col justify-between my-2 relative overflow-hidden min-h-[380px] border border-white/20"
+          className="w-full p-6 sm:p-8 rounded-2xl text-white shadow-2xl flex flex-col justify-between my-2 relative overflow-hidden min-h-[420px] border border-white/20"
           style={getCardStyle(cardData.cardObj)}
         >
           <div className="flex justify-between items-center z-10">
@@ -105,13 +109,17 @@ export default function ReceivedCardModal({ currentLanguage }: ReceivedCardModal
             </h3>
           </div>
 
-          {/* Als er een geüploade foto is gekoppeld, toon deze prachtig */}
+          {/* Exacte foto kader uit de builder inclusief opgeslagen zoom en positie */}
           {cardData.image && (
-            <div className="my-3 rounded-xl overflow-hidden shadow-lg h-40 border border-white/20 z-10 bg-black/50 relative">
+            <div className="my-3 rounded-xl overflow-hidden shadow-lg h-44 border border-white/20 z-10 bg-black/50 relative flex items-center justify-center">
               <img 
                 src={cardData.image} 
                 alt="Personal uploaded" 
-                className="w-full h-full object-cover"
+                className="absolute max-w-none pointer-events-none"
+                style={{
+                  transform: `translate(${cardData.imagePos.x}px, ${cardData.imagePos.y}px) scale(${cardData.imageScale})`,
+                  transformOrigin: 'center center',
+                }}
               />
             </div>
           )}
