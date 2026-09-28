@@ -18,8 +18,10 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   const [senderName, setSenderName] = useState(selectedCard.defaultSender[currentLanguage as 'so' | 'en'] || selectedCard.defaultSender['en']);
   const [message, setMessage] = useState(selectedCard.defaultMessage[currentLanguage as 'so' | 'en'] || selectedCard.defaultMessage['en']);
   
-  // Nieuwe state voor de geuploade foto
+  // States voor foto en aanpassingen (zoom & positie)
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [imageZoom, setImageZoom] = useState<number>(1);
+  const [imagePosY, setImagePosY] = useState<number>(50);
 
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
@@ -41,6 +43,8 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setUploadedImage(reader.result as string);
+        setImageZoom(1); // Reset zoom bij nieuwe foto
+        setImagePosY(50); // Reset positie bij nieuwe foto
       };
       reader.readAsDataURL(file);
     }
@@ -192,7 +196,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
               />
             </div>
 
-            {/* Foto Upload Veld toegevoegd */}
+            {/* Foto Upload Veld */}
             <div>
               <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
                 {currentLanguage === 'so' ? 'KU DAR SAWIR GAAR AH (IKHTIYAARI)' : 'ADD PERSONAL PHOTO (OPTIONAL)'}
@@ -204,6 +208,40 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 className="w-full text-xs text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-rose-50 file:text-rose-700 hover:file:bg-rose-100 cursor-pointer bg-gray-50 border border-gray-200 rounded-xl"
               />
             </div>
+
+            {/* Extra Regelaars om de foto aan te passen (Zoom & Positie) */}
+            {uploadedImage && (
+              <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 flex flex-col gap-3">
+                <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+                  {currentLanguage === 'so' ? 'Hagaaji Sawirka (Zoom & Positie)' : 'Adjust Photo (Zoom & Position)'}
+                </span>
+                
+                <div className="flex items-center gap-3">
+                  <span className="text-[11px] font-semibold text-gray-500 w-16">Zoom:</span>
+                  <input
+                    type="range"
+                    min="1"
+                    max="2.5"
+                    step="0.1"
+                    value={imageZoom}
+                    onChange={(e) => setImageZoom(parseFloat(e.target.value))}
+                    className="w-full accent-rose-600 cursor-pointer"
+                  />
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <span className="text-[11px] font-semibold text-gray-500 w-16">Positie:</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={imagePosY}
+                    onChange={(e) => setImagePosY(parseInt(e.target.value))}
+                    className="w-full accent-rose-600 cursor-pointer"
+                  />
+                </div>
+              </div>
+            )}
 
             <button
               onClick={() => setIsCheckoutOpen(true)}
@@ -240,10 +278,18 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 <span className="text-base animate-bounce">✨</span>
               </div>
 
-              {/* Geüploade foto weergave op de kaart */}
+              {/* Geüploade foto met dynamische zoom en positie */}
               {uploadedImage && (
-                <div className="my-3 rounded-xl overflow-hidden shadow-md max-h-36 border border-white/20 z-10">
-                  <img src={uploadedImage} alt="Preview" className="w-full h-full object-cover" />
+                <div className="my-3 rounded-xl overflow-hidden shadow-md h-36 border border-white/20 z-10 relative bg-black/40">
+                  <img 
+                    src={uploadedImage} 
+                    alt="Preview" 
+                    className="w-full h-full object-cover transition-transform duration-75"
+                    style={{
+                      objectPosition: `center ${imagePosY}%`,
+                      transform: `scale(${imageZoom})`
+                    }}
+                  />
                 </div>
               )}
 
