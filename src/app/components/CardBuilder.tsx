@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { cardOptions, CardOption } from '../data/cardOptions';
 import CheckoutModal from './CheckoutModal';
 
@@ -45,8 +45,8 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setUploadedImage(reader.result as string);
-        setImageScale(1); // Reset zoom
-        setImagePos({ x: 0, y: 0 }); // Reset positie
+        setImageScale(1);
+        setImagePos({ x: 0, y: 0 });
       };
       reader.readAsDataURL(file);
     }
@@ -78,19 +78,45 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
     setIsDragging(false);
   };
 
+  // Universele Deel-functie voor ALLE platformen (WhatsApp, Messenger, Instagram, iMessage, etc.)
   const handleShare = async () => {
+    // Bouw de unieke URL op basis van de hoofdpagina + alle formulierparameters
+    const baseUrl = window.location.origin + window.location.pathname;
+    const shareUrl = `${baseUrl}?cardId=${selectedCard.id}&to=${encodeURIComponent(recipientName)}&from=${encodeURIComponent(senderName)}&msg=${encodeURIComponent(message)}`;
+    
+    const shareTitle = 'HadiyadPay E-Card';
+    const shareText = currentLanguage === 'so'
+      ? `Waa lagusoo diray HadiyadPay gaar ah oo ku socota ${recipientName}! 🎁 Riix halkan si aad u aragto kaarkaaga:`
+      : `You've received a special HadiyadPay e-card for ${recipientName}! 🎁 Click here to view your card:`;
+
+    // 1. Probeer eerst de moderne Web Share API (opent automatisch het native deelmenu van de telefoon: WhatsApp, Messenger, Instagram Direct, iMessage, Mail, etc.)
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'HadiyadPay E-Card',
-          text: `E-card ku socota ${recipientName}: "${message}"`,
-          url: window.location.href,
+          title: shareTitle,
+          text: `${shareText}\n`,
+          url: shareUrl,
         });
+        return;
       } catch (err) {
-        console.log('Error sharing:', err);
+        console.log('Gebruiker heeft het delen geannuleerd of mislukt:', err);
       }
-    } else {
-      alert(currentLanguage === 'so' ? 'Linkiga waa la guuriyey!' : 'Link copied to clipboard!');
+    }
+
+    // 2. Fallback voor browsers/apparaten die navigator.share niet ondersteunen (kopieert direct naar klembord en geeft melding)
+    try {
+      await navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+      alert(
+        currentLanguage === 'so'
+          ? 'Linkiga waxaa la guuriyey klembord-ka! Hadda waxaad ku dhejin kartaa WhatsApp, Messenger ama Instagram.'
+          : 'Link copied to clipboard! You can now paste it into WhatsApp, Messenger, or Instagram.'
+      );
+    } catch (clipboardErr) {
+      // Ultieme fallback als klembord ook faalt
+      prompt(
+        currentLanguage === 'so' ? 'Nuuji linkigan hoose:' : 'Copy this link:',
+        shareUrl
+      );
     }
   };
 
@@ -277,7 +303,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 <span className="text-base animate-bounce">✨</span>
               </div>
 
-              {/* Interactief Foto Kader (Drag & Zoom met muis) */}
+              {/* Interactief Foto Kader */}
               {uploadedImage && (
                 <div 
                   className="my-3 rounded-xl overflow-hidden shadow-md h-36 border border-white/20 z-10 relative bg-black/50 cursor-grab active:cursor-grabbing select-none"
@@ -334,13 +360,13 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             <div className="grid grid-cols-2 gap-3 mt-4">
               <button
                 onClick={handleDownload}
-                className="py-2.5 px-3 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm"
+                className="py-2.5 px-3 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
               >
                 📥 {currentLanguage === 'so' ? 'Soo Degso Kaarka' : 'Download Card'}
               </button>
               <button
                 onClick={handleShare}
-                className="py-2.5 px-3 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm"
+                className="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
               >
                 🔗 {currentLanguage === 'so' ? 'La Wadaag' : 'Share Card'}
               </button>
