@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import CardBuilder from './components/CardBuilder';
+import ReceivedCardModal from './components/ReceivedCardModal';
 
 type Language = 'so' | 'en';
 
@@ -16,6 +17,12 @@ export default function Home() {
 
   return (
     <main className="min-h-screen text-gray-900 selection:bg-emerald-500 selection:text-white pb-16 relative overflow-x-hidden">
+      
+      {/* Ontvanger Kaart Modal (Wordt automatisch getoond als er parameters in de URL staan) */}
+      <Suspense fallback={null}>
+        <ReceivedCardModal currentLanguage={currentLanguage} />
+      </Suspense>
+
       {/* Taalselectie knoppen in de rechterbovenhoek (SO als eerste, dan EN) */}
       <div className="absolute top-6 right-6 z-20">
         <div className="flex bg-black/10 backdrop-blur-md p-1 rounded-xl text-xs font-bold border border-black/10 shadow-sm">
