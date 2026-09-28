@@ -91,8 +91,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   };
 
   const handleShare = async () => {
-    const cardPayloadId = 'card_' + Math.random().toString(36).substring(2, 9);
-    
     const cardDataToSave = {
       cardId: selectedCard.id,
       to: recipientName,
@@ -104,42 +102,40 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
     };
 
     try {
-      localStorage.setItem(cardPayloadId, JSON.stringify(cardDataToSave));
-    } catch (e) {
-      console.error('Opslaan mislukt', e);
-    }
+      // Zet de data om naar JSON en comprimeer/encodeer het zodat het veilig in de URL past
+      const jsonString = JSON.stringify(cardDataToSave);
+      const encodedData = btoa(encodeURIComponent(jsonString));
 
-    const baseUrl = window.location.origin + window.location.pathname;
-    // HIER WORDT DE TAALPARAMETER CORRECCT MEEGESTUURD:
-    const shareUrl = `${baseUrl}?card=${cardPayloadId}&lang=${currentLanguage}`;
-    
-    const shareTitle = langKey === 'so' ? 'HadiyadPay Kaarka Salaanta' : 'HadiyadPay E-Card';
-    const shareText = langKey === 'so'
-      ? `Waa lagusoo diray HadiyadPay kaar gaar ah oo ku socota ${recipientName}! 🎁 Riix halkan si aad u aragto kaarkaaga:`
-      : `You've received a special HadiyadPay e-card for ${recipientName}! 🎁 Click here to view your card:`;
+      const baseUrl = window.location.origin + window.location.pathname;
+      const shareUrl = `${baseUrl}?data=${encodedData}&lang=${currentLanguage}`;
+      
+      const shareTitle = langKey === 'so' ? 'HadiyadPay Kaarka Salaanta' : 'HadiyadPay E-Card';
+      const shareText = langKey === 'so'
+        ? `Waa lagusoo diray HadiyadPay kaar gaar ah oo ku socota ${recipientName}! 🎁 Riix halkan si aad u aragto kaarkaaga:`
+        : `You've received a special HadiyadPay e-card for ${recipientName}! 🎁 Click here to view your card:`;
 
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: shareTitle,
-          text: shareText,
-          url: shareUrl,
-        });
-        return;
-      } catch (err) {
-        console.log('Delen geannuleerd', err);
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: shareTitle,
+            text: shareText,
+            url: shareUrl,
+          });
+          return;
+        } catch (err) {
+          console.log('Delen geannuleerd', err);
+        }
       }
-    }
 
-    try {
       await navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
       alert(
         langKey === 'so'
           ? 'Linkiga waxaa la guuriyey klembord-ka!'
           : 'Link copied to clipboard!'
       );
-    } catch (clipboardErr) {
-      prompt('Kopieer link:', shareUrl);
+    } catch (e) {
+      console.error('Fout bij genereren share link', e);
+      alert('Kon de link niet genereren. Mogelijk is de afbeelding te groot.');
     }
   };
 

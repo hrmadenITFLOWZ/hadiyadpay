@@ -14,26 +14,25 @@ export default function ReceivedCardModal({ currentLanguage: parentLanguage }: R
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const cardId = params.get('card');
+    const dataParam = params.get('data');
     const langParam = params.get('lang');
 
-    // Als er een taal in de URL staat, dwing die dan direct af
+    // Bepaal taal uit URL
     if (langParam === 'so' || langParam === 'en') {
       setLang(langParam);
     } else {
       setLang(parentLanguage);
     }
 
-    if (cardId) {
+    if (dataParam) {
       try {
-        const savedData = localStorage.getItem(cardId);
-        if (savedData) {
-          const parsed = JSON.parse(savedData);
-          setCardData(parsed);
-          setIsOpen(true);
-        }
+        // Decodeer de Base64 URL data naar JSON object
+        const decodedJson = decodeURIComponent(atob(dataParam));
+        const parsed = JSON.parse(decodedJson);
+        setCardData(parsed);
+        setIsOpen(true);
       } catch (e) {
-        console.error('Fout bij ophalen kaart:', e);
+        console.error('Fout bij decoderen van de kaart data:', e);
       }
     }
   }, [parentLanguage]);
