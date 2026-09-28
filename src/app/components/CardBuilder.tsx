@@ -14,7 +14,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
   const [selectedCard, setSelectedCard] = useState<CardOption>(filteredCards[0]);
   
-  // Veilige taalcontrole helper
   const langKey = (currentLanguage === 'so' ? 'so' : 'en') as 'so' | 'en';
 
   const [recipientName, setRecipientName] = useState(
@@ -35,7 +34,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
-  // Update geselecteerde kaart als het deck verandert
   useEffect(() => {
     const newFiltered = cardOptions.filter((c) => c.category === activeDeck);
     if (newFiltered.length > 0) {
@@ -43,7 +41,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
     }
   }, [activeDeck]);
 
-  // Update standaardteksten als de kaart of taal verandert
   useEffect(() => {
     setRecipientName(selectedCard.defaultRecipient[langKey] || selectedCard.defaultRecipient['en']);
     setSenderName(selectedCard.defaultSender[langKey] || selectedCard.defaultSender['en']);
@@ -93,7 +90,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
     setIsDragging(false);
   };
 
-  // Deel-functie met dynamische taalondersteuning (Somalisch of Engels)
   const handleShare = async () => {
     const cardPayloadId = 'card_' + Math.random().toString(36).substring(2, 9);
     
@@ -114,7 +110,8 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
     }
 
     const baseUrl = window.location.origin + window.location.pathname;
-    const shareUrl = `${baseUrl}?card=${cardPayloadId}`;
+    // HIER WORDT DE TAALPARAMETER CORRECCT MEEGESTUURD:
+    const shareUrl = `${baseUrl}?card=${cardPayloadId}&lang=${currentLanguage}`;
     
     const shareTitle = langKey === 'so' ? 'HadiyadPay Kaarka Salaanta' : 'HadiyadPay E-Card';
     const shareText = langKey === 'so'
@@ -147,7 +144,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   };
 
   const handleDownload = () => {
-    // Hier kun je eventueel html2canvas integreren, voor nu een nette melding
     alert(langKey === 'so' ? 'Kaarka waa la keydiyey!' : 'Card saved successfully!');
   };
 
@@ -168,7 +164,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   return (
     <div className="w-full max-w-7xl mx-auto p-4 flex flex-col gap-4">
       
-      {/* Deck Switcher Knoppen */}
       <div className="bg-white/85 backdrop-blur-md p-2 rounded-2xl shadow-md border border-gray-100 flex gap-2 max-w-md mx-auto w-full">
         <button
           onClick={() => setActiveDeck('dhaqan')}
@@ -192,10 +187,8 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
         </button>
       </div>
 
-      {/* Hoofdgrid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full">
         
-        {/* Linkerkolom */}
         <div className="lg:col-span-7 bg-white/90 backdrop-blur-md p-6 rounded-3xl shadow-2xl border border-gray-100 flex flex-col gap-6">
           <div>
             <h2 className="text-2xl font-black text-gray-900 mb-1">
@@ -307,7 +300,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
           </div>
         </div>
 
-        {/* Rechterkolom */}
         <div className="lg:col-span-5 flex flex-col items-center justify-center">
           <div className="w-full max-w-md bg-white p-6 rounded-3xl shadow-2xl border border-gray-100 flex flex-col justify-between min-h-[500px] relative overflow-hidden">
             
