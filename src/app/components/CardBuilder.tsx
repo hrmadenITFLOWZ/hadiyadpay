@@ -52,14 +52,12 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
     }
   };
 
-  // Muiswiel zoom functionaliteit
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     const zoomFactor = e.deltaY < 0 ? 0.1 : -0.1;
     setImageScale((prev) => Math.min(Math.max(0.5, prev + zoomFactor), 3));
   };
 
-  // Drag & drop handlers voor het verplaatsen van de afbeelding
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsDragging(true);
@@ -78,45 +76,55 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
     setIsDragging(false);
   };
 
-  // Universele Deel-functie voor ALLE platformen (WhatsApp, Messenger, Instagram, iMessage, etc.)
+  // Professionele korte link generatie met opslag van foto en details
   const handleShare = async () => {
-    // Bouw de unieke URL op basis van de hoofdpagina + alle formulierparameters
+    const cardPayloadId = 'card_' + Math.random().toString(36).substring(2, 9);
+    
+    const cardDataToSave = {
+      cardId: selectedCard.id,
+      to: recipientName,
+      from: senderName,
+      msg: message,
+      image: uploadedImage,
+    };
+
+    // Sla tijdelijk op in localStorage zodat de link kort blijft
+    try {
+      localStorage.setItem(cardPayloadId, JSON.stringify(cardDataToSave));
+    } catch (e) {
+      console.error('Opslaan mislukt', e);
+    }
+
     const baseUrl = window.location.origin + window.location.pathname;
-    const shareUrl = `${baseUrl}?cardId=${selectedCard.id}&to=${encodeURIComponent(recipientName)}&from=${encodeURIComponent(senderName)}&msg=${encodeURIComponent(message)}`;
+    const shareUrl = `${baseUrl}?card=${cardPayloadId}`;
     
     const shareTitle = 'HadiyadPay E-Card';
     const shareText = currentLanguage === 'so'
       ? `Waa lagusoo diray HadiyadPay gaar ah oo ku socota ${recipientName}! 🎁 Riix halkan si aad u aragto kaarkaaga:`
       : `You've received a special HadiyadPay e-card for ${recipientName}! 🎁 Click here to view your card:`;
 
-    // 1. Probeer eerst de moderne Web Share API (opent automatisch het native deelmenu van de telefoon: WhatsApp, Messenger, Instagram Direct, iMessage, Mail, etc.)
     if (navigator.share) {
       try {
         await navigator.share({
           title: shareTitle,
-          text: `${shareText}\n`,
+          text: shareText,
           url: shareUrl,
         });
         return;
       } catch (err) {
-        console.log('Gebruiker heeft het delen geannuleerd of mislukt:', err);
+        console.log('Delen geannuleerd', err);
       }
     }
 
-    // 2. Fallback voor browsers/apparaten die navigator.share niet ondersteunen (kopieert direct naar klembord en geeft melding)
     try {
       await navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
       alert(
         currentLanguage === 'so'
-          ? 'Linkiga waxaa la guuriyey klembord-ka! Hadda waxaad ku dhejin kartaa WhatsApp, Messenger ama Instagram.'
-          : 'Link copied to clipboard! You can now paste it into WhatsApp, Messenger, or Instagram.'
+          ? 'Linkiga nadiifka ah waxaa la guuriyey klembord-ka! Hadda waa mid gaaban oo xirfad leh.'
+          : 'Clean, short link copied to clipboard! Ready to share.'
       );
     } catch (clipboardErr) {
-      // Ultieme fallback als klembord ook faalt
-      prompt(
-        currentLanguage === 'so' ? 'Nuuji linkigan hoose:' : 'Copy this link:',
-        shareUrl
-      );
+      prompt('Kopieer link:', shareUrl);
     }
   };
 

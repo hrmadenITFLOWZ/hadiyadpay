@@ -16,33 +16,38 @@ export default function ReceivedCardModal({ currentLanguage }: ReceivedCardModal
     to: string;
     from: string;
     msg: string;
+    image: string | null;
     cardObj: any;
   } | null>(null);
 
   useEffect(() => {
-    // Haal parameters direct op
-    const cardId = searchParams.get('cardId');
-    const to = searchParams.get('to');
-    const from = searchParams.get('from');
-    const msg = searchParams.get('msg');
+    const cardKey = searchParams.get('card');
 
-    console.log('URL Params gevonden:', { cardId, to, from, msg }); // Handig voor debugging in F12 console
-
-    if (cardId && to && from && msg) {
-      const foundCard = cardOptions.find((c) => c.id === cardId) || cardOptions[0];
-      setCardData({
-        to: decodeURIComponent(to),
-        from: decodeURIComponent(from),
-        msg: decodeURIComponent(msg),
-        cardObj: foundCard,
-      });
-      setIsOpen(true);
+    if (cardKey) {
+      // Probeer de gegevens op te halen uit localStorage
+      const savedDataJson = localStorage.getItem(cardKey);
+      if (savedDataJson) {
+        try {
+          const parsed = JSON.parse(savedDataJson);
+          const foundCard = cardOptions.find((c) => c.id === parsed.cardId) || cardOptions[0];
+          
+          setCardData({
+            to: parsed.to,
+            from: parsed.from,
+            msg: parsed.msg,
+            image: parsed.image || null,
+            cardObj: foundCard,
+          });
+          setIsOpen(true);
+        } catch (e) {
+          console.error('Fout bij parsen van opgeslagen kaartdata', e);
+        }
+      }
     }
   }, [searchParams]);
 
   const handleExploreWebsite = () => {
     setIsOpen(false);
-    // Verwijder de URL parameters netjes
     router.replace('/');
   };
 
@@ -64,7 +69,7 @@ export default function ReceivedCardModal({ currentLanguage }: ReceivedCardModal
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-fadeIn">
-      <div className="bg-gray-900 border border-white/10 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl flex flex-col items-center relative text-white">
+      <div className="bg-gray-900 border border-white/10 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl flex flex-col items-center relative text-white max-h-[90vh] overflow-y-auto">
         
         {/* Header Badge */}
         <div className="text-center mb-6">
@@ -81,7 +86,7 @@ export default function ReceivedCardModal({ currentLanguage }: ReceivedCardModal
 
         {/* De Volledige Grote Kaart Weergave */}
         <div 
-          className="w-full p-6 sm:p-8 rounded-2xl text-white shadow-2xl flex flex-col justify-between my-2 relative overflow-hidden min-h-[340px] border border-white/20"
+          className="w-full p-6 sm:p-8 rounded-2xl text-white shadow-2xl flex flex-col justify-between my-2 relative overflow-hidden min-h-[380px] border border-white/20"
           style={getCardStyle(cardData.cardObj)}
         >
           <div className="flex justify-between items-center z-10">
@@ -91,7 +96,7 @@ export default function ReceivedCardModal({ currentLanguage }: ReceivedCardModal
             <span className="text-lg animate-bounce">✨</span>
           </div>
 
-          <div className="my-6 z-10">
+          <div className="my-4 z-10">
             <p className="text-[10px] uppercase tracking-wider text-white/70 mb-1 font-semibold">
               {currentLanguage === 'so' ? 'MAGACA QAATAHA:' : 'TO:'}
             </p>
@@ -99,6 +104,17 @@ export default function ReceivedCardModal({ currentLanguage }: ReceivedCardModal
               {cardData.to}
             </h3>
           </div>
+
+          {/* Als er een geüploade foto is gekoppeld, toon deze prachtig */}
+          {cardData.image && (
+            <div className="my-3 rounded-xl overflow-hidden shadow-lg h-40 border border-white/20 z-10 bg-black/50 relative">
+              <img 
+                src={cardData.image} 
+                alt="Personal uploaded" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
 
           <div className="bg-black/40 backdrop-blur-md p-5 rounded-xl border border-white/20 my-2 shadow-inner z-10">
             <p className="text-sm sm:text-base italic font-light leading-relaxed">
