@@ -20,17 +20,20 @@ export default function ReceivedCardModal({ currentLanguage }: ReceivedCardModal
   } | null>(null);
 
   useEffect(() => {
+    // Haal parameters direct op
     const cardId = searchParams.get('cardId');
     const to = searchParams.get('to');
     const from = searchParams.get('from');
     const msg = searchParams.get('msg');
 
+    console.log('URL Params gevonden:', { cardId, to, from, msg }); // Handig voor debugging in F12 console
+
     if (cardId && to && from && msg) {
       const foundCard = cardOptions.find((c) => c.id === cardId) || cardOptions[0];
       setCardData({
-        to,
-        from,
-        msg,
+        to: decodeURIComponent(to),
+        from: decodeURIComponent(from),
+        msg: decodeURIComponent(msg),
         cardObj: foundCard,
       });
       setIsOpen(true);
@@ -39,6 +42,7 @@ export default function ReceivedCardModal({ currentLanguage }: ReceivedCardModal
 
   const handleExploreWebsite = () => {
     setIsOpen(false);
+    // Verwijder de URL parameters netjes
     router.replace('/');
   };
 
@@ -119,7 +123,7 @@ export default function ReceivedCardModal({ currentLanguage }: ReceivedCardModal
         <div className="mt-6 w-full flex flex-col gap-3">
           <button
             onClick={handleExploreWebsite}
-            className="w-full py-4 bg-gradient-to-r from-rose-600 to-orange-600 hover:brightness-110 text-white font-bold text-sm rounded-2xl shadow-xl transition flex items-center justify-center gap-2 border border-white/20"
+            className="w-full py-4 bg-gradient-to-r from-rose-600 to-orange-600 hover:brightness-110 text-white font-bold text-sm rounded-2xl shadow-xl transition flex items-center justify-center gap-2 border border-white/20 cursor-pointer"
           >
             🚀 {currentLanguage === 'so' ? 'Ka Fiiri Bogga Weyn ee HadiyadPay' : 'Explore HadiyadPay & Send Your Own'}
           </button>
