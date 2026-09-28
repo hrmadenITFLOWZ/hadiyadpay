@@ -91,27 +91,26 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   };
 
   const handleShare = async () => {
-    const uniqueCardId = 'card_' + Math.random().toString(36).substring(2, 9);
-    
+    // We coderen de data in de URL zodat ELKE ontvanger op elk apparaat de kaart direct ziet!
     const cardPayload = {
-      cardId: selectedCard.id,
+      card: selectedCard.id,
       to: recipientName,
       from: senderName,
       msg: message,
-      image: uploadedImage,
-      imageScale: imageScale,
-      imagePos: imagePos,
     };
 
-    // Sla op in localStorage zodat de app het kan inladen
-    localStorage.setItem(uniqueCardId, JSON.stringify(cardPayload));
-
-    // Super korte link met alleen de ID en de stijl!
+    const encodedData = encodeURIComponent(JSON.stringify(cardPayload));
     const baseUrl = window.location.origin + window.location.pathname;
-    const shareUrl = `${baseUrl}?card=${uniqueCardId}&style=${selectedCard.id}`;
+    const shareUrl = `${baseUrl}?data=${encodedData}&lang=${currentLanguage}`;
     
-    const shareTitle = 'HadiyadPay Kaarka Salaanta';
-    const shareText = `Waa lagusoo diray HadiyadPay kaar gaar ah oo ku socota ${recipientName}! 🎁 Riix halkan si aad u aragto kaarkaaga:`;
+    // Dynamische titel en tekst op basis van gekozen taal (Somalisch of Engels)
+    const shareTitle = currentLanguage === 'so' 
+      ? 'HadiyadPay Kaarka Salaanta' 
+      : 'HadiyadPay Greeting Card';
+      
+    const shareText = currentLanguage === 'so'
+      ? `Waa lagusoo diray HadiyadPay kaar gaar ah oo ku socota ${recipientName}! 🎁 Riix halkan si aad u aragto kaarkaaga:`
+      : `A special HadiyadPay card has been sent to ${recipientName}! 🎁 Click here to view your card:`;
 
     if (navigator.share) {
       try {
@@ -128,14 +127,14 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
     try {
       await navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
-      alert('Linkiga waxaa la guuriyey klembord-ka! 📋');
+      alert(currentLanguage === 'so' ? 'Linkiga waxaa la guuriyey klembord-ka! 📋' : 'Link copied to clipboard! 📋');
     } catch (e) {
       console.error('Fout bij kopiëren', e);
     }
   };
 
   const handleDownload = () => {
-    alert('Kaarka waa la keydiyey! 📥');
+    alert(currentLanguage === 'so' ? 'Kaarka waa la keydiyey! 📥' : 'Card downloaded! 📥');
   };
 
   const getCardStyle = (card: CardOption) => {
@@ -183,16 +182,18 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
         <div className="lg:col-span-7 bg-white/90 backdrop-blur-md p-6 rounded-3xl shadow-2xl border border-gray-100 flex flex-col gap-6">
           <div>
             <h2 className="text-2xl font-black text-gray-900 mb-1">
-              Naqshadee Hadiyadadaada ✨
+              {currentLanguage === 'so' ? 'Naqshadee Hadiyadadaada ✨' : 'Design Your Gift ✨'}
             </h2>
             <p className="text-sm text-gray-600">
-              Xulo qaabka kaarka, ku dar fariin qiiro leh oo u dir si degdeg ah.
+              {currentLanguage === 'so' 
+                ? 'Xulo qaabka kaarka, ku dar fariin qiiro leh oo u dir si degdeg ah.' 
+                : 'Select your card style, add a heartfelt message, and send instantly.'}
             </p>
           </div>
 
           <div>
             <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">
-              XULO KAARKA WANAAGSAN
+              {currentLanguage === 'so' ? 'XULO KAARKA WANAAGSAN' : 'SELECT CARD STYLE'}
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-h-[340px] overflow-y-auto pr-1">
               {filteredCards.map((card) => {
@@ -208,10 +209,10 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                     style={getCardStyle(card)}
                   >
                     <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-black/30 backdrop-blur-md text-white self-start shadow z-10">
-                      {card.badge['so'] || card.badge['en']}
+                      {card.badge[langKey] || card.badge['en']}
                     </span>
                     <span className="text-xs font-bold text-white line-clamp-2 drop-shadow-md z-10">
-                      {card.title['so'] || card.title['en']}
+                      {card.title[langKey] || card.title['en']}
                     </span>
                   </button>
                 );
@@ -223,7 +224,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                  MAGACA QAATAHA
+                  {currentLanguage === 'so' ? 'MAGACA QAATAHA' : 'RECIPIENT NAME'}
                 </label>
                 <input
                   type="text"
@@ -234,7 +235,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                  MAGACA DIRAHA
+                  {currentLanguage === 'so' ? 'MAGACA DIRAHA' : 'SENDER NAME'}
                 </label>
                 <input
                   type="text"
@@ -247,7 +248,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
             <div>
               <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                FARRIINTA GAARKA AH
+                {currentLanguage === 'so' ? 'FARRIINTA GAARKA AH' : 'PERSONAL MESSAGE'}
               </label>
               <textarea
                 rows={3}
@@ -260,14 +261,14 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             <div>
               <div className="flex justify-between items-center mb-1">
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
-                  KU DAR SAWIR GAAR AH (IKHTIYAARI)
+                  {currentLanguage === 'so' ? 'KU DAR SAWIR GAAR AH (IKHTIYAARI)' : 'ADD CUSTOM PHOTO (OPTIONAL)'}
                 </label>
                 {uploadedImage && (
                   <button 
                     onClick={handleRemoveImage}
                     className="text-xs text-rose-600 hover:text-rose-800 font-semibold cursor-pointer"
                   >
-                    Tirtir sawirka
+                    {currentLanguage === 'so' ? 'Tirtir sawirka' : 'Remove image'}
                   </button>
                 )}
               </div>
@@ -284,7 +285,9 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
               className="w-full py-4 px-4 font-bold rounded-2xl shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-base text-white hover:brightness-110 border border-white/20 cursor-pointer"
               style={getCardStyle(selectedCard)}
             >
-              <span className="z-10">🚀 Dir Hadiyad iyo Xawilaad Degdeg ah</span>
+              <span className="z-10">
+                {currentLanguage === 'so' ? '🚀 Dir Hadiyad iyo Xawilaad Degdeg ah' : '🚀 Send Gift & Instant Transfer'}
+              </span>
             </button>
           </div>
         </div>
@@ -307,7 +310,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             >
               <div className="flex justify-between items-center z-10">
                 <span className="text-[10px] tracking-widest uppercase bg-black/30 px-3 py-1 rounded-md backdrop-blur-md font-bold border border-white/20">
-                  HADIYADPAY • {selectedCard.badge['so'] || selectedCard.badge['en']}
+                  HADIYADPAY • {selectedCard.badge[langKey] || selectedCard.badge['en']}
                 </span>
                 <span className="text-base animate-bounce">✨</span>
               </div>
@@ -331,14 +334,14 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                     }}
                   />
                   <div className="absolute bottom-1 right-1 bg-black/60 text-[9px] px-1.5 py-0.5 rounded text-white/80 pointer-events-none backdrop-blur-sm z-20">
-                    🔍 Jiid & Weynee
+                    🔍 {currentLanguage === 'so' ? 'Jiid & Weynee' : 'Drag & Zoom'}
                   </div>
                 </div>
               )}
 
               <div className="my-4 z-10">
                 <p className="text-[10px] uppercase tracking-wider opacity-90 mb-1 font-semibold">
-                  MAGACA QAATAHA:
+                  {currentLanguage === 'so' ? 'MAGACA QAATAHA:' : 'RECIPIENT:'}
                 </p>
                 <h3 className="text-xl font-black tracking-wide drop-shadow-md">
                   {recipientName}
@@ -354,7 +357,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
               <div className="mt-6 flex justify-between items-end border-t border-white/20 pt-3 z-10">
                 <div>
                   <p className="text-[10px] uppercase tracking-wider opacity-90 font-semibold">
-                    MAGACA DIRAHA:
+                    {currentLanguage === 'so' ? 'MAGACA DIRAHA:' : 'SENDER:'}
                   </p>
                   <p className="text-xs font-bold">
                     {senderName}
@@ -369,13 +372,13 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 onClick={handleDownload}
                 className="py-2.5 px-3 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
               >
-                📥 Soo Degso Kaarka
+                📥 {currentLanguage === 'so' ? 'Soo Degso Kaarka' : 'Download Card'}
               </button>
               <button
                 onClick={handleShare}
                 className="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-600/30 cursor-pointer"
               >
-                🔗 La Wadaag
+                🔗 {currentLanguage === 'so' ? 'La Wadaag' : 'Share Card'}
               </button>
             </div>
 
