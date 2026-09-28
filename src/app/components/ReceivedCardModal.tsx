@@ -10,32 +10,43 @@ interface ReceivedCardModalProps {
 export default function ReceivedCardModal({ currentLanguage: parentLanguage }: ReceivedCardModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [cardData, setCardData] = useState<any>(null);
-  const [cardLanguage, setCardLanguage] = useState<string>('so');
+  const [cardLang, setCardLang] = useState<string>(parentLanguage);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const dataParam = params.get('data');
     const langParam = params.get('lang');
 
-    if (langParam) {
-      setCardLanguage(langParam);
+    if (langParam === 'so' || langParam === 'en') {
+      setCardLang(langParam);
+    } else {
+      setCardLang(parentLanguage);
     }
 
     if (dataParam) {
       try {
-        const parsed = JSON.parse(decodeURIComponent(dataParam));
-        setCardData(parsed);
+        // Decodeer de Base64 URL data naar JSON object
+        const jsonStr = decodeURIComponent(atob(dataParam));
+        const parsed = JSON.parse(jsonStr);
+        
+        // Mapped korte sleutels terug naar normale data
+        setCardData({
+          cardId: parsed.c,
+          to: parsed.t,
+          from: parsed.f,
+          msg: parsed.m,
+        });
         setIsOpen(true);
       } catch (e) {
-        console.error('Fout bij decoderen kaartdata', e);
+        console.error('Fout bij decoderen van de kaart data:', e);
       }
     }
-  }, []);
+  }, [parentLanguage]);
 
   if (!isOpen || !cardData) return null;
 
-  const selectedCardOption = cardOptions.find((c) => c.id === cardData.card) || cardOptions[0];
-  const langKey = (cardLanguage === 'so' ? 'so' : 'en') as 'so' | 'en';
+  const selectedCardOption = cardOptions.find((c) => c.id === cardData.cardId) || cardOptions[0];
+  const langKey = (cardLang === 'so' ? 'so' : 'en') as 'so' | 'en';
 
   const getCardStyle = () => {
     if (selectedCardOption.bgImage) {
@@ -69,15 +80,15 @@ export default function ReceivedCardModal({ currentLanguage: parentLanguage }: R
 
         <div className="text-center mb-6 mt-2">
           <span className="text-[10px] uppercase font-bold tracking-widest bg-rose-500/20 text-rose-400 border border-rose-500/30 px-3 py-1 rounded-full">
-            {cardLanguage === 'so' ? '🎁 HADIYADPAY FARIIN GAAR AH' : '🎁 HADIYADPAY SPECIAL MESSAGE'}
+            {cardLang === 'so' ? '🎁 HADIYADPAY FARIIN GAAR AH' : '🎁 HADIYADPAY SPECIAL DELIVERY'}
           </span>
           <h2 className="text-2xl font-black text-white mt-3">
-            {cardLanguage === 'so' ? 'Waa lagusoo diray Kaar Gaar ah!' : 'A Special Card Was Sent To You!'}
+            {cardLang === 'so' ? 'Waa lagusoo diray Kaar Gaar ah!' : "You've Received a Special Card!"}
           </h2>
           <p className="text-xs text-gray-400 mt-1">
-            {cardLanguage === 'so' 
+            {cardLang === 'so' 
               ? 'Kaar salaan iyo layaab leh ayaa lagusoo hagaajiyay.' 
-              : 'A thoughtful greeting card has been delivered for you.'}
+              : 'A thoughtful greeting card and surprise have been sent to you.'}
           </p>
         </div>
 
@@ -94,7 +105,7 @@ export default function ReceivedCardModal({ currentLanguage: parentLanguage }: R
 
           <div className="my-3 z-10">
             <p className="text-[10px] uppercase tracking-wider opacity-90 mb-1 font-semibold">
-              {cardLanguage === 'so' ? 'MAGACA QAATAHA:' : 'RECIPIENT:'}
+              {cardLang === 'so' ? 'MAGACA QAATAHA:' : 'TO:'}
             </p>
             <h3 className="text-xl font-black tracking-wide drop-shadow-md">
               {cardData.to}
@@ -110,7 +121,7 @@ export default function ReceivedCardModal({ currentLanguage: parentLanguage }: R
           <div className="mt-4 flex justify-between items-end border-t border-white/20 pt-3 z-10">
             <div>
               <p className="text-[10px] uppercase tracking-wider opacity-90 font-semibold">
-                {cardLanguage === 'so' ? 'MAGACA DIRAHA:' : 'SENDER:'}
+                {cardLang === 'so' ? 'MAGACA DIRAHA:' : 'FROM:'}
               </p>
               <p className="text-xs font-bold">
                 {cardData.from}
@@ -124,7 +135,7 @@ export default function ReceivedCardModal({ currentLanguage: parentLanguage }: R
           onClick={handleClose}
           className="w-full mt-5 py-3.5 px-4 font-bold rounded-2xl shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm text-white bg-gradient-to-r from-rose-600 to-orange-600 hover:brightness-110 cursor-pointer"
         >
-          <span>{cardLanguage === 'so' ? '🚀 Abuur Kaarkaaga Xiga / Adeegso HadiyadPay' : '🚀 Create Your Own Card / Use HadiyadPay'}</span>
+          <span>🚀 {cardLang === 'so' ? 'Abuur Kaarkaaga Xiga / Adeegso HadiyadPay' : 'Explore HadiyadPay & Send Your Own'}</span>
         </button>
 
       </div>
