@@ -7,11 +7,11 @@ import ReceivedCardModal from './components/ReceivedCardModal';
 type Language = 'so' | 'en';
 
 export default function Home() {
-  const [currentLanguage, setCurrentLanguage] = useState<Language>('so');
+  const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
 
   const subtitles = {
-    so: 'Dir salaamo dhijitaal ah oo shaqsi ah oo ay ku lammaan yihiin xawilaado lacagideed oo toos ah kuwa aad jeceshahay.',
-    en: 'Send personal digital greetings combined with direct financial transfers to loved ones.',
+    so: 'Abuur oo u dir salaamo dijitaal ah oo shaqsi ah oo loogu talagalay kuwa aad jeceshahay.',
+    en: 'Create and send thoughtful, customized digital greeting cards to your loved ones.',
   };
 
   return (
@@ -48,12 +48,19 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Gecentreerde Header bovenaan */}
+      {/* Gecentreerde Header bovenaan met Logo */}
       <header className="max-w-4xl mx-auto px-4 pt-10 pb-6 text-center">
-        <h1 className="text-2xl font-black tracking-wider text-gray-900 inline-block">
-          HadiyadPay
-        </h1>
-        <p className="text-xs text-gray-600 font-medium max-w-sm mx-auto mt-1">
+        <div className="flex items-center justify-center gap-3">
+          <img 
+            src="/images/og-cover.png" 
+            alt="HadiyadPay Logo" 
+            className="w-12 h-12 rounded-full object-cover shadow-md border border-gray-300"
+          />
+          <h1 className="text-2xl font-black tracking-wider text-gray-900">
+            HadiyadPay
+          </h1>
+        </div>
+        <p className="text-xs text-gray-600 font-medium max-w-sm mx-auto mt-2">
           {subtitles[currentLanguage]}
         </p>
       </header>
