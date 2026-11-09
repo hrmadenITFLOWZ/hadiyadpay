@@ -106,10 +106,10 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
       const baseUrl = window.location.origin + window.location.pathname;
       const shareUrl = `${baseUrl}?data=${encoded}&lang=${currentLanguage}`;
       
-      const shareTitle = currentLanguage === 'so' ? 'HadiyadPay Kaarka Dhaqanka' : 'HadiyadPay E-Card';
+      const shareTitle = currentLanguage === 'so' ? 'HadiyadPay Kaarka Dhaqanka' : 'HadiyadPay Ceramic E-Card';
       const shareText = currentLanguage === 'so'
-        ? `Waa lagusoo diray HadiyadPay kaar gaar ah oo ku socota ${recipientName}! 🌸✨ Riix halkan:`
-        : `You've received a special HadiyadPay e-card for ${recipientName}! 🌸✨ Click here:`;
+        ? `Waa lagusoo diray HadiyadPay kaar gaar ah oo ku socota ${recipientName}! 🏺✨ Riix halkan:`
+        : `You've received a special HadiyadPay ceramic e-card for ${recipientName}! 🏺✨ Click here:`;
 
       if (navigator.share) {
         try {
@@ -136,44 +136,48 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
     alert(currentLanguage === 'so' ? 'Kaarka waa la keydiyey! 📥' : 'Card saved successfully! 📥');
   };
 
+  // Vrolijke, zachte Ceramic Cartoon Somali achtergronden en sferen per kaart
   const getCardStyle = (card: CardOption) => {
     if (card.bgImage) {
       return {
-        backgroundImage: `linear-gradient(to bottom, rgba(40,30,20,0.2), rgba(20,15,10,0.85)), url(${card.bgImage})`,
-        backgroundColor: '#26221e',
+        backgroundImage: `linear-gradient(to bottom, rgba(50,35,25,0.25), rgba(25,18,12,0.88)), url(${card.bgImage})`,
+        backgroundColor: '#2e241d',
         backgroundSize: 'cover',
         backgroundPosition: 'center'
       };
     }
-    const gradients: Record<string, string> = {
-      'dhalasho': 'linear-gradient(135deg, #f43f5e 0%, #fb7185 50%, #fda4af 100%)',
-      'aroos': 'linear-gradient(135deg, #d97706 0%, #b45309 50%, #78350f 100%)',
-      'eid': 'linear-gradient(135deg, #059669 0%, #10b981 50%, #047857 100%)',
-      'guul': 'linear-gradient(135deg, #7c3aed 0%, #8b5cf6 50%, #6d28d9 100%)',
-      'jacayl': 'linear-gradient(135deg, #e11d48 0%, #f43f5e 50%, #be123c 100%)',
-      'mahadsanid': 'linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #b45309 100%)',
+    
+    // Warme keramische aardetinten en terracotta cartoon gradients
+    const ceramicGradients: Record<string, string> = {
+      'dhalasho': 'linear-gradient(135deg, #e11d48 0%, #fb7185 50%, #fda4af 100%)', // Vrolijke terracotta roze
+      'aroos': 'linear-gradient(135deg, #b45309 0%, #d97706 50%, #fef3c7 100%)', // Keramisch goud & klei
+      'eid': 'linear-gradient(135deg, #065f46 0%, #059669 50%, #a7f3d0 100%)', // Zacht smaragdgroen
+      'guul': 'linear-gradient(135deg, #5b21b6 0%, #7c3aed 50%, #ddd6fe 100%)', // Prachtig keramisch paars
+      'jacayl': 'linear-gradient(135deg, #9f1239 0%, #e11d48 50%, #fecdd3 100%)', // Romantisch klei-rood
+      'mahadsanid': 'linear-gradient(135deg, #92400e 0%, #b45309 50%, #fde68a 100%)', // Aardetint oker
     };
+
     return {
-      background: card.gradient || gradients[card.id] || 'linear-gradient(135deg, #d97706 0%, #9a3412 100%)'
+      background: card.gradient || ceramicGradients[card.id] || 'linear-gradient(135deg, #b45309 0%, #78350f 100%)'
     };
   };
 
   return (
     <div className="w-full max-w-[1600px] mx-auto px-4 lg:px-10 flex flex-col gap-8">
       
-      {/* Hallmark Categorie Navigatie Balk */}
+      {/* Categorie Navigatie Balk */}
       <div className="w-full bg-white/90 backdrop-blur-xl p-3.5 rounded-2xl border border-stone-200 shadow-sm flex flex-wrap items-center justify-start gap-3">
         {[
-          { id: 'all', label: 'All E-Cards' },
-          { id: 'dhaqan', label: '🌸 Wedding & Heritage' },
-          { id: 'cities', label: '🏜️ Nomadic & Cities' }
+          { id: 'all', label: 'All Ceramic E-Cards' },
+          { id: 'dhaqan', label: '🏺 Wedding & Heritage' },
+          { id: 'cities', label: '🐪 Nomadic & Cities' }
         ].map((cat) => (
           <button
             key={cat.id}
             onClick={() => setActiveCategory(cat.id)}
             className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 cursor-pointer ${
               activeCategory === cat.id
-                ? 'bg-amber-500 text-white shadow-md'
+                ? 'bg-amber-600 text-white shadow-md'
                 : 'bg-white text-stone-600 hover:bg-stone-100 border border-stone-200'
             }`}
           >
@@ -182,27 +186,26 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
         ))}
       </div>
 
-      {/* Hallmark Hoofdlayout: Links een ruim 3-koloms telefoon mockups raster, Rechts de Preview & Formulier */}
+      {/* Hoofdlayout: Links het raster met Ceramic Cartoon kaarten, Rechts de Preview & Formulier */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start w-full">
         
-        {/* Linkerzijde: Grote Telefoon Mockups Galerij (Vult de hele linkerhelft natúúrlijk) */}
+        {/* Linkerzijde: 3-Koloms Raster met Ceramic Cartoon Kaarten */}
         <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-6">
           <div className="bg-white/90 backdrop-blur-xl p-5 rounded-3xl border border-stone-200 shadow-sm flex items-center justify-between text-xs text-stone-600 font-bold">
-            <span>Showing <strong className="text-stone-900 font-black text-sm">{filteredCards.length}</strong> E-Cards</span>
-            <span className="text-amber-600 uppercase tracking-wider">Hallmark Interactive Grid</span>
+            <span>Showing <strong className="text-stone-900 font-black text-sm">{filteredCards.length}</strong> Ceramic Somali E-Cards</span>
+            <span className="text-amber-700 uppercase tracking-wider">Artisan Cartoon Collection</span>
           </div>
 
           <div className="bg-white/95 backdrop-blur-2xl p-6 sm:p-10 rounded-3xl border border-stone-200 shadow-xl">
             <div className="mb-8">
               <h2 className="text-2xl font-black text-stone-900 tracking-tight">
-                {currentLanguage === 'so' ? 'Dooro Kaarka (Select E-Card)' : 'Featured E-Cards Collection'}
+                {currentLanguage === 'so' ? 'Dooro Kaarka (Select Ceramic Card)' : 'Somali Ceramic Cartoon Collection'}
               </h2>
               <p className="text-xs text-stone-500 mt-1">
-                Click any phone mockup to instantly select and customize your greeting card.
+                Click any phone mockup below to preview and customize your cultural ceramic greeting card.
               </p>
             </div>
 
-            {/* Groot, natuurlijk 3-koloms raster met grotere telefoon-mockups */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
               {filteredCards.map((card) => {
                 const isSelected = selectedOccasion.id === card.id;
@@ -215,9 +218,8 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                       isSelected ? 'scale-105' : 'hover:scale-105'
                     }`}
                   >
-                    {/* Grotere, realistische telefoon mockup */}
-                    <div className={`w-48 h-84 rounded-[3rem] p-3 bg-stone-950 border-4 transition-all duration-300 shadow-xl relative flex flex-col justify-between ${
-                      isSelected ? 'border-amber-500 ring-4 ring-amber-500/25 shadow-amber-500/30' : 'border-stone-800 hover:border-amber-400'
+                    <div className={`w-48 h-84 rounded-[3rem] p-3 bg-stone-950 border-4 transition-all duration-300 shadow-lg relative flex flex-col justify-between ${
+                      isSelected ? 'border-amber-600 ring-4 ring-amber-500/25 shadow-amber-600/30' : 'border-stone-800 hover:border-amber-500'
                     }`}>
                       <div className="absolute top-3 left-1/2 -translate-x-1/2 w-16 h-4 bg-black rounded-full z-20 flex items-center justify-center">
                         <div className="w-4 h-1 bg-stone-800 rounded-full"></div>
@@ -232,7 +234,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                             {card.badge[langKey] || card.badge['en']}
                           </span>
                           <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[10px]">
-                            ▶
+                            🏺
                           </span>
                         </div>
 
@@ -244,12 +246,12 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                         </div>
 
                         <div className="text-[9px] text-center text-stone-200 z-10 border-t border-white/15 pt-1.5 font-semibold">
-                          {isSelected ? '✓ Selected' : 'Choose option'}
+                          {isSelected ? '✓ Selected' : 'Tap to customize'}
                         </div>
                       </div>
                     </div>
 
-                    <span className={`text-sm font-bold mt-3 text-center line-clamp-1 ${isSelected ? 'text-amber-600 font-black' : 'text-stone-800'}`}>
+                    <span className={`text-sm font-bold mt-3 text-center line-clamp-1 ${isSelected ? 'text-amber-700 font-black' : 'text-stone-800'}`}>
                       {card.title[langKey] || card.title['en']}
                     </span>
                   </div>
@@ -259,16 +261,15 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
           </div>
         </div>
 
-        {/* Rechterzijde: Live Studio Preview & Formulier (Plakt sticky mee net als Hallmark) */}
+        {/* Rechterzijde: Live Studio Preview & Formulier */}
         <div className="lg:col-span-5 xl:col-span-4 sticky top-6 flex flex-col gap-6">
           
-          {/* Live Studio Preview Kaart */}
           <div className="bg-white p-6 sm:p-8 rounded-3xl border border-stone-200 shadow-xl flex flex-col gap-4">
             <div className="flex justify-between items-center">
               <span className="text-xs font-black text-stone-800 tracking-wider uppercase">
-                ✨ Live Studio Preview
+                🏺 Live Studio Preview
               </span>
-              <span className="text-[10px] bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-bold">
+              <span className="text-[10px] bg-amber-100 text-amber-900 px-3 py-1 rounded-full font-bold">
                 {selectedOccasion.badge[langKey] || selectedOccasion.badge['en']}
               </span>
             </div>
@@ -281,7 +282,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 <span className="text-[10px] tracking-widest uppercase bg-black/60 px-3 py-1 rounded-lg font-black text-amber-300">
                   HADIYADPAY
                 </span>
-                <span className="text-lg">🌸✨</span>
+                <span className="text-lg">🏺🐪</span>
               </div>
 
               {uploadedImage && (
@@ -339,7 +340,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             </div>
           </div>
 
-          {/* Personaliseren Formulier */}
           <div className="bg-white p-6 sm:p-8 rounded-3xl border border-stone-200 shadow-xl flex flex-col gap-4">
             <h3 className="text-base font-black text-stone-900 tracking-tight">
               {currentLanguage === 'so' ? '✍️ Geli Fariintaada' : 'Personalize Your Card'}
@@ -393,7 +393,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
             <button
               onClick={() => setIsCheckoutOpen(true)}
-              className="w-full py-4 px-4 font-black rounded-2xl shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm text-white bg-amber-500 hover:bg-amber-600 shadow-amber-500/25 cursor-pointer uppercase tracking-wider"
+              className="w-full py-4 px-4 font-black rounded-2xl shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm text-white bg-amber-600 hover:bg-amber-700 shadow-amber-600/25 cursor-pointer uppercase tracking-wider"
             >
               🚀 {currentLanguage === 'so' ? 'Bixi €2.00 oo Dir Hadiyadda' : 'Pay €2.00 & Send Card'}
             </button>
