@@ -159,188 +159,250 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   };
 
   return (
-    <div className="w-full max-w-[1550px] mx-auto px-4 lg:px-8 flex flex-col gap-8">
+    <div className="w-full max-w-7xl mx-auto px-4 lg:px-8 flex flex-col gap-8">
       
-      {/* Hallmark Top Pill Categories Bar */}
-      <div className="w-full bg-white/90 backdrop-blur-xl p-3 rounded-2xl border border-stone-200 shadow-sm flex flex-wrap items-center justify-start gap-3">
+      {/* Clean Category Navigation Tabs */}
+      <div className="flex justify-center border-b border-stone-200 pb-4 gap-3">
         {[
-          { id: 'all', labelSo: 'All E-Cards', labelEn: 'All E-Cards' },
-          { id: 'dhaqan', labelSo: '🌸 Wedding & Heritage', labelEn: 'Wedding & Heritage' },
-          { id: 'cities', labelSo: '🏜️ Nomadic & Land', labelEn: 'Nomadic & Land' }
+          { id: 'all', label: 'All E-Cards' },
+          { id: 'dhaqan', label: '🌸 Wedding & Heritage' },
+          { id: 'cities', label: '🏜️ Nomadic & Cities' }
         ].map((cat) => (
           <button
             key={cat.id}
             onClick={() => setActiveCategory(cat.id)}
-            className={`px-5 py-2 rounded-xl text-xs font-bold transition-all duration-300 cursor-pointer ${
+            className={`px-6 py-2.5 rounded-full text-xs font-bold transition-all duration-300 cursor-pointer ${
               activeCategory === cat.id
-                ? 'bg-amber-500 text-white shadow-sm'
-                : 'text-stone-600 hover:bg-stone-100'
+                ? 'bg-amber-500 text-white shadow-md'
+                : 'bg-white text-stone-600 hover:bg-stone-100 border border-stone-200'
             }`}
           >
-            {cat.labelEn}
+            {cat.label}
           </button>
         ))}
       </div>
 
-      {/* Hallmark Layout: Left Sidebar + Wide Natural Grid Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full">
+      {/* Main Clean Hallmark Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start w-full">
         
-        {/* Left Sidebar Filters (Hallmark Style) */}
-        <div className="lg:col-span-3 bg-white/90 backdrop-blur-xl p-6 rounded-3xl border border-stone-200 shadow-sm hidden lg:flex flex-col gap-6 sticky top-6">
-          <h3 className="text-xs font-black uppercase tracking-wider text-stone-900 border-b border-stone-200 pb-3">
-            Filters & Collections
-          </h3>
-          <div className="flex flex-col gap-3 text-xs text-stone-600 font-semibold">
-            <span className="cursor-pointer hover:text-amber-600">Occasion ({filteredCards.length})</span>
-            <span className="cursor-pointer hover:text-amber-600">Recipient (Family & Friends)</span>
-            <span className="cursor-pointer hover:text-amber-600">Tone (Heartfelt & Warm)</span>
-            <span className="cursor-pointer hover:text-amber-600">Personalize Photo</span>
+        {/* Left Column: Phone Mockups Natural Store Grid (No scrollbar box, pure grid) */}
+        <div className="lg:col-span-7 flex flex-col gap-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-black text-stone-900 tracking-tight">
+              {currentLanguage === 'so' ? 'Dooro Kaarka (Select E-Card)' : 'Select an E-Card'}
+            </h2>
+            <span className="text-xs text-stone-500 font-medium">
+              {filteredCards.length} Design options
+            </span>
           </div>
 
-          <div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl mt-4">
-            <h4 className="text-xs font-bold text-amber-900 mb-1">✨ HadiyadPay Membership</h4>
-            <p className="text-[11px] text-amber-800/80 leading-relaxed mb-3">
-              Send unlimited digital greetings and instant money transfers worldwide.
-            </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+            {filteredCards.map((card) => {
+              const isSelected = selectedOccasion.id === card.id;
+              
+              return (
+                <div
+                  key={card.id}
+                  onClick={() => setSelectedOccasion(card)}
+                  className={`group cursor-pointer flex flex-col items-center transition-all duration-300 ${
+                    isSelected ? 'scale-105' : 'hover:scale-105'
+                  }`}
+                >
+                  <div className={`w-36 h-64 rounded-[2.5rem] p-2.5 bg-stone-950 border-4 transition-all duration-300 shadow-lg relative flex flex-col justify-between ${
+                    isSelected ? 'border-amber-500 ring-4 ring-amber-500/20 shadow-amber-500/30' : 'border-stone-800 hover:border-amber-400'
+                  }`}>
+                    <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-3.5 bg-black rounded-full z-20 flex items-center justify-center">
+                      <div className="w-3 h-1 bg-stone-800 rounded-full"></div>
+                    </div>
+
+                    <div 
+                      className="w-full h-full rounded-[2rem] pt-6 pb-3 px-3 flex flex-col justify-between relative overflow-hidden text-white"
+                      style={getCardStyle(card)}
+                    >
+                      <div className="flex justify-between items-center z-10">
+                        <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-black/60 text-amber-300 uppercase">
+                          {card.badge[langKey] || card.badge['en']}
+                        </span>
+                        <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[9px]">
+                          ▶
+                        </span>
+                      </div>
+
+                      <div className="text-center z-10 my-auto">
+                        <p className="text-[8px] uppercase tracking-wider text-amber-200 font-bold">HadiyadPay</p>
+                        <h4 className="text-xs font-black line-clamp-2 mt-0.5 drop-shadow">
+                          {card.title[langKey] || card.title['en']}
+                        </h4>
+                      </div>
+
+                      <div className="text-[8px] text-center text-stone-200 z-10 border-t border-white/15 pt-1 font-semibold">
+                        {isSelected ? '✓ Selected' : 'Tap to customize'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <span className={`text-xs font-bold mt-2.5 text-center line-clamp-1 ${isSelected ? 'text-amber-600 font-black' : 'text-stone-700'}`}>
+                    {card.title[langKey] || card.title['en']}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* Right Content Area: Full Natural Store Grid & Studio */}
-        <div className="lg:col-span-9 flex flex-col gap-8">
+        {/* Right Column: Live Studio Preview & Customization (Sticky) */}
+        <div className="lg:col-span-5 sticky top-6 flex flex-col gap-6">
           
-          {/* Store Grid Header */}
-          <div className="bg-white/90 backdrop-blur-xl p-5 rounded-3xl border border-stone-200 shadow-sm flex items-center justify-between text-xs text-stone-600 font-semibold">
-            <span>Showing <strong className="text-stone-900 font-black">{filteredCards.length}</strong> E-Cards</span>
-            <span className="text-amber-600 font-bold uppercase tracking-wider">Sorted by Featured</span>
-          </div>
-
-          {/* Natural Expanded Phone Mockup Grid */}
-          <div className="bg-white/95 backdrop-blur-2xl p-6 sm:p-10 rounded-3xl border border-stone-200 shadow-xl">
-            <div className="mb-8">
-              <h2 className="text-2xl font-black text-stone-900 tracking-tight">
-                {currentLanguage === 'so' ? 'Kaarka Xulo (Select E-Card)' : 'Featured E-Cards Collection'}
-              </h2>
-              <p className="text-xs text-stone-500 mt-1">
-                Hover or tap any phone mockup below to preview and load it into your live studio.
-              </p>
+          {/* Live Hallmark Card Preview */}
+          <div className="bg-white p-6 rounded-3xl border border-stone-200 shadow-xl flex flex-col gap-4">
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-black text-stone-800 tracking-wider uppercase">
+                ✨ Live Studio Preview
+              </span>
+              <span className="text-[10px] bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full font-bold">
+                {selectedOccasion.badge[langKey] || selectedOccasion.badge['en']}
+              </span>
             </div>
 
-            {/* Grid fills the space naturally */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredCards.map((card) => {
-                const isSelected = selectedOccasion.id === card.id;
-                
-                return (
-                  <div
-                    key={card.id}
-                    onClick={() => setSelectedOccasion(card)}
-                    className={`group cursor-pointer flex flex-col items-center transition-all duration-300 ${
-                      isSelected ? 'scale-105' : 'opacity-90 hover:opacity-100 hover:scale-105'
-                    }`}
-                  >
-                    <div className={`w-36 h-64 rounded-[2.5rem] p-2.5 bg-stone-900 border-4 transition-all duration-500 shadow-xl relative flex flex-col justify-between group-hover:shadow-2xl group-hover:border-amber-500 ${
-                      isSelected ? 'border-amber-500 ring-4 ring-amber-500/25 shadow-amber-500/30' : 'border-stone-800'
-                    }`}>
-                      <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-3.5 bg-black rounded-full z-20 flex items-center justify-center">
-                        <div className="w-3 h-1 bg-stone-800 rounded-full"></div>
-                      </div>
+            <div 
+              className="w-full p-6 sm:p-7 rounded-2xl text-white shadow-xl flex flex-col justify-between min-h-[340px] relative overflow-hidden transition-all duration-500 border border-white/20"
+              style={getCardStyle(selectedOccasion)}
+            >
+              <div className="flex justify-between items-center z-10">
+                <span className="text-[10px] tracking-widest uppercase bg-black/60 px-3 py-1 rounded-lg font-black text-amber-300">
+                  HADIYADPAY
+                </span>
+                <span className="text-base">🌸✨</span>
+              </div>
 
-                      <div 
-                        className="w-full h-full rounded-[2rem] pt-6 pb-3 px-3 flex flex-col justify-between relative overflow-hidden text-white shadow-inner transition-transform duration-500 group-hover:scale-[1.02]"
-                        style={getCardStyle(card)}
-                      >
-                        <div className="flex justify-between items-center z-10">
-                          <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-black/60 text-amber-300 border border-white/10 uppercase">
-                            {card.badge[langKey] || card.badge['en']}
-                          </span>
-                          <span className="w-6 h-6 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-[10px] text-white shadow group-hover:bg-amber-500 transition-colors">
-                            ▶
-                          </span>
-                        </div>
+              {uploadedImage && (
+                <div 
+                  className="my-3 rounded-xl overflow-hidden shadow-2xl h-36 border border-white/20 z-10 relative bg-black/70 cursor-grab active:cursor-grabbing select-none flex items-center justify-center"
+                  onWheel={handleWheel}
+                  onMouseDown={handleMouseDown}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                  onMouseLeave={handleMouseUp}
+                >
+                  <img 
+                    src={uploadedImage} 
+                    alt="Preview" 
+                    className="absolute max-w-none pointer-events-none"
+                    style={{
+                      transform: `translate(${imagePos.x}px, ${imagePos.y}px) scale(${imageScale})`,
+                      transformOrigin: 'center center',
+                    }}
+                  />
+                </div>
+              )}
 
-                        <div className="text-center z-10 my-auto">
-                          <p className="text-[8px] uppercase tracking-wider text-amber-200 font-bold">HadiyadPay</p>
-                          <h4 className="text-xs font-black line-clamp-2 mt-0.5 drop-shadow">
-                            {card.title[langKey] || card.title['en']}
-                          </h4>
-                        </div>
+              <div className="my-4 z-10">
+                <p className="text-[10px] uppercase tracking-widest text-amber-300 mb-1 font-bold">TO:</p>
+                <h3 className="text-2xl font-black tracking-wide drop-shadow-xl text-white">{recipientName}</h3>
+              </div>
 
-                        <div className="text-[8px] text-center text-stone-200 z-10 border-t border-white/15 pt-1 font-semibold">
-                          {isSelected ? '✨ Active' : 'Select'}
-                        </div>
-                      </div>
-                    </div>
+              <div className="bg-black/40 backdrop-blur-md p-4 rounded-xl border border-white/15 my-2 shadow-lg z-10">
+                <p className="text-xs italic font-light leading-relaxed text-stone-100">&ldquo;{message}&rdquo;</p>
+              </div>
 
-                    <span className={`text-xs font-bold mt-2.5 text-center line-clamp-1 ${isSelected ? 'text-amber-600 font-black' : 'text-stone-700 group-hover:text-stone-900'}`}>
-                      {card.title[langKey] || card.title['en']}
-                    </span>
-                  </div>
-                );
-              })}
+              <div className="mt-4 flex justify-between items-end border-t border-white/15 pt-3 z-10">
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-stone-300 font-bold">FROM:</p>
+                  <p className="text-xs font-black text-amber-300">{senderName}</p>
+                </div>
+                <span className="text-[10px] font-black tracking-widest bg-white/15 text-amber-300 px-2 py-0.5 rounded">HADIYADPAY</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mt-2">
+              <button
+                onClick={handleDownload}
+                className="py-2.5 px-3 bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-bold rounded-xl transition border border-stone-200 flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                📥 Download
+              </button>
+              <button
+                onClick={handleShare}
+                className="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl transition flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
+              >
+                🔗 Share Card
+              </button>
             </div>
           </div>
 
-          {/* Personalization & Live Studio Section side-by-side or stacked naturally */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-            
-            {/* Form */}
-            <div className="bg-white/95 backdrop-blur-2xl p-6 sm:p-8 rounded-3xl border border-stone-200 shadow-xl flex flex-col gap-5">
-              <h3 className="text-xl font-black text-stone-900 tracking-tight">
-                {currentLanguage === 'so' ? '✍️ Shakhsiyeey Kaarkaaga' : 'Personalize Your E-Card'}
-              </h3>
+          {/* Clean Input Form */}
+          <div className="bg-white p-6 rounded-3xl border border-stone-200 shadow-xl flex flex-col gap-4">
+            <h3 className="text-base font-black text-stone-900 tracking-tight">
+              {currentLanguage === 'so' ? '✍️ Geli Fariintaada' : 'Personalize Your Card'}
+            </h3>
 
-              <div className="flex flex-col gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
-                    {currentLanguage === 'so' ? 'MAGACA QAATAHA (TO)' : 'RECIPIENT NAME (TO)'}
-                  </label>
-                  <input
-                    type="text"
-                    value={recipientName}
-                    onChange={(e) => setRecipientName(e.target.value)}
-                    className="w-full px-4 py-3 text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-stone-900 bg-stone-50 font-medium shadow-inner"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
-                    {currentLanguage === 'so' ? 'MAGACA DIRAHA (FROM)' : 'SENDER NAME (FROM)'}
-                  </label>
-                  <input
-                    type="text"
-                    value={senderName}
-                    onChange={(e) => setSenderName(e.target.value)}
-                    className="w-full px-4 py-3 text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-stone-900 bg-stone-50 font-medium shadow-inner"
-                  />
-                </div>
-              </div>
-
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
-                  {currentLanguage === 'so' ? 'FARRIINTA QIIRO LEH' : 'HEARTFELT MESSAGE'}
-                </label>
-                <textarea
-                  rows={3}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  className="w-full px-4 py-3 text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-stone-900 bg-stone-50 font-medium shadow-inner"
-                />
-              </div>
-
-              <div>
-                <div className="flex justify-between items-center mb-1.5">
-                  <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider">
-                    {currentLanguage === 'so' ? 'SAWIRKA QOFAALKA (IKHTIYAARI)' : 'UPLOAD PHOTO (OPTIONAL)'}
-                  </label>
-                  {uploadedImage && (
-                    <button onClick={handleRemoveImage} className="text-xs text-rose-600 hover:text-rose-800 font-semibold cursor-pointer">
-                      Remove
-                    </button>
-                  )}
-                </div>
+                <label className="block text-[10px] font-bold text-stone-600 uppercase mb-1">To (Recipient)</label>
                 <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="w-full text-xs text-stone-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 cursor-pointer bg-stone-50 border border-stone-200 rounded-xl"
+                  type="text"
+                  value={recipientName}
+                  onChange={(e) => setRecipientName(e.target.value)}
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-stone-900 bg-stone-50"
                 />
               </div>
+              <div>
+                <label className="block text-[10px] font-bold text-stone-600 uppercase mb-1">From (Sender)</label>
+                <input
+                  type="text"
+                  value={senderName}
+                  onChange={(e) => setSenderName(e.target.value)}
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-stone-900 bg-stone-50"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-stone-600 uppercase mb-1">Message</label>
+              <textarea
+                rows={2}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                className="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-stone-900 bg-stone-50"
+              />
+            </div>
+
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-[10px] font-bold text-stone-600 uppercase">Photo (Optional)</label>
+                {uploadedImage && (
+                  <button onClick={handleRemoveImage} className="text-[10px] text-rose-600 font-semibold cursor-pointer">Remove</button>
+                )}
+              </div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="w-full text-[10px] text-stone-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-amber-50 file:text-amber-700 cursor-pointer bg-stone-50 border border-stone-200 rounded-xl"
+              />
+            </div>
+
+            <button
+              onClick={() => setIsCheckoutOpen(true)}
+              className="w-full py-3.5 px-4 font-black rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2 text-sm text-white bg-amber-500 hover:bg-amber-600 shadow-amber-500/25 cursor-pointer uppercase tracking-wider"
+            >
+              🚀 {currentLanguage === 'so' ? 'Bixi €2.00 oo Dir Hadiyadda' : 'Pay €2.00 & Send Card'}
+            </button>
+          </div>
+
+        </div>
+
+        <CheckoutModal
+          isOpen={isCheckoutOpen}
+          onClose={() => setIsCheckoutOpen(false)}
+          selectedOccasion={selectedOccasion}
+          recipientName={recipientName}
+          senderName={senderName}
+          message={message}
+          cardPrice={2.00}
+          initialLanguage={currentLanguage}
+        />
+      </div>
+    </div>
+  );
+}
