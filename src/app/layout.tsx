@@ -38,7 +38,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="so">
       <head>
         <meta property="og:image" content="https://www.hadiyadpay.com/images/logo.jpg" />
         <meta property="og:image:secure_url" content="https://www.hadiyadpay.com/images/logo.jpg" />
@@ -48,10 +48,10 @@ export default function RootLayout({
       </head>
       <body 
         style={{ 
-          backgroundColor: '#d4d4d8', 
-          backgroundImage: 'radial-gradient(circle at 50% 20%, #e4e4e7 0%, #a1a1aa 100%)' 
+          backgroundColor: '#e4e4e7', 
+          backgroundImage: 'radial-gradient(circle at 50% 10%, #f4f4f5 0%, #d4d4d8 60%, #a1a1aa 100%)' 
         }}
-        className={`${inter.className} text-gray-900 min-h-screen`}
+        className={`${inter.className} text-gray-900 min-h-screen antialiased selection:bg-emerald-600 selection:text-white`}
       >
         {children}
       </body>
