@@ -159,10 +159,10 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 lg:px-8 flex flex-col gap-8">
+    <div className="w-full max-w-[1600px] mx-auto px-4 lg:px-10 flex flex-col gap-8">
       
-      {/* Clean Category Navigation Tabs */}
-      <div className="flex justify-center border-b border-stone-200 pb-4 gap-3">
+      {/* Hallmark Categorie Navigatie Balk */}
+      <div className="w-full bg-white/90 backdrop-blur-xl p-3.5 rounded-2xl border border-stone-200 shadow-sm flex flex-wrap items-center justify-start gap-3">
         {[
           { id: 'all', label: 'All E-Cards' },
           { id: 'dhaqan', label: '🌸 Wedding & Heritage' },
@@ -171,7 +171,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
           <button
             key={cat.id}
             onClick={() => setActiveCategory(cat.id)}
-            className={`px-6 py-2.5 rounded-full text-xs font-bold transition-all duration-300 cursor-pointer ${
+            className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 cursor-pointer ${
               activeCategory === cat.id
                 ? 'bg-amber-500 text-white shadow-md'
                 : 'bg-white text-stone-600 hover:bg-stone-100 border border-stone-200'
@@ -182,102 +182,111 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
         ))}
       </div>
 
-      {/* Main Clean Hallmark Layout */}
+      {/* Hallmark Hoofdlayout: Links een ruim 3-koloms telefoon mockups raster, Rechts de Preview & Formulier */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start w-full">
         
-        {/* Left Column: Phone Mockups Natural Store Grid (No scrollbar box, pure grid) */}
-        <div className="lg:col-span-7 flex flex-col gap-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-black text-stone-900 tracking-tight">
-              {currentLanguage === 'so' ? 'Dooro Kaarka (Select E-Card)' : 'Select an E-Card'}
-            </h2>
-            <span className="text-xs text-stone-500 font-medium">
-              {filteredCards.length} Design options
-            </span>
+        {/* Linkerzijde: Grote Telefoon Mockups Galerij (Vult de hele linkerhelft natúúrlijk) */}
+        <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-6">
+          <div className="bg-white/90 backdrop-blur-xl p-5 rounded-3xl border border-stone-200 shadow-sm flex items-center justify-between text-xs text-stone-600 font-bold">
+            <span>Showing <strong className="text-stone-900 font-black text-sm">{filteredCards.length}</strong> E-Cards</span>
+            <span className="text-amber-600 uppercase tracking-wider">Hallmark Interactive Grid</span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
-            {filteredCards.map((card) => {
-              const isSelected = selectedOccasion.id === card.id;
-              
-              return (
-                <div
-                  key={card.id}
-                  onClick={() => setSelectedOccasion(card)}
-                  className={`group cursor-pointer flex flex-col items-center transition-all duration-300 ${
-                    isSelected ? 'scale-105' : 'hover:scale-105'
-                  }`}
-                >
-                  <div className={`w-36 h-64 rounded-[2.5rem] p-2.5 bg-stone-950 border-4 transition-all duration-300 shadow-lg relative flex flex-col justify-between ${
-                    isSelected ? 'border-amber-500 ring-4 ring-amber-500/20 shadow-amber-500/30' : 'border-stone-800 hover:border-amber-400'
-                  }`}>
-                    <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-3.5 bg-black rounded-full z-20 flex items-center justify-center">
-                      <div className="w-3 h-1 bg-stone-800 rounded-full"></div>
+          <div className="bg-white/95 backdrop-blur-2xl p-6 sm:p-10 rounded-3xl border border-stone-200 shadow-xl">
+            <div className="mb-8">
+              <h2 className="text-2xl font-black text-stone-900 tracking-tight">
+                {currentLanguage === 'so' ? 'Dooro Kaarka (Select E-Card)' : 'Featured E-Cards Collection'}
+              </h2>
+              <p className="text-xs text-stone-500 mt-1">
+                Click any phone mockup to instantly select and customize your greeting card.
+              </p>
+            </div>
+
+            {/* Groot, natuurlijk 3-koloms raster met grotere telefoon-mockups */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+              {filteredCards.map((card) => {
+                const isSelected = selectedOccasion.id === card.id;
+                
+                return (
+                  <div
+                    key={card.id}
+                    onClick={() => setSelectedOccasion(card)}
+                    className={`group cursor-pointer flex flex-col items-center transition-all duration-300 ${
+                      isSelected ? 'scale-105' : 'hover:scale-105'
+                    }`}
+                  >
+                    {/* Grotere, realistische telefoon mockup */}
+                    <div className={`w-48 h-84 rounded-[3rem] p-3 bg-stone-950 border-4 transition-all duration-300 shadow-xl relative flex flex-col justify-between ${
+                      isSelected ? 'border-amber-500 ring-4 ring-amber-500/25 shadow-amber-500/30' : 'border-stone-800 hover:border-amber-400'
+                    }`}>
+                      <div className="absolute top-3 left-1/2 -translate-x-1/2 w-16 h-4 bg-black rounded-full z-20 flex items-center justify-center">
+                        <div className="w-4 h-1 bg-stone-800 rounded-full"></div>
+                      </div>
+
+                      <div 
+                        className="w-full h-full rounded-[2.3rem] pt-7 pb-4 px-4 flex flex-col justify-between relative overflow-hidden text-white"
+                        style={getCardStyle(card)}
+                      >
+                        <div className="flex justify-between items-center z-10">
+                          <span className="text-[9px] font-black px-2 py-0.5 rounded bg-black/60 text-amber-300 uppercase">
+                            {card.badge[langKey] || card.badge['en']}
+                          </span>
+                          <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[10px]">
+                            ▶
+                          </span>
+                        </div>
+
+                        <div className="text-center z-10 my-auto">
+                          <p className="text-[9px] uppercase tracking-wider text-amber-200 font-bold">HadiyadPay</p>
+                          <h4 className="text-sm font-black line-clamp-2 mt-1 drop-shadow">
+                            {card.title[langKey] || card.title['en']}
+                          </h4>
+                        </div>
+
+                        <div className="text-[9px] text-center text-stone-200 z-10 border-t border-white/15 pt-1.5 font-semibold">
+                          {isSelected ? '✓ Selected' : 'Choose option'}
+                        </div>
+                      </div>
                     </div>
 
-                    <div 
-                      className="w-full h-full rounded-[2rem] pt-6 pb-3 px-3 flex flex-col justify-between relative overflow-hidden text-white"
-                      style={getCardStyle(card)}
-                    >
-                      <div className="flex justify-between items-center z-10">
-                        <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-black/60 text-amber-300 uppercase">
-                          {card.badge[langKey] || card.badge['en']}
-                        </span>
-                        <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[9px]">
-                          ▶
-                        </span>
-                      </div>
-
-                      <div className="text-center z-10 my-auto">
-                        <p className="text-[8px] uppercase tracking-wider text-amber-200 font-bold">HadiyadPay</p>
-                        <h4 className="text-xs font-black line-clamp-2 mt-0.5 drop-shadow">
-                          {card.title[langKey] || card.title['en']}
-                        </h4>
-                      </div>
-
-                      <div className="text-[8px] text-center text-stone-200 z-10 border-t border-white/15 pt-1 font-semibold">
-                        {isSelected ? '✓ Selected' : 'Tap to customize'}
-                      </div>
-                    </div>
+                    <span className={`text-sm font-bold mt-3 text-center line-clamp-1 ${isSelected ? 'text-amber-600 font-black' : 'text-stone-800'}`}>
+                      {card.title[langKey] || card.title['en']}
+                    </span>
                   </div>
-
-                  <span className={`text-xs font-bold mt-2.5 text-center line-clamp-1 ${isSelected ? 'text-amber-600 font-black' : 'text-stone-700'}`}>
-                    {card.title[langKey] || card.title['en']}
-                  </span>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
 
-        {/* Right Column: Live Studio Preview & Customization (Sticky) */}
-        <div className="lg:col-span-5 sticky top-6 flex flex-col gap-6">
+        {/* Rechterzijde: Live Studio Preview & Formulier (Plakt sticky mee net als Hallmark) */}
+        <div className="lg:col-span-5 xl:col-span-4 sticky top-6 flex flex-col gap-6">
           
-          {/* Live Hallmark Card Preview */}
-          <div className="bg-white p-6 rounded-3xl border border-stone-200 shadow-xl flex flex-col gap-4">
+          {/* Live Studio Preview Kaart */}
+          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-stone-200 shadow-xl flex flex-col gap-4">
             <div className="flex justify-between items-center">
               <span className="text-xs font-black text-stone-800 tracking-wider uppercase">
                 ✨ Live Studio Preview
               </span>
-              <span className="text-[10px] bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full font-bold">
+              <span className="text-[10px] bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-bold">
                 {selectedOccasion.badge[langKey] || selectedOccasion.badge['en']}
               </span>
             </div>
 
             <div 
-              className="w-full p-6 sm:p-7 rounded-2xl text-white shadow-xl flex flex-col justify-between min-h-[340px] relative overflow-hidden transition-all duration-500 border border-white/20"
+              className="w-full p-6 sm:p-8 rounded-2xl text-white shadow-xl flex flex-col justify-between min-h-[360px] relative overflow-hidden transition-all duration-500 border border-white/20"
               style={getCardStyle(selectedOccasion)}
             >
               <div className="flex justify-between items-center z-10">
                 <span className="text-[10px] tracking-widest uppercase bg-black/60 px-3 py-1 rounded-lg font-black text-amber-300">
                   HADIYADPAY
                 </span>
-                <span className="text-base">🌸✨</span>
+                <span className="text-lg">🌸✨</span>
               </div>
 
               {uploadedImage && (
                 <div 
-                  className="my-3 rounded-xl overflow-hidden shadow-2xl h-36 border border-white/20 z-10 relative bg-black/70 cursor-grab active:cursor-grabbing select-none flex items-center justify-center"
+                  className="my-3 rounded-xl overflow-hidden shadow-2xl h-40 border border-white/20 z-10 relative bg-black/70 cursor-grab active:cursor-grabbing select-none flex items-center justify-center"
                   onWheel={handleWheel}
                   onMouseDown={handleMouseDown}
                   onMouseMove={handleMouseMove}
@@ -298,11 +307,11 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
               <div className="my-4 z-10">
                 <p className="text-[10px] uppercase tracking-widest text-amber-300 mb-1 font-bold">TO:</p>
-                <h3 className="text-2xl font-black tracking-wide drop-shadow-xl text-white">{recipientName}</h3>
+                <h3 className="text-2xl sm:text-3xl font-black tracking-wide drop-shadow-xl text-white">{recipientName}</h3>
               </div>
 
               <div className="bg-black/40 backdrop-blur-md p-4 rounded-xl border border-white/15 my-2 shadow-lg z-10">
-                <p className="text-xs italic font-light leading-relaxed text-stone-100">&ldquo;{message}&rdquo;</p>
+                <p className="text-sm italic font-light leading-relaxed text-stone-100">&ldquo;{message}&rdquo;</p>
               </div>
 
               <div className="mt-4 flex justify-between items-end border-t border-white/15 pt-3 z-10">
@@ -310,28 +319,28 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                   <p className="text-[10px] uppercase tracking-widest text-stone-300 font-bold">FROM:</p>
                   <p className="text-xs font-black text-amber-300">{senderName}</p>
                 </div>
-                <span className="text-[10px] font-black tracking-widest bg-white/15 text-amber-300 px-2 py-0.5 rounded">HADIYADPAY</span>
+                <span className="text-[10px] font-black tracking-widest bg-white/15 text-amber-300 px-2.5 py-0.5 rounded">HADIYADPAY</span>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3 mt-2">
               <button
                 onClick={handleDownload}
-                className="py-2.5 px-3 bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-bold rounded-xl transition border border-stone-200 flex items-center justify-center gap-1.5 cursor-pointer"
+                className="py-3 px-3 bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-bold rounded-xl transition border border-stone-200 flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 📥 Download
               </button>
               <button
                 onClick={handleShare}
-                className="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl transition flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
+                className="py-3 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl transition flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
               >
                 🔗 Share Card
               </button>
             </div>
           </div>
 
-          {/* Clean Input Form */}
-          <div className="bg-white p-6 rounded-3xl border border-stone-200 shadow-xl flex flex-col gap-4">
+          {/* Personaliseren Formulier */}
+          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-stone-200 shadow-xl flex flex-col gap-4">
             <h3 className="text-base font-black text-stone-900 tracking-tight">
               {currentLanguage === 'so' ? '✍️ Geli Fariintaada' : 'Personalize Your Card'}
             </h3>
@@ -343,7 +352,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                   type="text"
                   value={recipientName}
                   onChange={(e) => setRecipientName(e.target.value)}
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-stone-900 bg-stone-50"
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-stone-900 bg-stone-50 font-medium"
                 />
               </div>
               <div>
@@ -352,7 +361,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                   type="text"
                   value={senderName}
                   onChange={(e) => setSenderName(e.target.value)}
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-stone-900 bg-stone-50"
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-stone-900 bg-stone-50 font-medium"
                 />
               </div>
             </div>
@@ -360,10 +369,10 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             <div>
               <label className="block text-[10px] font-bold text-stone-600 uppercase mb-1">Message</label>
               <textarea
-                rows={2}
+                rows={3}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                className="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-stone-900 bg-stone-50"
+                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-stone-900 bg-stone-50 font-medium"
               />
             </div>
 
@@ -378,13 +387,13 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 type="file"
                 accept="image/*"
                 onChange={handleImageUpload}
-                className="w-full text-[10px] text-stone-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-amber-50 file:text-amber-700 cursor-pointer bg-stone-50 border border-stone-200 rounded-xl"
+                className="w-full text-xs text-stone-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-amber-50 file:text-amber-700 cursor-pointer bg-stone-50 border border-stone-200 rounded-xl"
               />
             </div>
 
             <button
               onClick={() => setIsCheckoutOpen(true)}
-              className="w-full py-3.5 px-4 font-black rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2 text-sm text-white bg-amber-500 hover:bg-amber-600 shadow-amber-500/25 cursor-pointer uppercase tracking-wider"
+              className="w-full py-4 px-4 font-black rounded-2xl shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm text-white bg-amber-500 hover:bg-amber-600 shadow-amber-500/25 cursor-pointer uppercase tracking-wider"
             >
               🚀 {currentLanguage === 'so' ? 'Bixi €2.00 oo Dir Hadiyadda' : 'Pay €2.00 & Send Card'}
             </button>
