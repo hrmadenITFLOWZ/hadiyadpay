@@ -106,10 +106,10 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
       const baseUrl = window.location.origin + window.location.pathname;
       const shareUrl = `${baseUrl}?data=${encoded}&lang=${currentLanguage}`;
       
-      const shareTitle = currentLanguage === 'so' ? 'HadiyadPay Kaarka Dhaqanka' : 'HadiyadPay African E-Card';
+      const shareTitle = currentLanguage === 'so' ? 'HadiyadPay Kaarka Dhaqanka' : 'HadiyadPay E-Card';
       const shareText = currentLanguage === 'so'
         ? `Waa lagusoo diray HadiyadPay kaar gaar ah oo ku socota ${recipientName}! 🌍✨ Riix halkan:`
-        : `You've received a special HadiyadPay African heritage e-card for ${recipientName}! 🌍✨ Click here:`;
+        : `You've received a special HadiyadPay e-card for ${recipientName}! 🌍✨ Click here:`;
 
       if (navigator.share) {
         try {
@@ -136,11 +136,11 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
     alert(currentLanguage === 'so' ? 'Kaarka waa la keydiyey! 📥' : 'Card saved successfully! 📥');
   };
 
-  // Zorgt voor heldere, rijke, kleurrijke weergave met lichte overlays zodat de afbeeldingen prachtig zichtbaar zijn
+  // Zorgt ervoor dat de rijke culturele achtergronden perfect zichtbaar en levendig zijn
   const getCardStyle = (card: CardOption) => {
     if (card.bgImage) {
       return {
-        backgroundImage: `linear-gradient(to bottom, rgba(20,15,10,0.15), rgba(15,10,5,0.75)), url(${card.bgImage})`,
+        backgroundImage: `linear-gradient(to bottom, rgba(20,15,10,0.1), rgba(15,10,5,0.65)), url(${card.bgImage})`,
         backgroundColor: '#261e16',
         backgroundSize: 'cover',
         backgroundPosition: 'center'
@@ -154,11 +154,11 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   return (
     <div className="w-full max-w-[1600px] mx-auto px-4 lg:px-10 flex flex-col gap-8">
       
-      {/* Categorie Navigatie Balk */}
+      {/* Vrolijke Categorie Navigatie Balk */}
       <div className="w-full bg-white/90 backdrop-blur-xl p-3.5 rounded-2xl border border-stone-200 shadow-sm flex flex-wrap items-center justify-start gap-3">
         {[
-          { id: 'all', label: 'All African Heritage Cards' },
-          { id: 'dhaqan', label: '🏺 Wedding & Heritage' },
+          { id: 'all', label: 'All Greeting Cards' },
+          { id: 'dhaqan', label: '🏺 Wedding & Celebrations' },
           { id: 'cities', label: '🐪 Nomadic & Homeland' }
         ].map((cat) => (
           <button
@@ -178,15 +178,17 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
       {/* Hoofdlayout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start w-full">
         
-        {/* Linkerzijde: 3-Koloms Raster met Kleurrijke Afrikaanse/Somalische Kaarten */}
+        {/* Linkerzijde: 3-Koloms Raster met Schitterende Cultuurkaarten */}
         <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-6">
           <div className="bg-white/95 backdrop-blur-2xl p-6 sm:p-10 rounded-3xl border border-stone-200 shadow-xl">
             <div className="mb-8">
               <h2 className="text-2xl font-black text-stone-900 tracking-tight">
-                {currentLanguage === 'so' ? 'Hiddaha & Dhaqanka Soomaaliyeed' : 'African & Somali Heritage Collection'}
+                {currentLanguage === 'so' ? 'Dooro Kaarka Salaanta ee Ugu Fiican' : 'Choose Your Special Greeting Card'}
               </h2>
               <p className="text-xs text-stone-500 mt-1">
-                Click any phone mockup below to preview and customize your vibrant cultural greeting card.
+                {currentLanguage === 'so' 
+                  ? 'Riix mid ka mid ah kaarka hoose si aad u shakhsiyeeydid oo aad ugu dirto ehelkaaga.' 
+                  : 'Click any card below to customize and send instantly to your loved ones.'}
               </p>
             </div>
 
@@ -214,11 +216,11 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                         style={getCardStyle(card)}
                       >
                         <div className="flex justify-between items-center z-10">
-                          <span className="text-[9px] font-black px-2 py-0.5 rounded bg-black/60 text-amber-300 uppercase">
+                          <span className="text-[9px] font-black px-2 py-0.5 rounded bg-black/60 text-amber-300 uppercase shadow">
                             {card.badge[langKey] || card.badge['en']}
                           </span>
-                          <span className="w-6 h-6 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center text-[10px]">
-                            🌍
+                          <span className="w-6 h-6 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center text-[10px] shadow">
+                            ✨
                           </span>
                         </div>
 
@@ -229,8 +231,8 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                           </h4>
                         </div>
 
-                        <div className="text-[9px] text-center text-amber-100 z-10 border-t border-white/20 pt-1.5 font-bold">
-                          {isSelected ? '✓ Selected' : 'Tap to customize'}
+                        <div className="text-[9px] text-center text-amber-100 z-10 border-t border-white/20 pt-1.5 font-bold drop-shadow">
+                          {isSelected ? '✓ Selected' : 'Click to customize'}
                         </div>
                       </div>
                     </div>
@@ -251,7 +253,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
           <div className="bg-white p-6 sm:p-8 rounded-3xl border border-stone-200 shadow-xl flex flex-col gap-4">
             <div className="flex justify-between items-center">
               <span className="text-xs font-black text-stone-800 tracking-wider uppercase">
-                🌍 Live Studio Preview
+                ✨ Live Studio Preview
               </span>
               <span className="text-[10px] bg-amber-100 text-amber-900 px-3 py-1 rounded-full font-bold">
                 {selectedOccasion.badge[langKey] || selectedOccasion.badge['en']}
@@ -263,10 +265,10 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
               style={getCardStyle(selectedOccasion)}
             >
               <div className="flex justify-between items-center z-10">
-                <span className="text-[10px] tracking-widest uppercase bg-black/60 px-3 py-1 rounded-lg font-black text-amber-300">
+                <span className="text-[10px] tracking-widest uppercase bg-black/60 px-3 py-1 rounded-lg font-black text-amber-300 shadow">
                   HADIYADPAY
                 </span>
-                <span className="text-lg">🌍✨</span>
+                <span className="text-lg">✨🌍</span>
               </div>
 
               {uploadedImage && (
@@ -326,7 +328,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
           <div className="bg-white p-6 sm:p-8 rounded-3xl border border-stone-200 shadow-xl flex flex-col gap-4">
             <h3 className="text-base font-black text-stone-900 tracking-tight">
-              {currentLanguage === 'so' ? '✍️ Geli Fariintaada' : 'Personalize Your Card'}
+              {currentLanguage === 'so' ? '✍️ Shakhsiyeey Kaarkaaga' : 'Personalize Your Card'}
             </h3>
 
             <div className="grid grid-cols-2 gap-3">
@@ -356,4 +358,46 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 rows={3}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-stone-900
+                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-stone-900 bg-stone-50 font-medium"
+              />
+            </div>
+
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-[10px] font-bold text-stone-600 uppercase">Photo (Optional)</label>
+                {uploadedImage && (
+                  <button onClick={handleRemoveImage} className="text-[10px] text-rose-600 font-semibold cursor-pointer">Remove</button>
+                )}
+              </div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="w-full text-xs text-stone-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-amber-50 file:text-amber-700 cursor-pointer bg-stone-50 border border-stone-200 rounded-xl"
+              />
+            </div>
+
+            <button
+              onClick={() => setIsCheckoutOpen(true)}
+              className="w-full py-4 px-4 font-black rounded-2xl shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm text-white bg-amber-600 hover:bg-amber-700 shadow-amber-600/25 cursor-pointer uppercase tracking-wider"
+            >
+              🚀 {currentLanguage === 'so' ? 'Bixi €2.00 oo Dir Hadiyadda' : 'Pay €2.00 & Send Card'}
+            </button>
+          </div>
+
+        </div>
+
+        <CheckoutModal
+          isOpen={isCheckoutOpen}
+          onClose={() => setIsCheckoutOpen(false)}
+          selectedOccasion={selectedOccasion}
+          recipientName={recipientName}
+          senderName={senderName}
+          message={message}
+          cardPrice={2.00}
+          initialLanguage={currentLanguage}
+        />
+      </div>
+    </div>
+  );
+}
