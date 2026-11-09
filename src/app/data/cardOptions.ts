@@ -2,7 +2,7 @@ export interface CardOption {
   id: string;
   category: 'dhaqan' | 'cities';
   badge: { so: string; en: string };
-  title: { so: string; en: string };
+  title: { so: { so: string; en: string } | string; en: string };
   gradient?: string;
   bgImage?: string;
   defaultRecipient: { so: string; en: string };
@@ -15,8 +15,7 @@ export const cardOptions: CardOption[] = [
     id: 'dhalasho',
     category: 'dhaqan',
     badge: { so: 'DHALASHO 🎂', en: 'BIRTHDAY 🎂' },
-    title: { so: 'Dhalasho Wacan', en: 'Joyful Celebration' },
-    // Feestelijke gouden en warme patronen (geen mensen)
+    title: { so: 'Dhalasho Wacan', en: 'Festive Birthday Celebration' },
     bgImage: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=800&auto=format&fit=crop',
     defaultRecipient: { so: 'Saxiib Qaali', en: 'Dear Friend' },
     defaultSender: { so: 'Walaalkaa / Saaxiibkaa', en: 'Your Friend' },
@@ -28,10 +27,10 @@ export const cardOptions: CardOption[] = [
   {
     id: 'aroos',
     category: 'dhaqan',
-    badge: { so: 'AROOS 🏺', en: 'WEDDING 🏺' },
-    title: { so: 'Xaflada Arooska', en: 'Traditional Wedding Blessing' },
-    // Handgemaakte keramische kunst en goudtinten
-    bgImage: 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?q=80&w=800&auto=format&fit=crop',
+    badge: { so: 'AROOS & DHAQAN 🏺', en: 'WEDDING & HERITAGE 🏺' },
+    title: { so: 'Xaflada Arooska & Dhaqanka', en: 'Traditional Wedding Celebration' },
+    // Gebaseerd op de upload: prachtige traditionele kleding, goudkleurige sieraden en bruiloftssfeer
+    bgImage: 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=800&auto=format&fit=crop',
     defaultRecipient: { so: 'Arooska iyo Ardo', en: 'Bride & Groom' },
     defaultSender: { so: 'Qoyskaaga', en: 'Your Family' },
     defaultMessage: { 
@@ -40,11 +39,25 @@ export const cardOptions: CardOption[] = [
     }
   },
   {
+    id: 'henna',
+    category: 'dhaqan',
+    badge: { so: 'XAFXAD & HENNA ✨', en: 'HENNA NIGHT ✨' },
+    title: { so: 'Habeenka Henna & Dahab', en: 'Henna & Gold Night' },
+    // Gebaseerd op de upload met prachtige henna en traditionele handversiering
+    bgImage: 'https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800&auto=format&fit=crop',
+    defaultRecipient: { so: 'Saxiibaddii Qaaliga ahayd', en: 'Dearest' },
+    defaultSender: { so: 'Asxaabtaada', en: 'Your Friends' },
+    defaultMessage: { 
+      so: 'Habeen qurux badan oo ay ka buuxaan heeso dhaqameed, farxad, iyo henna cajiib ah! ✨ Handasaad wacan! 🤎', 
+      en: 'A beautiful night filled with traditional songs, joy, and stunning henna patterns! ✨ Wishing you the best! 🤎' 
+    }
+  },
+  {
     id: 'eid',
     category: 'dhaqan',
-    badge: { so: 'EID MUBARAK 🌙', en: 'EID MUBARAK 🌙' },
-    title: { so: 'Ciid Wacan', en: 'Blessed Eid Mubarak' },
-    // Rijke islamitische geometrische patronen en lantaarns (geen mensen)
+    badge: { so: 'CIID WACAN 🌙', en: 'EID MUBARAK 🌙' },
+    title: { so: 'Ciid Wacan & Barako', en: 'Blessed Eid Mubarak' },
+    // Gebaseerd op de upload van Eid Wanaagsan met gouden lantaarns en Oosterse sferen
     bgImage: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?q=80&w=800&auto=format&fit=crop',
     defaultRecipient: { so: 'Dhamaan Qoyska', en: 'Family & Loved Ones' },
     defaultSender: { so: 'Aden & Qoyska', en: 'Aden & Family' },
@@ -54,11 +67,24 @@ export const cardOptions: CardOption[] = [
     }
   },
   {
+    id: 'haargab',
+    category: 'dhaqan',
+    badge: { so: 'HIDDHA & DHAQAN 🧺', en: 'HERITAGE ART 🧺' },
+    title: { so: 'Dhaqanka Hiddaha Hooyo', en: 'Traditional Handicraft Heritage' },
+    // Gebaseerd op de handgemaakte traditionele mand (haarqab/dambiil)
+    bgImage: 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?q=80&w=800&auto=format&fit=crop',
+    defaultRecipient: { so: 'Ehelka iyo Asxaabta', en: 'Family & Friends' },
+    defaultSender: { so: 'HadiyadPay', en: 'HadiyadPay Team' },
+    defaultMessage: { 
+      so: 'Qiimaha hiddaha iyo dhaqanka iyo xusuusta dalkeenna hooyo oo qalbiga ku weyn. 🧺🤎', 
+      en: 'Celebrating our rich heritage, traditions, and timeless cultural craftsmanship. 🧺🤎' 
+    }
+  },
+  {
     id: 'taageero',
     category: 'cities',
     badge: { so: 'TAAGEERO 🤝', en: 'SUPPORT 🤝' },
     title: { so: 'Taageero & Dhiirigelin', en: 'Strength & Encouragement' },
-    // Warme terracotta en aardse texturen
     bgImage: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=800&auto=format&fit=crop',
     defaultRecipient: { so: 'Saxiibkey', en: 'My Friend' },
     defaultSender: { so: 'Walaalkii', en: 'Your Brother' },
@@ -72,7 +98,6 @@ export const cardOptions: CardOption[] = [
     category: 'cities',
     badge: { so: 'GUUL 🎓', en: 'SUCCESS 🎓' },
     title: { so: 'Qalinjabin & Guul', en: 'Milestone & Success' },
-    // Stijlvolle gouden en feestelijke achtergrond
     bgImage: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=800&auto=format&fit=crop',
     defaultRecipient: { so: 'Ardayga Guuleystay', en: 'Graduate' },
     defaultSender: { so: 'Qoyska oo idil', en: 'Proud Family' },
@@ -82,59 +107,16 @@ export const cardOptions: CardOption[] = [
     }
   },
   {
-    id: 'mahadsanid',
-    category: 'dhaqan',
-    badge: { so: 'MAHADSANID 🤎', en: 'THANK YOU 🤎' },
-    title: { so: 'Mahadcelin Wacan', en: 'Heartfelt Gratitude' },
-    // Prachtige handgemaakte terracotta elementen
-    bgImage: 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?q=80&w=800&auto=format&fit=crop',
-    defaultRecipient: { so: 'Qof Qaali ah', en: 'Special Person' },
-    defaultSender: { so: 'Mahadsanid', en: 'With Gratitude' },
-    defaultMessage: { 
-      so: 'Waan uga mahadcelinayaa garab istaaggaaga iyo deeqsinimadaada. Illahay ha kaa abaalmariyo khayr. 🤎🙏', 
-      en: 'Deeply thankful for your constant support and kindness. Wishing you the absolute best. 🤎🙏' 
-    }
-  },
-  {
     id: 'barako',
     category: 'cities',
     badge: { so: 'BARAKO 🐪', en: 'BLESSINGS 🐪' },
     title: { so: 'Barako & Nabad', en: 'Nomadic Heritage Sunset' },
-    // Magische gouden woestijnzonsondergang
     bgImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=800&auto=format&fit=crop',
     defaultRecipient: { so: 'Reer Xamar / Reer Baadiye', en: 'Dear Family' },
     defaultSender: { so: 'Qoyska Yurub', en: 'The Family Abroad' },
     defaultMessage: { 
       so: 'Nabad, barako, iyo caafimaad ha dego gurigiinna. Waxaan idinkoo nabad qaba idiin rajeynayaa maalin wacan. 🐪🌿', 
       en: 'May peace, blessings, and good health dwell in your home. Wishing you a wonderful day ahead. 🐪🌿' 
-    }
-  },
-  {
-    id: 'caasimadda',
-    category: 'cities',
-    badge: { so: 'CAASIMADDA 🌆', en: 'COASTAL BREEZE 🌆' },
-    title: { so: 'Caasimadda Sunset', en: 'Coastal Breeze & Palms' },
-    // Palmbomen en oceanische zonsondergang
-    bgImage: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800&auto=format&fit=crop',
-    defaultRecipient: { so: 'Asxaabta Xeepta', en: 'Beach Friends' },
-    defaultSender: { so: 'Salaan diirran ✨', en: 'Warm Greetings' },
-    defaultMessage: { 
-      so: 'Xeepta caanka ah iyo habeennada jawiga macaan leh. Nabad iyo caafimaad! 🌅☕', 
-      en: 'The legendary breeze and cozy nights. Wishing you peace and wonderful times! 🌅☕' 
-    }
-  },
-  {
-    id: 'buuraleyda',
-    category: 'cities',
-    badge: { so: 'DHULKA HOOYO ⛰️', en: 'HOMELAND NATURE ⛰️' },
-    title: { so: 'Dhulka Buuraleyda ah', en: 'Homeland Highlands' },
-    // Prachtige weelderige bergen en natuur
-    bgImage: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=800&auto=format&fit=crop',
-    defaultRecipient: { so: 'Dhamaan Ehelka', en: 'All Relatives' },
-    defaultSender: { so: 'Qoraa Digfeer', en: 'From Afar' },
-    defaultMessage: { 
-      so: 'Hawa-mareenka iyo cimilada wacan ee dhulka hooyo. Xasuus iyo jacayl badan baan idinka soo dirayaa! ⛰️💚', 
-      en: 'Thinking of the breathtaking landscapes and homelands. Sending so much love and memories your way! ⛰️💚' 
     }
   }
 ];

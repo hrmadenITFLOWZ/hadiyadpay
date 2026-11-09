@@ -14,6 +14,19 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   
   const langKey = (currentLanguage === 'so' ? 'so' : 'en') as 'so' | 'en';
 
+  const getTitleText = (titleObj: CardOption['title'], lang: 'so' | 'en') => {
+    if (typeof titleObj.title === 'string') return titleObj.title;
+    if (typeof titleObj.title === 'object' && titleObj.title !== null) {
+      return titleObj.title[lang] || titleObj.title['en'] || '';
+    }
+    // Als de eigenschap rechtstreeks op title zit:
+    const t = titleObj as unknown as { so: string | { so: string; en: string }; en: string };
+    if (typeof t.so === 'object' && t.so !== null) {
+      return t.so[lang] || t.so['en'] || t.en;
+    }
+    return lang === 'so' ? (t.so as string) : t.en;
+  };
+
   const [recipientName, setRecipientName] = useState(
     selectedOccasion.defaultRecipient[langKey] || selectedOccasion.defaultRecipient['en']
   );
@@ -136,7 +149,6 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
     alert(currentLanguage === 'so' ? 'Kaarka waa la keydiyey! 📥' : 'Card saved successfully! 📥');
   };
 
-  // Zorgt ervoor dat de rijke culturele achtergronden perfect zichtbaar en levendig zijn
   const getCardStyle = (card: CardOption) => {
     if (card.bgImage) {
       return {
@@ -154,7 +166,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   return (
     <div className="w-full max-w-[1600px] mx-auto px-4 lg:px-10 flex flex-col gap-8">
       
-      {/* Vrolijke Categorie Navigatie Balk */}
+      {/* Categorie Navigatie Balk */}
       <div className="w-full bg-white/90 backdrop-blur-xl p-3.5 rounded-2xl border border-stone-200 shadow-sm flex flex-wrap items-center justify-start gap-3">
         {[
           { id: 'all', label: 'All Greeting Cards' },
@@ -178,7 +190,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
       {/* Hoofdlayout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start w-full">
         
-        {/* Linkerzijde: 3-Koloms Raster met Schitterende Cultuurkaarten */}
+        {/* Linkerzijde: 3-Koloms Raster */}
         <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-6">
           <div className="bg-white/95 backdrop-blur-2xl p-6 sm:p-10 rounded-3xl border border-stone-200 shadow-xl">
             <div className="mb-8">
@@ -195,6 +207,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
               {filteredCards.map((card) => {
                 const isSelected = selectedOccasion.id === card.id;
+                const cardTitleText = getTitleText(card.title, langKey);
                 
                 return (
                   <div
@@ -227,7 +240,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                         <div className="text-center z-10 my-auto">
                           <p className="text-[9px] uppercase tracking-wider text-amber-200 font-bold drop-shadow-md">HadiyadPay</p>
                           <h4 className="text-sm font-black line-clamp-2 mt-1 drop-shadow-lg text-white">
-                            {card.title[langKey] || card.title['en']}
+                            {cardTitleText}
                           </h4>
                         </div>
 
@@ -238,7 +251,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                     </div>
 
                     <span className={`text-sm font-bold mt-3 text-center line-clamp-1 ${isSelected ? 'text-amber-700 font-black' : 'text-stone-800'}`}>
-                      {card.title[langKey] || card.title['en']}
+                      {cardTitleText}
                     </span>
                   </div>
                 );
