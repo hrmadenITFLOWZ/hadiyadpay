@@ -136,37 +136,49 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
     alert(currentLanguage === 'so' ? 'Kaarka waa la keydiyey! 📥' : 'Card saved successfully! 📥');
   };
 
+  // Unieke, levendige en creatieve kleurthema's per kaart ID voor hover en weergave
   const getCardStyle = (card: CardOption) => {
     if (card.bgImage) {
       return {
-        backgroundImage: `linear-gradient(to bottom, rgba(40,30,20,0.2), rgba(20,15,10,0.85)), url(${card.bgImage})`,
+        backgroundImage: `linear-gradient(to bottom, rgba(30,20,10,0.3), rgba(15,10,5,0.9)), url(${card.bgImage})`,
         backgroundColor: '#26221e',
         backgroundSize: 'cover',
         backgroundPosition: 'center'
       };
     }
+    
+    // Specifieke creatieve gradients per kaarttype
+    const gradients: Record<string, string> = {
+      'dhalasho': 'linear-gradient(135deg, #f43f5e 0%, #fb7185 50%, #fda4af 100%)',
+      'aroos': 'linear-gradient(135deg, #d97706 0%, #b45309 50%, #78350f 100%)',
+      'eid': 'linear-gradient(135deg, #059669 0%, #10b981 50%, #047857 100%)',
+      'guul': 'linear-gradient(135deg, #7c3aed 0%, #8b5cf6 50%, #6d28d9 100%)',
+      'jacayl': 'linear-gradient(135deg, #e11d48 0%, #f43f5e 50%, #be123c 100%)',
+      'mahadsanid': 'linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #b45309 100%)',
+    };
+
     return {
-      background: card.gradient || 'linear-gradient(135deg, #d97706 0%, #78350f 100%)'
+      background: card.gradient || gradients[card.id] || 'linear-gradient(135deg, #d97706 0%, #9a3412 100%)'
     };
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 flex flex-col gap-8">
+    <div className="w-full max-w-[1400px] mx-auto px-4 lg:px-8 flex flex-col gap-10">
       
-      {/* Hallmark Categorieknoppen in lichte, zachte stijl */}
-      <div className="bg-white/80 backdrop-blur-xl p-2.5 rounded-2xl border border-stone-200 shadow-sm flex flex-wrap items-center justify-center gap-2">
+      {/* Hallmark Categorieknoppen */}
+      <div className="bg-white/90 backdrop-blur-xl p-3 rounded-2xl border border-stone-200 shadow-sm flex flex-wrap items-center justify-center gap-3 max-w-xl mx-auto w-full">
         {[
-          { id: 'all', labelSo: 'Dhammaan (All E-Cards)', labelEn: 'All E-Cards' },
-          { id: 'dhaqan', labelSo: '🌸 Dhaqan & Aroos', labelEn: '🌸 Wedding & Heritage' },
-          { id: 'cities', labelSo: '🏜️ Geel iyo Baadiye', labelEn: '🏜️ Nomadic & Land' }
+          { id: 'all', labelSo: 'Dhammaan E-Cards', labelEn: 'All E-Cards' },
+          { id: 'dhaqan', labelSo: '🌸 Dhaqan & Aroos', labelEn: 'Wedding & Heritage' },
+          { id: 'cities', labelSo: '🏜️ Geel iyo Baadiye', labelEn: 'Nomadic & Land' }
         ].map((cat) => (
           <button
             key={cat.id}
             onClick={() => setActiveCategory(cat.id)}
-            className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 cursor-pointer ${
+            className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 cursor-pointer ${
               activeCategory === cat.id
-                ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20 scale-105'
-                : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100 border border-transparent'
+                ? 'bg-amber-500 text-white shadow-md shadow-amber-500/25 scale-105'
+                : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
             }`}
           >
             {currentLanguage === 'so' ? cat.labelSo : cat.labelEn}
@@ -174,27 +186,29 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      {/* Volledige Breedte Layout: Links de uitgebreide Phone Mockup Galerij, Rechts het Live Studio Preview */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full">
         
-        {/* Linker kolom: Vrolijke Phone Mockups Galerij met lichte achtergrond */}
-        <div className="lg:col-span-7 flex flex-col gap-6">
+        {/* Linkerzijde: Uitgebreide Phone Mockup Galerij over de volle breedte */}
+        <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-6">
           
-          <div className="bg-white/80 backdrop-blur-xl p-5 rounded-3xl border border-stone-200 shadow-sm flex items-center justify-between text-xs text-stone-500">
-            <span>Showing <strong className="text-stone-800 font-bold">{filteredCards.length}</strong> Modern Cultural Cards</span>
-            <span className="text-amber-600 font-bold uppercase tracking-wider">✨ Hallmark Style Grid</span>
+          <div className="bg-white/90 backdrop-blur-xl p-6 rounded-3xl border border-stone-200 shadow-sm flex items-center justify-between text-xs text-stone-600 font-semibold">
+            <span>Showing <strong className="text-stone-900 font-black text-sm">{filteredCards.length}</strong> Artistic Cultural E-Cards</span>
+            <span className="text-amber-600 font-bold uppercase tracking-wider">✨ Hallmark Interactive Grid</span>
           </div>
 
-          <div className="bg-white/90 backdrop-blur-2xl p-6 sm:p-8 rounded-3xl border border-stone-200 shadow-xl">
+          <div className="bg-white/95 backdrop-blur-2xl p-6 sm:p-8 rounded-3xl border border-stone-200 shadow-xl">
             <div className="mb-6">
-              <h2 className="text-xl font-black text-stone-900 tracking-tight">
-                {currentLanguage === 'so' ? '📱 Dooro Kaarkaaga (Phone Mockups)' : '📱 Choose E-Card Phone Mockup'}
+              <h2 className="text-2xl font-black text-stone-900 tracking-tight">
+                {currentLanguage === 'so' ? '📱 Dooro Kaarka (Phone Mockup Gallery)' : '📱 Choose E-Card Phone Mockup'}
               </h2>
               <p className="text-xs text-stone-500 mt-1">
-                {currentLanguage === 'so' ? 'Riix telefoonka si aad u dooratid kaarka' : 'Tap any phone mockup below to load into the preview studio'}
+                {currentLanguage === 'so' ? 'Hover ama riix si aad u aragto midabada iyo nashqada gaarka ah' : 'Hover or tap any phone mockup to preview its unique thematic design'}
               </p>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 max-h-[520px] overflow-y-auto pr-2 custom-scrollbar">
+            {/* Breed, natuurlijk grid voor alle telefoon mockups */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-6 max-h-[680px] overflow-y-auto pr-2 custom-scrollbar">
               {filteredCards.map((card) => {
                 const isSelected = selectedOccasion.id === card.id;
                 
@@ -203,39 +217,40 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                     key={card.id}
                     onClick={() => setSelectedOccasion(card)}
                     className={`group cursor-pointer flex flex-col items-center transition-all duration-300 ${
-                      isSelected ? 'scale-105' : 'opacity-85 hover:opacity-100 hover:scale-[1.02]'
+                      isSelected ? 'scale-105' : 'opacity-90 hover:opacity-100 hover:scale-105'
                     }`}
                   >
-                    {/* Telefoon met lichte, moderne rand */}
-                    <div className={`w-36 h-64 rounded-[2.5rem] p-2.5 bg-stone-900 border-4 transition-all duration-300 shadow-xl relative flex flex-col justify-between ${
-                      isSelected ? 'border-amber-500 ring-4 ring-amber-500/20 shadow-amber-500/30' : 'border-stone-800 hover:border-amber-400/50'
+                    {/* Telefoon Mockup met unieke thema-kleuren bij hover */}
+                    <div className={`w-36 h-64 rounded-[2.5rem] p-2.5 bg-stone-900 border-4 transition-all duration-500 shadow-xl relative flex flex-col justify-between group-hover:shadow-2xl group-hover:border-amber-500 ${
+                      isSelected ? 'border-amber-500 ring-4 ring-amber-500/25 shadow-amber-500/30' : 'border-stone-800'
                     }`}>
                       <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-3.5 bg-black rounded-full z-20 flex items-center justify-center">
                         <div className="w-3 h-1 bg-stone-800 rounded-full"></div>
                       </div>
 
+                      {/* Unieke kaartgradient per thema */}
                       <div 
-                        className="w-full h-full rounded-[2rem] pt-6 pb-3 px-3 flex flex-col justify-between relative overflow-hidden text-white shadow-inner"
+                        className="w-full h-full rounded-[2rem] pt-6 pb-3 px-3 flex flex-col justify-between relative overflow-hidden text-white shadow-inner transition-transform duration-500 group-hover:scale-[1.02]"
                         style={getCardStyle(card)}
                       >
                         <div className="flex justify-between items-center z-10">
                           <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-black/60 text-amber-300 border border-white/10 uppercase">
                             {card.badge[langKey] || card.badge['en']}
                           </span>
-                          <span className="w-6 h-6 rounded-full bg-amber-500/30 backdrop-blur-md flex items-center justify-center text-[10px] text-amber-300 shadow">
+                          <span className="w-6 h-6 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-[10px] text-white shadow group-hover:bg-amber-500 transition-colors">
                             ▶
                           </span>
                         </div>
 
                         <div className="text-center z-10 my-auto">
-                          <p className="text-[8px] uppercase tracking-wider text-amber-300 font-bold">HadiyadPay</p>
+                          <p className="text-[8px] uppercase tracking-wider text-amber-200 font-bold">HadiyadPay</p>
                           <h4 className="text-xs font-black line-clamp-2 mt-0.5 drop-shadow">
                             {card.title[langKey] || card.title['en']}
                           </h4>
                         </div>
 
-                        <div className="text-[8px] text-center text-stone-300 z-10 border-t border-white/10 pt-1 font-semibold">
-                          {isSelected ? '✨ Active' : 'Select'}
+                        <div className="text-[8px] text-center text-stone-200 z-10 border-t border-white/15 pt-1 font-semibold">
+                          {isSelected ? '✨ Active' : 'Hover to preview'}
                         </div>
                       </div>
                     </div>
@@ -249,8 +264,8 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             </div>
           </div>
 
-          {/* Formulier */}
-          <div className="bg-white/90 backdrop-blur-2xl p-6 sm:p-8 rounded-3xl border border-stone-200 shadow-xl flex flex-col gap-5">
+          {/* Persoonlijk bericht formulier */}
+          <div className="bg-white/95 backdrop-blur-2xl p-6 sm:p-8 rounded-3xl border border-stone-200 shadow-xl flex flex-col gap-5">
             <h2 className="text-xl font-black text-stone-900 tracking-tight">
               {currentLanguage === 'so' ? '✍️ Shakhsiyeey Kaarkaaga' : '✍️ Personalize Your Message'}
             </h2>
@@ -320,9 +335,9 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
           </div>
         </div>
 
-        {/* Rechter kolom: Vrolijke Live Studio Preview */}
-        <div className="lg:col-span-5 sticky top-8">
-          <div className="bg-white/95 backdrop-blur-2xl p-6 rounded-3xl border border-stone-200 shadow-xl flex flex-col justify-between min-h-[600px]">
+        {/* Rechterzijde: Grote Live Studio Preview */}
+        <div className="lg:col-span-5 xl:col-span-4 sticky top-8">
+          <div className="bg-white/95 backdrop-blur-2xl p-6 rounded-3xl border border-stone-200 shadow-xl flex flex-col justify-between min-h-[620px]">
             
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center gap-2">
@@ -332,7 +347,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 </span>
               </div>
               <span className="text-[10px] bg-amber-100 text-amber-800 px-2.5 py-1 rounded-lg border border-amber-200 font-bold">
-                MODERN 2026 EDITION
+                THEME STUDIO
               </span>
             </div>
 
