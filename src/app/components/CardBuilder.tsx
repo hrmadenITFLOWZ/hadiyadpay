@@ -9,21 +9,19 @@ interface CardBuilderProps {
 }
 
 export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
-  const [activeDeck, setActiveDeck] = useState<'dhaqan' | 'cities'>('dhaqan');
-  const filteredCards = cardOptions.filter((card) => card.category === activeDeck);
-
-  const [selectedCard, setSelectedCard] = useState<CardOption>(filteredCards[0]);
+  const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [selectedOccasion, setSelectedOccasion] = useState<CardOption>(cardOptions[0]);
   
   const langKey = (currentLanguage === 'so' ? 'so' : 'en') as 'so' | 'en';
 
   const [recipientName, setRecipientName] = useState(
-    selectedCard.defaultRecipient[langKey] || selectedCard.defaultRecipient['en']
+    selectedOccasion.defaultRecipient[langKey] || selectedOccasion.defaultRecipient['en']
   );
   const [senderName, setSenderName] = useState(
-    selectedCard.defaultSender[langKey] || selectedCard.defaultSender['en']
+    selectedOccasion.defaultSender[langKey] || selectedOccasion.defaultSender['en']
   );
   const [message, setMessage] = useState(
-    selectedCard.defaultMessage[langKey] || selectedCard.defaultMessage['en']
+    selectedOccasion.defaultMessage[langKey] || selectedOccasion.defaultMessage['en']
   );
   
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -34,18 +32,22 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
-  useEffect(() => {
-    const newFiltered = cardOptions.filter((c) => c.category === activeDeck);
-    if (newFiltered.length > 0) {
-      setSelectedCard(newFiltered[0]);
-    }
-  }, [activeDeck]);
+  // Filter kaarten op basis van Hallmark-stijl categorie menu
+  const filteredCards = activeCategory === 'all' 
+    ? cardOptions 
+    : cardOptions.filter((card) => card.category === activeCategory);
 
   useEffect(() => {
-    setRecipientName(selectedCard.defaultRecipient[langKey] || selectedCard.defaultRecipient['en']);
-    setSenderName(selectedCard.defaultSender[langKey] || selectedCard.defaultSender['en']);
-    setMessage(selectedCard.defaultMessage[langKey] || selectedCard.defaultMessage['en']);
-  }, [selectedCard, langKey]);
+    if (filteredCards.length > 0 && !filteredCards.find(c => c.id === selectedOccasion.id)) {
+      setSelectedOccasion(filteredCards[0]);
+    }
+  }, [activeCategory]);
+
+  useEffect(() => {
+    setRecipientName(selectedOccasion.defaultRecipient[langKey] || selectedOccasion.defaultRecipient['en']);
+    setSenderName(selectedOccasion.defaultSender[langKey] || selectedOccasion.defaultSender['en']);
+    setMessage(selectedOccasion.defaultMessage[langKey] || selectedOccasion.defaultMessage['en']);
+  }, [selectedOccasion, langKey]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -92,7 +94,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
   const handleShare = async () => {
     const payload = {
-      c: selectedCard.id,
+      c: selectedOccasion.id,
       t: recipientName,
       f: senderName,
       m: message,
@@ -105,10 +107,10 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
       const baseUrl = window.location.origin + window.location.pathname;
       const shareUrl = `${baseUrl}?data=${encoded}&lang=${currentLanguage}`;
       
-      const shareTitle = currentLanguage === 'so' ? 'HadiyadPay Kaarka Salaanta' : 'HadiyadPay E-Card';
+      const shareTitle = currentLanguage === 'so' ? 'HadiyadPay Kaarka Dhaqanka' : 'HadiyadPay Cultural E-Card';
       const shareText = currentLanguage === 'so'
-        ? `Waa lagusoo diray HadiyadPay kaar gaar ah oo ku socota ${recipientName}! 🎁 Riix halkan si aad u aragto kaarkaaga:`
-        : `You've received a special HadiyadPay e-card for ${recipientName}! 🎁 Click here to view your card:`;
+        ? `Waa lagusoo diray HadiyadPay kaar gaar ah oo ku socota ${recipientName}! 🐪✨ Riix halkan:`
+        : `You've received a special HadiyadPay cultural e-card for ${recipientName}! 🐪✨ Click here:`;
 
       if (navigator.share) {
         try {
@@ -124,7 +126,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
       }
 
       await navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
-      alert(currentLanguage === 'so' ? 'Linkiga waxaa la guuriyey klembord-ka! 📋' : 'Link copied to clipboard! 📋');
+      alert(currentLanguage === 'so' ? 'Linkiga waxaa la guuriyey! 📋' : 'Link copied to clipboard! 📋');
     } catch (e) {
       console.error('Fout bij genereren share link', e);
       alert('Kon de link niet genereren.');
@@ -138,7 +140,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   const getCardStyle = (card: CardOption) => {
     if (card.bgImage) {
       return {
-        backgroundImage: `linear-gradient(to bottom, rgba(7,9,14,0.4), rgba(7,9,14,0.85)), url(${card.bgImage})`,
+        backgroundImage: `linear-gradient(to bottom, rgba(10,14,23,0.4), rgba(10,14,23,0.9)), url(${card.bgImage})`,
         backgroundColor: '#0c1017',
         backgroundSize: 'cover',
         backgroundPosition: 'center'
@@ -150,86 +152,110 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-8 flex flex-col gap-8">
+    <div className="w-full max-w-7xl mx-auto px-4 py-6 flex flex-col gap-8">
       
-      {/* Hallmark Category Selector Header */}
-      <div className="flex flex-col items-center gap-4 text-center">
-        <div className="inline-flex bg-[#0d121f]/90 p-1.5 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-xl">
+      {/* 1. Hallmark-Style Sub-Navigation Bar (Categories & Occasions) */}
+      <div className="bg-[#0f1523]/90 backdrop-blur-xl p-3 rounded-2xl border border-amber-500/20 shadow-2xl flex flex-wrap items-center justify-center gap-2">
+        {[
+          { id: 'all', labelSo: 'Dhammaan (All)', labelEn: 'All E-Cards' },
+          { id: 'dhaqan', labelSo: '✨ Dhaqan & Aroos', labelEn: '✨ Dhaqan & Wedding' },
+          { id: 'cities', labelSo: '🌍 Geel iyo Guri', labelEn: '🌍 Cities & Nomadic' }
+        ].map((cat) => (
           <button
-            onClick={() => setActiveDeck('dhaqan')}
-            className={`px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 cursor-pointer ${
-              activeDeck === 'dhaqan'
-                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-lg shadow-amber-500/25 scale-[1.02]'
-                : 'text-gray-400 hover:text-white hover:bg-white/5'
+            key={cat.id}
+            onClick={() => setActiveCategory(cat.id)}
+            className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 cursor-pointer ${
+              activeCategory === cat.id
+                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-lg shadow-amber-500/30 scale-105'
+                : 'text-gray-300 hover:text-white hover:bg-white/5 border border-white/5'
             }`}
           >
-            ✨ Dhaqan Collection ({cardOptions.filter(c => c.category === 'dhaqan').length})
+            {currentLanguage === 'so' ? cat.labelSo : cat.labelEn}
           </button>
-          <button
-            onClick={() => setActiveDeck('cities')}
-            className={`px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 cursor-pointer ${
-              activeDeck === 'cities'
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25 scale-[1.02]'
-                : 'text-gray-400 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            🌍 Geel iyo Guri Vibes ({cardOptions.filter(c => c.category === 'cities').length})
-          </button>
-        </div>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
-        {/* Left Side: Hallmark E-Card Visual Gallery & Personalization Form */}
+        {/* 2. Left Column: Hallmark Filter Sidebar & Phone Mockup Grid Gallery */}
         <div className="lg:col-span-7 flex flex-col gap-6">
           
-          {/* Card Gallery Grid */}
-          <div className="bg-[#0d121f]/80 backdrop-blur-2xl p-6 sm:p-8 rounded-3xl border border-white/10 shadow-2xl">
-            <div className="flex justify-between items-center mb-4">
-              <div>
-                <h2 className="text-xl font-black text-white tracking-tight">
-                  {currentLanguage === 'so' ? '1. Xulo Naqshadda Kaarka 🎨' : '1. Choose E-Card Design 🎨'}
-                </h2>
-                <p className="text-xs text-gray-400 mt-1">
-                  {currentLanguage === 'so' ? 'Riix kaarka aad rabto si aad u eegto' : 'Tap any card below to preview & customize'}
-                </p>
-              </div>
+          {/* Filter Sidebar Mockup (Hallmark Style) */}
+          <div className="bg-[#0f1523]/80 backdrop-blur-2xl p-5 rounded-3xl border border-white/10 shadow-2xl flex items-center justify-between text-xs text-gray-400">
+            <span>Showing <strong className="text-amber-400">{filteredCards.length}</strong> Cultural Masterpieces</span>
+            <span className="text-amber-400 font-bold uppercase tracking-wider">🐪 Somalische Hiddaha Hub</span>
+          </div>
+
+          {/* Phone Mockup Grid Gallery */}
+          <div className="bg-[#0f1523]/90 backdrop-blur-2xl p-6 sm:p-8 rounded-3xl border border-amber-500/20 shadow-2xl">
+            <div className="mb-6">
+              <h2 className="text-xl font-black text-white tracking-tight">
+                {currentLanguage === 'so' ? '📱 Dooro Kaarkaaga (Phone Mockups)' : '📱 Choose E-Card Phone Gallery'}
+              </h2>
+              <p className="text-xs text-gray-400 mt-1">
+                {currentLanguage === 'so' ? 'Riix si aad toos ugu aragto live preview-ga' : 'Tap any phone mockup to load into the live studio'}
+              </p>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-h-[380px] overflow-y-auto pr-2 custom-scrollbar">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
               {filteredCards.map((card) => {
-                const isSelected = selectedCard.id === card.id;
+                const isSelected = selectedOccasion.id === card.id;
                 
                 return (
-                  <button
+                  <div
                     key={card.id}
-                    onClick={() => setSelectedCard(card)}
-                    className={`text-left p-4 rounded-2xl transition-all duration-300 border relative overflow-hidden flex flex-col justify-between h-40 shadow-xl group cursor-pointer ${
-                      isSelected 
-                        ? 'ring-2 ring-amber-400 border-amber-400 scale-[1.03] shadow-amber-500/20 shadow-2xl z-10' 
-                        : 'border-white/10 opacity-70 hover:opacity-100 hover:scale-[1.02] bg-black/40'
+                    onClick={() => setSelectedOccasion(card)}
+                    className={`group cursor-pointer flex flex-col items-center transition-all duration-300 ${
+                      isSelected ? 'scale-105' : 'opacity-80 hover:opacity-100 hover:scale-[1.02]'
                     }`}
-                    style={getCardStyle(card)}
                   >
-                    <div className="flex justify-between items-start z-10">
-                      <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-amber-300 border border-amber-400/30">
-                        {card.badge[langKey] || card.badge['en']}
-                      </span>
-                      {isSelected && <span className="text-amber-400 text-xs">✓</span>}
+                    {/* Realistic Phone Mockup */}
+                    <div className={`w-36 h-64 rounded-[2.5rem] p-2.5 bg-gray-950 border-4 transition-all duration-300 shadow-2xl relative flex flex-col justify-between ${
+                      isSelected ? 'border-amber-400 ring-4 ring-amber-400/40 shadow-amber-500/40' : 'border-gray-800 hover:border-amber-500/50'
+                    }`}>
+                      <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-3.5 bg-black rounded-full z-20 flex items-center justify-center">
+                        <div className="w-3 h-1 bg-gray-900 rounded-full"></div>
+                      </div>
+
+                      <div 
+                        className="w-full h-full rounded-[2rem] pt-6 pb-3 px-3 flex flex-col justify-between relative overflow-hidden text-white"
+                        style={getCardStyle(card)}
+                      >
+                        <div className="flex justify-between items-center z-10">
+                          <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-black/70 text-amber-300 border border-amber-400/30 uppercase">
+                            {card.badge[langKey] || card.badge['en']}
+                          </span>
+                          <span className="w-6 h-6 rounded-full bg-amber-500/20 backdrop-blur-md flex items-center justify-center text-[10px] text-amber-400 shadow">
+                            ▶
+                          </span>
+                        </div>
+
+                        <div className="text-center z-10 my-auto">
+                          <p className="text-[8px] uppercase tracking-wider text-amber-300 font-extrabold">HadiyadPay</p>
+                          <h4 className="text-xs font-black line-clamp-2 mt-0.5 drop-shadow">
+                            {card.title[langKey] || card.title['en']}
+                          </h4>
+                        </div>
+
+                        <div className="text-[8px] text-center text-amber-300/80 z-10 border-t border-white/10 pt-1 font-bold">
+                          {isSelected ? '✨ Active' : 'Select'}
+                        </div>
+                      </div>
                     </div>
-                    <span className="text-sm font-extrabold text-white leading-snug drop-shadow-md z-10">
+
+                    <span className={`text-xs font-bold mt-2.5 text-center line-clamp-1 ${isSelected ? 'text-amber-400 font-black' : 'text-gray-300 group-hover:text-white'}`}>
                       {card.title[langKey] || card.title['en']}
                     </span>
-                  </button>
+                  </div>
                 );
               })}
             </div>
           </div>
 
-          {/* Input Form Panel */}
-          <div className="bg-[#0d121f]/80 backdrop-blur-2xl p-6 sm:p-8 rounded-3xl border border-white/10 shadow-2xl flex flex-col gap-5">
+          {/* Customization Form */}
+          <div className="bg-[#0f1523]/90 backdrop-blur-2xl p-6 sm:p-8 rounded-3xl border border-white/10 shadow-2xl flex flex-col gap-5">
             <h2 className="text-xl font-black text-white tracking-tight">
-              {currentLanguage === 'so' ? '2. Geli Fariintaada ✍️' : '2. Personalize Your Card ✍️'}
+              {currentLanguage === 'so' ? '✍️ Shakhsiyeey Kaarkaaga' : '✍️ Personalize Your Message'}
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -241,7 +267,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                   type="text"
                   value={recipientName}
                   onChange={(e) => setRecipientName(e.target.value)}
-                  className="w-full px-4 py-3 text-sm rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400 text-white bg-black/40 font-medium placeholder-gray-600 shadow-inner"
+                  className="w-full px-4 py-3 text-sm rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400 text-white bg-black/50 font-medium shadow-inner"
                 />
               </div>
               <div>
@@ -252,34 +278,31 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                   type="text"
                   value={senderName}
                   onChange={(e) => setSenderName(e.target.value)}
-                  className="w-full px-4 py-3 text-sm rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400 text-white bg-black/40 font-medium placeholder-gray-600 shadow-inner"
+                  className="w-full px-4 py-3 text-sm rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400 text-white bg-black/50 font-medium shadow-inner"
                 />
               </div>
             </div>
 
             <div>
               <label className="block text-xs font-bold text-amber-400 uppercase tracking-wider mb-1.5">
-                {currentLanguage === 'so' ? 'FARRIINTA WANAAGSAN' : 'PERSONAL MESSAGE'}
+                {currentLanguage === 'so' ? 'FARRIINTA QIIRO LEH' : 'HEARTFELT MESSAGE'}
               </label>
               <textarea
                 rows={3}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                className="w-full px-4 py-3 text-sm rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400 text-white bg-black/40 font-medium placeholder-gray-600 shadow-inner"
+                className="w-full px-4 py-3 text-sm rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400 text-white bg-black/50 font-medium shadow-inner"
               />
             </div>
 
             <div>
               <div className="flex justify-between items-center mb-1.5">
                 <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider">
-                  {currentLanguage === 'so' ? 'SAWIR GAAR AH (IKHTIYAARI)' : 'ADD PHOTO (OPTIONAL)'}
+                  {currentLanguage === 'so' ? 'SAWIRKA QOFAALKA (IKHTIYAARI)' : 'UPLOAD PHOTO (OPTIONAL)'}
                 </label>
                 {uploadedImage && (
-                  <button 
-                    onClick={handleRemoveImage}
-                    className="text-xs text-rose-400 hover:text-rose-300 font-semibold cursor-pointer"
-                  >
-                    {currentLanguage === 'so' ? 'Tirtir sawirka' : 'Remove photo'}
+                  <button onClick={handleRemoveImage} className="text-xs text-rose-400 hover:text-rose-300 font-semibold cursor-pointer">
+                    {currentLanguage === 'so' ? 'Tirtir' : 'Remove'}
                   </button>
                 )}
               </div>
@@ -287,46 +310,50 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 type="file"
                 accept="image/*"
                 onChange={handleImageUpload}
-                className="w-full text-xs text-gray-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-amber-400/10 file:text-amber-400 hover:file:bg-amber-400/20 cursor-pointer bg-black/40 border border-white/10 rounded-xl"
+                className="w-full text-xs text-gray-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-amber-400/20 file:text-amber-300 hover:file:bg-amber-400/30 cursor-pointer bg-black/50 border border-white/10 rounded-xl"
               />
             </div>
 
+            {/* Hallmark Checkout Trigger Button */}
             <button
               onClick={() => setIsCheckoutOpen(true)}
-              className="w-full py-4 px-4 font-black rounded-2xl shadow-2xl transition-all duration-300 flex items-center justify-center gap-2 text-base text-black bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:brightness-110 shadow-amber-500/20 cursor-pointer uppercase tracking-wider mt-2"
+              className="w-full py-4 px-4 font-black rounded-2xl shadow-2xl transition-all duration-300 flex items-center justify-center gap-2 text-base text-black bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:brightness-110 shadow-amber-500/30 cursor-pointer uppercase tracking-wider mt-2"
             >
-              🚀 {currentLanguage === 'so' ? 'Dir Kaarka iyo Hadiyadda (€2.00)' : 'Send E-Card & Gift (€2.00)'}
+              🚀 {currentLanguage === 'so' ? 'Bixi €2.00 oo Dir Hadiyadda & Xawilaadda' : 'Pay €2.00 & Send Gift + Transfer'}
             </button>
           </div>
         </div>
 
-        {/* Right Side: Showcase Preview Card (Hallmark Visual Style) */}
+        {/* 3. Right Column: Large Cinematic Hallmark Studio Preview */}
         <div className="lg:col-span-5 sticky top-8">
-          <div className="bg-[#0d121f]/90 backdrop-blur-2xl p-6 rounded-3xl border border-white/10 shadow-2xl flex flex-col justify-between min-h-[560px]">
+          <div className="bg-[#0f1523]/95 backdrop-blur-2xl p-6 rounded-3xl border border-amber-500/20 shadow-2xl flex flex-col justify-between min-h-[600px]">
             
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
-                <span className="text-xs font-black text-gray-400 tracking-widest uppercase">
-                  LIVE HALLMARK PREVIEW ✨
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse shadow-lg shadow-amber-400/50"></span>
+                <span className="text-xs font-black text-amber-300 tracking-widest uppercase">
+                  ✨ LIVE STUDIO PREVIEW
                 </span>
               </div>
+              <span className="text-[10px] bg-amber-500/10 text-amber-400 px-2.5 py-1 rounded-lg border border-amber-500/30 font-bold">
+                HADIYADPAY EXCLUSIVE
+              </span>
             </div>
 
             <div 
-              className="w-full p-6 sm:p-8 rounded-2xl text-white shadow-2xl flex flex-col justify-between flex-grow my-2 relative overflow-hidden transition-all duration-500 border border-white/15"
-              style={getCardStyle(selectedCard)}
+              className="w-full p-6 sm:p-8 rounded-2xl text-white shadow-2xl flex flex-col justify-between flex-grow my-2 relative overflow-hidden transition-all duration-500 border border-white/20"
+              style={getCardStyle(selectedOccasion)}
             >
               <div className="flex justify-between items-center z-10">
-                <span className="text-[10px] tracking-widest uppercase bg-black/60 px-3 py-1 rounded-lg backdrop-blur-md font-black border border-amber-400/30 text-amber-300 shadow">
-                  HADIYADPAY • {selectedCard.badge[langKey] || selectedCard.badge['en']}
+                <span className="text-[10px] tracking-widest uppercase bg-black/70 px-3 py-1 rounded-lg backdrop-blur-md font-black border border-amber-400/40 text-amber-300 shadow">
+                  HADIYADPAY • {selectedOccasion.badge[langKey] || selectedOccasion.badge['en']}
                 </span>
-                <span className="text-lg">✨</span>
+                <span className="text-lg">🐪✨</span>
               </div>
 
               {uploadedImage && (
                 <div 
-                  className="my-3 rounded-xl overflow-hidden shadow-2xl h-44 border border-white/20 z-10 relative bg-black/70 cursor-grab active:cursor-grabbing select-none flex items-center justify-center"
+                  className="my-3 rounded-xl overflow-hidden shadow-2xl h-44 border border-white/20 z-10 relative bg-black/80 cursor-grab active:cursor-grabbing select-none flex items-center justify-center"
                   onWheel={handleWheel}
                   onMouseDown={handleMouseDown}
                   onMouseMove={handleMouseMove}
@@ -357,7 +384,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 </h3>
               </div>
 
-              <div className="bg-black/50 backdrop-blur-md p-5 rounded-2xl border border-white/15 my-2 shadow-2xl z-10">
+              <div className="bg-black/60 backdrop-blur-md p-5 rounded-2xl border border-white/15 my-2 shadow-2xl z-10">
                 <p className="text-sm italic font-light leading-relaxed text-gray-100">
                   &ldquo;{message}&rdquo;
                 </p>
@@ -394,14 +421,15 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
           </div>
         </div>
 
+        {/* 4. Fully Integrated Checkout Modal (Stripe + Remittance Deeplink Hand-off) */}
         <CheckoutModal
           isOpen={isCheckoutOpen}
           onClose={() => setIsCheckoutOpen(false)}
-          selectedOccasion={selectedCard}
+          selectedOccasion={selectedOccasion}
           recipientName={recipientName}
           senderName={senderName}
           message={message}
-          cardPrice={10}
+          cardPrice={2.00}
           initialLanguage={currentLanguage}
         />
       </div>
