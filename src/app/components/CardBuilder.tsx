@@ -136,29 +136,17 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
     alert(currentLanguage === 'so' ? 'Kaarka waa la keydiyey! 📥' : 'Card saved successfully! 📥');
   };
 
-  // Vrolijke, zachte Ceramic Cartoon Somali achtergronden en sferen per kaart
   const getCardStyle = (card: CardOption) => {
     if (card.bgImage) {
       return {
-        backgroundImage: `linear-gradient(to bottom, rgba(50,35,25,0.25), rgba(25,18,12,0.88)), url(${card.bgImage})`,
-        backgroundColor: '#2e241d',
+        backgroundImage: `linear-gradient(to bottom, rgba(40,28,18,0.35), rgba(20,14,9,0.9)), url(${card.bgImage})`,
+        backgroundColor: '#261e16',
         backgroundSize: 'cover',
         backgroundPosition: 'center'
       };
     }
-    
-    // Warme keramische aardetinten en terracotta cartoon gradients
-    const ceramicGradients: Record<string, string> = {
-      'dhalasho': 'linear-gradient(135deg, #e11d48 0%, #fb7185 50%, #fda4af 100%)', // Vrolijke terracotta roze
-      'aroos': 'linear-gradient(135deg, #b45309 0%, #d97706 50%, #fef3c7 100%)', // Keramisch goud & klei
-      'eid': 'linear-gradient(135deg, #065f46 0%, #059669 50%, #a7f3d0 100%)', // Zacht smaragdgroen
-      'guul': 'linear-gradient(135deg, #5b21b6 0%, #7c3aed 50%, #ddd6fe 100%)', // Prachtig keramisch paars
-      'jacayl': 'linear-gradient(135deg, #9f1239 0%, #e11d48 50%, #fecdd3 100%)', // Romantisch klei-rood
-      'mahadsanid': 'linear-gradient(135deg, #92400e 0%, #b45309 50%, #fde68a 100%)', // Aardetint oker
-    };
-
     return {
-      background: card.gradient || ceramicGradients[card.id] || 'linear-gradient(135deg, #b45309 0%, #78350f 100%)'
+      background: card.gradient || 'linear-gradient(135deg, #b45309 0%, #78350f 100%)'
     };
   };
 
@@ -186,20 +174,15 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
         ))}
       </div>
 
-      {/* Hoofdlayout: Links het raster met Ceramic Cartoon kaarten, Rechts de Preview & Formulier */}
+      {/* Hoofdlayout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start w-full">
         
         {/* Linkerzijde: 3-Koloms Raster met Ceramic Cartoon Kaarten */}
         <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-6">
-          <div className="bg-white/90 backdrop-blur-xl p-5 rounded-3xl border border-stone-200 shadow-sm flex items-center justify-between text-xs text-stone-600 font-bold">
-            <span>Showing <strong className="text-stone-900 font-black text-sm">{filteredCards.length}</strong> Ceramic Somali E-Cards</span>
-            <span className="text-amber-700 uppercase tracking-wider">Artisan Cartoon Collection</span>
-          </div>
-
           <div className="bg-white/95 backdrop-blur-2xl p-6 sm:p-10 rounded-3xl border border-stone-200 shadow-xl">
             <div className="mb-8">
               <h2 className="text-2xl font-black text-stone-900 tracking-tight">
-                {currentLanguage === 'so' ? 'Dooro Kaarka (Select Ceramic Card)' : 'Somali Ceramic Cartoon Collection'}
+                {currentLanguage === 'so' ? 'Soomaali Ceramic Cartoon Collection' : 'Somali Ceramic Cartoon Collection'}
               </h2>
               <p className="text-xs text-stone-500 mt-1">
                 Click any phone mockup below to preview and customize your cultural ceramic greeting card.

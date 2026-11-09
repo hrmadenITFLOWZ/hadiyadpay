@@ -3,197 +3,138 @@ export interface CardOption {
   category: 'dhaqan' | 'cities';
   badge: { so: string; en: string };
   title: { so: string; en: string };
+  gradient?: string;
+  bgImage?: string;
   defaultRecipient: { so: string; en: string };
   defaultSender: { so: string; en: string };
   defaultMessage: { so: string; en: string };
-  gradient?: string;
-  bgImage?: string;
 }
 
 export const cardOptions: CardOption[] = [
-  // --- DECK 1: Dhaqan Vibes ---
   {
     id: 'dhalasho',
     category: 'dhaqan',
-    badge: { so: 'DHALASHO', en: 'BIRTHDAY' },
-    title: { so: 'Dhalasho Wacan 🎉✨', en: 'Birthday Celebration 🎉✨' },
-    defaultRecipient: { so: 'Saxiib Qaali 🎂', en: 'Dear Friend 🎂' },
-    defaultSender: { so: 'Walaalkaa / Saaxiibkaa ✨', en: 'Your Friend ✨' },
-    defaultMessage: {
-      so: 'Waxaan kuu rajeynayaa caafimaad, barako, iyo sannad kale oo ay ka buuxaan farxad, qosol, iyo guul weyn. 🎉✨',
-      en: 'Wishing you health, blessings, and another year filled with happiness, laughter, and great success.'
-    },
-    gradient: 'linear-gradient(135deg, #be185d 0%, #9f1239 100%)'
+    badge: { so: 'DHALASHO 🎂', en: 'BIRTHDAY 🎂' },
+    title: { so: 'Dhalasho Wacan', en: 'Somali Ceramic Birthday' },
+    // Warme keramische cartoon stijl met feestelijke elementen
+    bgImage: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=800&auto=format&fit=crop',
+    defaultRecipient: { so: 'Saxiib Qaali', en: 'Dear Friend' },
+    defaultSender: { so: 'Walaalkaa / Saaxiibkaa', en: 'Your Friend' },
+    defaultMessage: { 
+      so: 'Waxaan kuu rajeynayaa caafimaad, barako, iyo sannad kale oo ay ka buuxaan farxad, qosol, iyo guul weyn. 🎂✨', 
+      en: 'Wishing you health, blessings, and another year filled with immense joy and success! 🎂✨' 
+    }
   },
   {
     id: 'aroos',
     category: 'dhaqan',
-    badge: { so: 'AROOS', en: 'WEDDING' },
-    title: { so: 'Xaflada Arooska 💍🕊️', en: 'Wedding & Union 💍🕊️' },
-    defaultRecipient: { so: 'Lamaanaha Cusub 💍', en: 'The Happy Couple 💍' },
-    defaultSender: { so: 'Asxaabtaada & Ehelka 💛', en: 'Friends & Loved Ones 💛' },
-    defaultMessage: {
-      so: 'Hambalyo arooska ku saabsan! Allah idinka yeero kuwii isu waara ee hela guri barako leh. 💍🕊️',
-      en: 'Congratulations on your wedding! May Allah bless your union and fill your home with peace and joy.'
-    },
-    gradient: 'linear-gradient(135deg, #b45309 0%, #78350f 100%)'
+    badge: { so: 'AROOS 🏺', en: 'WEDDING 🏺' },
+    title: { so: 'Xaflada Arooska', en: 'Traditional Ceramic Wedding' },
+    // Keramische aardetinten met traditionele bruiloftsfeer
+    bgImage: 'https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800&auto=format&fit=crop',
+    defaultRecipient: { so: 'Arooska iyo Ardo', en: 'Bride & Groom' },
+    defaultSender: { so: 'Qoyskaaga', en: 'Your Family' },
+    defaultMessage: { 
+      so: 'Hambalyo! Illahay ha idinka dhigo kuwii isku waara ee isu naxariista, gurigooduna noqdo mid barako leh. 🏺💍', 
+      en: 'Congratulations! May Allah bless your union and fill your home with everlasting peace and happiness. 🏺💍' 
+    }
   },
   {
     id: 'eid',
     category: 'dhaqan',
-    badge: { so: 'EID', en: 'EID' },
-    title: { so: 'Eid Mubarak 🌙⭐', en: 'Eid Mubarak 🌙⭐' },
-    defaultRecipient: { so: 'Saxiibkey Qaali 🌙', en: 'Dear Friend 🌙' },
-    defaultSender: { so: 'Saaxiibkaaga ka maqan ⭐', en: 'Your Friend Abroad ⭐' },
-    defaultMessage: {
-      so: 'Eid Mubaarak! Waxaan kuu rajeynayaa adiga iyo dadkaaga ku hareeraysan nabad, caafimaad, iyo barako badan. 🌙⭐',
-      en: 'Eid Mubarak! May this joyous occasion bring peace, happiness, and prosperity to you and your loved ones.'
-    },
-    gradient: 'linear-gradient(135deg, #047857 0%, #065f46 100%)'
+    badge: { so: 'EID MUBARAK 🌙', en: 'EID MUBARAK 🌙' },
+    title: { so: 'Ciid Wacan', en: 'Ceramic Eid Mubarak' },
+    // Smaragdgroene keramische sfeer met feestelijke patronen
+    bgImage: 'https://images.unsplash.com/photo-1564769625905-50e936150255?q=80&w=800&auto=format&fit=crop',
+    defaultRecipient: { so: 'Dhamaan Qoyska', en: 'Family & Loved Ones' },
+    defaultSender: { so: 'Aden & Qoyska', en: 'Aden & Family' },
+    defaultMessage: { 
+      so: 'Ciid Mubaarak! Illahay ha aqbalo amalkeenna suubban, idinkuna ciidda nabad iyo caafimaad ku gaadha. 🌙✨', 
+      en: 'Eid Mubarak! May Allah accept our good deeds and bring peace and prosperity to your household. 🌙✨' 
+    }
   },
   {
     id: 'taageero',
-    category: 'dhaqan',
-    badge: { so: 'TAAGEERO', en: 'SUPPORT' },
-    title: { so: 'Taageero & Dhiirigelin 💪', en: 'Support & Encouragement 💪' },
-    defaultRecipient: { so: 'Aqoonyahan Qaali 💪', en: 'Dear Friend 💪' },
-    defaultSender: { so: 'Taageerahaaga Joogtada ah 🤝', en: 'Your Constant Supporter 🤝' },
-    defaultMessage: {
-      so: 'Waan kugula jirbaa mar walba. Ha welwelin, si adag u soco oo guushu waa kuu dhowdahay! 💪',
-      en: 'I am always supporting you. Keep your head up, stay strong, and success is right around the corner!'
-    },
-    gradient: 'linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%)'
+    category: 'cities',
+    badge: { so: 'TAAGEERO 🤝', en: 'SUPPORT 🤝' },
+    title: { so: 'Taageero & Dhiirigelin', en: 'Nomadic Heritage Support' },
+    // Warme terracotta nomadische landschappen
+    bgImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=800&auto=format&fit=crop',
+    defaultRecipient: { so: 'Saxiibkey', en: 'My Friend' },
+    defaultSender: { so: 'Walaalkii', en: 'Your Brother' },
+    defaultMessage: { 
+      so: 'Mar walba garabkaaga ayaan taaganahay. Guul iyo gobanimo ayaan kuu rajeynayaa hawlahaaga cusub! 🤝🌟', 
+      en: 'Always standing by your side. Wishing you strength, success, and prosperity in all your endeavors! 🤝🌟' 
+    }
   },
   {
     id: 'guul',
-    category: 'dhaqan',
-    badge: { so: 'GUUL', en: 'SUCCESS' },
-    title: { so: 'Qalinjabin & Guul 🎓🚀', en: 'Graduation & Success 🎓🚀' },
-    defaultRecipient: { so: 'Dr. / Injineer Cusub 🎓', en: 'Graduate Star 🎓' },
-    defaultSender: { so: 'Taageerahaaga Gaarka ah 🚀', en: 'Your Proud Supporter 🚀' },
-    defaultMessage: {
-      so: 'Hambalyo heerkan sare aad ka gaartay! Waxaan kuu rajeynayaa mustaqbal ifaya iyo guulo waaweyn. 🎓🚀',
-      en: 'Congratulations on your incredible achievement! Wishing you a bright future and endless successes.'
-    },
-    gradient: 'linear-gradient(135deg, #6b21a8 0%, #581c87 100%)'
+    category: 'cities',
+    badge: { so: 'GUUL 🎓', en: 'SUCCESS 🎓' },
+    title: { so: 'Qalinjabin & Guul', en: 'Ceramic Graduation & Success' },
+    // Diep keramisch paars/goud
+    bgImage: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=800&auto=format&fit=crop',
+    defaultRecipient: { so: 'Ardayga Guuleystay', en: 'Graduate' },
+    defaultSender: { so: 'Qoyska oo idil', en: 'Proud Family' },
+    defaultMessage: { 
+      so: 'Hambalyo qalinjabinta! Tani waa bilowga safar dheer oo ay ka buuxaan guulo waaweyn iyo mustaqbal dhalaalaya. 🎓🎉', 
+      en: 'Congratulations on your graduation! This is just the beginning of an amazing journey of success. 🎓🎉' 
+    }
   },
   {
-    id: 'mahadcelin',
+    id: 'mahadsanid',
     category: 'dhaqan',
-    badge: { so: 'MAHAD', en: 'THANKS' },
-    title: { so: 'Mahadcelin Wacan 🙏💛', en: 'Heartfelt Thanks 🙏💛' },
-    defaultRecipient: { so: 'Saxiibka Wanaagsan 🙏', en: 'Kind Friend 🙏' },
-    defaultSender: { so: 'Mahadsanid Qaali 💛', en: 'Grateful Friend 💛' },
-    defaultMessage: {
-      so: 'Waan ka mahadcelinayaa garab istaaggaaga iyo wanaaggaaga joogtada ah. Alle ha ku xafido! 🙏💛',
-      en: 'Thank you so much for your constant support and kindness. May God protect you!'
-    },
-    gradient: 'linear-gradient(135deg, #b45309 0%, #92400e 100%)'
+    badge: { so: 'MAHADSANID 🤎', en: 'THANK YOU 🤎' },
+    title: { so: 'Mahadcelin Wacan', en: 'Artisan Clay Thank You' },
+    // Warme aardetinten en klei-effecten
+    bgImage: 'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?q=80&w=800&auto=format&fit=crop',
+    defaultRecipient: { so: 'Qof Qaali ah', en: 'Special Person' },
+    defaultSender: { so: 'Mahadsanid', en: 'With Gratitude' },
+    defaultMessage: { 
+      so: 'Waan uga mahadcelinayaa garab istaaggaaga iyo deeqsinimadaada. Illahay ha kaa abaalmariyo khayr. 🤎🙏', 
+      en: 'Deeply thankful for your constant support and kindness. Wishing you the absolute best. 🤎🙏' 
+    }
   },
   {
     id: 'barako',
-    category: 'dhaqan',
-    badge: { so: 'BARAKO', en: 'BLESSINGS' },
-    title: { so: 'Barako & Nabad 🌟🤲', en: 'Blessings & Peace 🌟🤲' },
-    defaultRecipient: { so: 'Asxaabta Qaali ah 🌟', en: 'Dear Friends 🌟' },
-    defaultSender: { so: 'Duco & Salaam 🤲', en: 'Prayers & Blessings 🤲' },
-    defaultMessage: {
-      so: 'Maalintaan qiimaha badan waxaa ka buuxa duco iyo barako adiga iyo dadkaaga ku Xiga ku socota. 🌟🤲',
-      en: 'Sending you prayers and blessings for a peaceful and joyous day ahead.'
-    },
-    gradient: 'linear-gradient(135deg, #0f766e 0%, #115e59 100%)'
-  },
-
-  // --- DECK 2: Geel iyo Guri Vibes ---
-  {
-    id: 'mogadishu',
     category: 'cities',
-    badge: { so: 'CAASIMADDA', en: 'CAPITAL VIBES' },
-    title: { so: 'Caasimadda Sunset 🌇', en: 'Golden Hour Sunset 🌇' },
-    defaultRecipient: { so: 'Ehelka & Asxaabta Qaali 🌇', en: 'Dear Friends & Family 🌇' },
-    defaultSender: { so: 'Saaxiibkaaga fog 🌊', en: 'From Afar 🌊' },
-    defaultMessage: {
-      so: 'Salaan diirran oo ka soo jeeda caasimadda taariikhiga ah ee quruxda badan. Habeen wacan! 🌇🌊',
-      en: 'Warm greetings straight from the historic coastal capital. Good evening!'
-    },
-    bgImage: 'https://images.unsplash.com/photo-1516026662394-266d5b060609?q=80&w=1000&auto=format&fit=crop'
+    badge: { so: 'BARAKO 🐪', en: 'BLESSINGS 🐪' },
+    title: { so: 'Barako & Nabad', en: 'Nomadic Life & Peace' },
+    // Prachtige nomadische sfeer met geel en baadiye
+    bgImage: 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?q=80&w=800&auto=format&fit=crop',
+    defaultRecipient: { so: 'Reer Xamar / Reer Baadiye', en: 'Dear Family' },
+    defaultSender: { so: 'Qoyska Yurub', en: 'The Family Abroad' },
+    defaultMessage: { 
+      so: 'Nabad, barako, iyo caafimaad ha dego gurigiinna. Waxaan idinkoo nabad qaba idiin rajeynayaa maalin wacan. 🐪🌿', 
+      en: 'May peace, blessings, and good health dwell in your home. Wishing you a wonderful day ahead. 🐪🌿' 
+    }
   },
   {
-    id: 'hargeisa',
+    id: 'caasimadda',
     category: 'cities',
-    badge: { so: 'BUURAHA', en: 'HIGHLANDS' },
-    title: { so: 'Dhulka Buuraleyda ah ⛰️', en: 'Scenic Hills ⛰️' },
-    defaultRecipient: { so: 'Asxaabta Wanaagsan ⛰️', en: 'Special Friends ⛰️' },
-    defaultSender: { so: 'Saaxiibkaaga fog ✨', en: 'Your Friend ✨' },
-    defaultMessage: {
-      so: 'Hambalyo iyo salaan qaali ah oo ka timid buuraha iyo jawiga degan. ⛰️✨',
-      en: 'Special greetings and love sent from the iconic hills and cool breeze.'
-    },
-    bgImage: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1000&auto=format&fit=crop'
+    badge: { so: 'CAASIMADDA 🌆', en: 'CITY LIGHTS 🌆' },
+    title: { so: 'Caasimadda Sunset', en: 'Mogadishu Sunset Vibes' },
+    // Warme zonsondergang over de kust/stad
+    bgImage: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800&auto=format&fit=crop',
+    defaultRecipient: { so: 'Asxaabta Xeepta', en: 'Beach Friends' },
+    defaultSender: { so: 'Salaan diirran ✨', en: 'Warm Greetings' },
+    defaultMessage: { 
+      so: 'Xeepta caanka ah iyo habeennada jawiga macaan leh. Nabad iyo caafimaad! 🌅☕', 
+      en: 'The legendary breeze and cozy nights. Wishing you peace and wonderful times! 🌅☕' 
+    }
   },
   {
-    id: 'kismayo',
+    id: 'buuraleyda',
     category: 'cities',
-    badge: { so: 'XEEBTA', en: 'COASTAL BREEZE' },
-    title: { so: 'Jubbada Palms 🌴', en: 'Tropical Coast 🌴' },
-    defaultRecipient: { so: 'Asxaabta Xeebta 🌴', en: 'Coastal Friends 🌴' },
-    defaultSender: { so: 'Walaalkaa ☀️', en: 'Your Brother ☀️' },
-    defaultMessage: {
-      so: 'Dabaylaha qabow ee xeebta iyo caleemaha timirta. Maalin wacan oo farxad leh! 🌴☀️',
-      en: 'Cool tropical breeze and palm trees. Wishing you a wonderful day!'
-    },
-    bgImage: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1000&auto=format&fit=crop'
-  },
-  {
-    id: 'geel',
-    category: 'cities',
-    badge: { so: 'HIDDE & DHAQAN', en: 'NOMADIC VIBES' },
-    title: { so: 'Baadiye & Geel 🐪', en: 'Nomadic Horizon 🐪' },
-    defaultRecipient: { so: 'Geeljiraha Guud 🐪', en: 'Nomadic Community 🐪' },
-    defaultSender: { so: 'Hiddaha & Dhaqanka 🌾', en: 'Heritage Lover 🌾' },
-    defaultMessage: {
-      so: 'Nolol baadiye, hiddaha iyo dhaqanka suuban. Barako iyo nabad! 🐪🌾',
-      en: 'Pure nomadic heritage and desert horizon vibes. Sending peace and traditional blessings!'
-    },
-    bgImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=1000&auto=format&fit=crop'
-  },
-  {
-    id: 'bosaso',
-    category: 'cities',
-    badge: { so: 'DEKADDA', en: 'PORT CITY' },
-    title: { so: 'Dekadda Ganacsiga ⚓', en: 'Seaside Port ⚓' },
-    defaultRecipient: { so: 'Asxaabta Dekadda ⚓', en: 'Port Friends ⚓' },
-    defaultSender: { so: 'Ganacsade / Saaxiib 🌊', en: 'Your Partner 🌊' },
-    defaultMessage: {
-      so: 'Badda iyo hawada diirran ee dekadda ganacsiga. Xusuus qaas ah! ⚓🌊',
-      en: 'The sea breeze and warm greetings from the bustling port city.'
-    },
-    bgImage: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop'
-  },
-  {
-    id: 'berbera',
-    category: 'cities',
-    badge: { so: 'XEEBTA CAS', en: 'BEACH NIGHTS' },
-    title: { so: 'Habeenada Xeebta 🌊', en: 'Coastal Breeze 🌊' },
-    defaultRecipient: { so: 'Asxaabta Xeebta 🌊', en: 'Beach Friends 🌊' },
-    defaultSender: { so: 'Salaan diirran ✨', en: 'Warm Greetings ✨' },
-    defaultMessage: {
-      so: 'Xeebta caanka ah iyo habeenada jawiga macaan leh. Nabad iyo caafimaad! 🌙✨',
-      en: 'The stunning coastline and magical night atmosphere. Peace and love!'
-    },
-    bgImage: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?q=80&w=1000&auto=format&fit=crop'
-  },
-  {
-    id: 'galkayo',
-    category: 'cities',
-    badge: { so: 'BARTAMAHA', en: 'HEARTLAND' },
-    title: { so: 'Bartamaha Dalka ✨', en: 'Heart of the Region ✨' },
-    defaultRecipient: { so: 'Asxaabta Qaali ✨', en: 'Dear Friends ✨' },
-    defaultSender: { so: 'Wadajir & Nabad 💫', en: 'Solidarity 💫' },
-    defaultMessage: {
-      so: 'Fariin diirran iyo salaan wadajir ah oo ka timid bartamaha dalka. Guul iyo barako! 💫🏙️',
-      en: 'A warm message and greetings sent straight from the vibrant heart of the region.'
-    },
-    bgImage: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?q=80&w=1000&auto=format&fit=crop'
+    badge: { so: 'DHULKA HOOYO ⛰️', en: 'HOMELAND ⛰️' },
+    title: { so: 'Dhulka Buuraleyda ah', en: 'Mountain Homeland Vibes' },
+    // Prachtige natuur en bergen
+    bgImage: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=800&auto=format&fit=crop',
+    defaultRecipient: { so: 'Dhamaan Ehelka', en: 'All Relatives' },
+    defaultSender: { so: 'Qoraa Digfeer', en: 'From Afar' },
+    defaultMessage: { 
+      so: 'Hawa-mareenka iyo cimilada wacan ee dhulka hooyo. Xasuus iyo jacayl badan baan idinka soo dirayaa! ⛰️💚', 
+      en: 'Thinking of the breathtaking landscapes and homelands. Sending so much love and memories your way! ⛰️💚' 
+    }
   }
 ];
