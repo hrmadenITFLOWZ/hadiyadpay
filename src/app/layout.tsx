@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "HadiyadPay | Personalized Digital Greetings",
-  description: "Create and send thoughtful, customized digital greeting cards and celebratory moments to your loved ones.",
+  title: "HadiyadPay | Digital Greetings & Cultural Experiences",
+  description: "Create and send thoughtful, customized digital greeting cards blended with heritage and modern warmth.",
   metadataBase: new URL('https://www.hadiyadpay.com'),
   openGraph: {
     title: 'HadiyadPay | Personalized Digital Greetings & E-Cards',
@@ -38,7 +38,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="so">
+    <html lang="so" className="dark">
       <head>
         <meta property="og:image" content="https://www.hadiyadpay.com/images/logo.jpg" />
         <meta property="og:image:secure_url" content="https://www.hadiyadpay.com/images/logo.jpg" />
@@ -47,11 +47,12 @@ export default function RootLayout({
         <meta property="og:image:height" content="630" />
       </head>
       <body 
+        className={`${inter.className} text-gray-100 min-h-screen antialiased selection:bg-amber-500 selection:text-black`}
         style={{ 
-          backgroundColor: '#e4e4e7', 
-          backgroundImage: 'radial-gradient(circle at 50% 10%, #f4f4f5 0%, #d4d4d8 60%, #a1a1aa 100%)' 
+          backgroundColor: '#07090e', 
+          backgroundImage: 'radial-gradient(circle at 50% 0%, #131b2e 0%, #07090e 70%, #030406 100%)',
+          backgroundAttachment: 'fixed'
         }}
-        className={`${inter.className} text-gray-900 min-h-screen antialiased selection:bg-emerald-600 selection:text-white`}
       >
         {children}
       </body>
