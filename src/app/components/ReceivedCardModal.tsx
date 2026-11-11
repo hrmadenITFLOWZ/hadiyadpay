@@ -20,28 +20,34 @@ interface ReceivedCardModalProps {
   currentLanguage: Language;
 }
 
+const MAX_LEGACY_PAYLOAD_LENGTH = 4096;
+const ALLOWED_LEGACY_KEYS = new Set(['c', 't', 'f', 'm']);
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function decodeCardData(encodedData: string | null): ReceivedCardData | null {
-  if (!encodedData || encodedData.length > 65536) return null;
+  if (!encodedData || encodedData.length === 0 || encodedData.length > MAX_LEGACY_PAYLOAD_LENGTH) return null;
+  if (!/^[A-Za-z0-9_-]+$/.test(encodedData)) return null;
 
   try {
-    const json = decodeURIComponent(atob(encodedData));
+    const normalized = encodedData.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+    const json = decodeURIComponent(atob(padded));
     const parsed: unknown = JSON.parse(json);
 
     if (!isRecord(parsed)) return null;
+    if (Object.keys(parsed).length !== ALLOWED_LEGACY_KEYS.size) return null;
+    if (!Object.keys(parsed).every((key) => ALLOWED_LEGACY_KEYS.has(key))) return null;
 
     const card = cardOptions.find((option) => option.id === parsed.c);
-    if (
-      !card ||
-      typeof parsed.t !== 'string' ||
-      typeof parsed.f !== 'string' ||
-      typeof parsed.m !== 'string'
-    ) {
+    if (!card || typeof parsed.t !== 'string' || typeof parsed.f !== 'string' || typeof parsed.m !== 'string') {
       return null;
     }
+
+    if (parsed.t.length > 80 || parsed.f.length > 80 || parsed.m.length > 800) return null;
+    if (parsed.t.trim().length === 0 || parsed.f.trim().length === 0 || parsed.m.trim().length === 0) return null;
 
     return {
       cardId: card.id,
@@ -50,7 +56,6 @@ function decodeCardData(encodedData: string | null): ReceivedCardData | null {
       msg: parsed.m,
     };
   } catch {
-    console.warn('Invalid received-card link.');
     return null;
   }
 }
@@ -133,9 +138,7 @@ export default function ReceivedCardModal({ currentLanguage }: ReceivedCardModal
           </p>
         </div>
 
-        <div
-          className="w-full p-6 rounded-2xl text-white shadow-2xl flex flex-col justify-between relative overflow-hidden min-h-[340px]"
-        >
+        <div className="w-full p-6 rounded-2xl text-white shadow-2xl flex flex-col justify-between relative overflow-hidden min-h-[340px]">
           <CardArtworkLayer artwork={selectedCardOption.artwork} language={cardLang} />
           <div className="flex justify-between items-center z-10">
             <span className="text-[10px] tracking-widest uppercase bg-black/30 px-3 py-1 rounded-md backdrop-blur-md font-bold border border-white/20">
