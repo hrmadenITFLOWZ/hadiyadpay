@@ -1,17 +1,37 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { cardOptions } from "./data/cardOptions";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
+const metadataBase = new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.hadiyadpay.com');
+const cardCatalogJsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: "HadiyadPay digital greeting cards",
+  numberOfItems: cardOptions.length,
+  itemListOrder: "https://schema.org/ItemListOrderAscending",
+  itemListElement: cardOptions.map((card, index) => ({
+    "@type": "ListItem",
+    position: index + 1,
+    name: card.title.en,
+  })),
+}).replace(/</g, "\\u003c");
 
 export const metadata: Metadata = {
-  title: "HadiyadPay | Digital Greetings & Cultural Experiences",
-  description: "Create and send thoughtful, customized digital greeting cards blended with heritage and modern warmth.",
-  metadataBase: new URL('https://www.hadiyadpay.com'),
+  title: {
+    default: 'HadiyadPay | Digitale kaarten voor bijzondere momenten',
+    template: '%s | HadiyadPay',
+  },
+  description: 'Maak en deel een persoonlijke digitale kaart voor een bijzonder moment.',
+  metadataBase,
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
-    title: 'HadiyadPay | Personalized Digital Greetings & E-Cards',
-    description: 'Create and send thoughtful, customized digital greeting cards and celebratory moments to your loved ones.',
-    url: 'https://www.hadiyadpay.com',
+    title: 'HadiyadPay | Digitale kaarten voor bijzondere momenten',
+    description: 'Maak en deel een persoonlijke digitale kaart voor een bijzonder moment.',
+    url: '/',
     siteName: 'HadiyadPay',
     images: [
       {
@@ -21,14 +41,21 @@ export const metadata: Metadata = {
         alt: 'HadiyadPay Logo Preview',
       },
     ],
-    locale: 'so_SO',
+    locale: 'nl_NL',
     type: 'website',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  icons: {
+    icon: '/favicon.ico',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'HadiyadPay | Personalized Digital Greetings',
-    description: 'Create and send thoughtful, customized digital greeting cards and celebratory moments to your loved ones.',
-    images: ['https://www.hadiyadpay.com/images/logo.jpg'],
+    title: 'HadiyadPay | Digitale kaarten voor bijzondere momenten',
+    description: 'Maak en deel een persoonlijke digitale kaart voor een bijzonder moment.',
+    images: ['/images/logo.jpg'],
   },
 };
 
@@ -38,22 +65,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="so" className="dark">
-      <head>
-        <meta property="og:image" content="https://www.hadiyadpay.com/images/logo.jpg" />
-        <meta property="og:image:secure_url" content="https://www.hadiyadpay.com/images/logo.jpg" />
-        <meta property="og:image:type" content="image/jpeg" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-      </head>
-      <body 
-        className={`${inter.className} text-gray-100 min-h-screen antialiased selection:bg-amber-500 selection:text-black`}
-        style={{ 
-          backgroundColor: '#07090e', 
-          backgroundImage: 'radial-gradient(circle at 50% 0%, #131b2e 0%, #07090e 70%, #030406 100%)',
-          backgroundAttachment: 'fixed'
-        }}
-      >
+    <html lang="so">
+      <body className={`${inter.className} min-h-screen bg-background text-foreground antialiased selection:bg-amber-200 selection:text-[#203b32]`}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: cardCatalogJsonLd }}
+        />
         {children}
       </body>
     </html>

@@ -1,106 +1,142 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { Suspense, useEffect, useState } from 'react';
+import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
 import CardBuilder from './components/CardBuilder';
 import ReceivedCardModal from './components/ReceivedCardModal';
 
 type Language = 'so' | 'en' | 'nl';
 
-export default function Home() {
-  const [currentLanguage, setCurrentLanguage] = useState<Language>('so');
+const content: Record<Language, { title: string; banner: string; desc: string; skip: string }> = {
+  so: {
+    title: 'HadiyadPay | Kaararka Salaanta Dijitaalka ah',
+    banner: '✨ Ku soo dhowow HadiyadPay • Kaararka Salaanta Dijitaalka ah',
+    desc: 'Samee oo la wadaag kaar salaaneed dijitaal ah oo loogu talagalay munaasabad gaar ah.',
+    skip: 'U gudub nuxurka',
+  },
+  en: {
+    title: 'HadiyadPay | Digital Greeting Cards',
+    banner: '✨ Welcome to HadiyadPay • Digital Greeting Cards',
+    desc: 'Create and share a personalized digital greeting card for a special moment.',
+    skip: 'Skip to content',
+  },
+  nl: {
+    title: 'HadiyadPay | Digitale kaarten voor bijzondere momenten',
+    banner: '✨ Welkom bij HadiyadPay • Digitale kaarten voor bijzondere momenten',
+    desc: 'Maak en deel een persoonlijke digitale kaart voor een bijzonder moment.',
+    skip: 'Ga naar de inhoud',
+  },
+};
 
-  const content = {
-    so: {
-      title: 'HadiyadPay | E-Cards & Xawilaad Dhaqameed',
-      banner: '✨ Ku soo dhowow HadiyadPay • Xarunta E-Cards & Hadiyadaha Dhaqanka',
-      heading: 'Salaamo Dijitaal ah & Waayo-aragnimo',
-      desc: 'Abuur oo u dir salaamo dijitaal ah oo qiimo leh, oo ay ku lammaan tahay xawilaad degdeg ah.'
-    },
-    en: {
-      title: 'HadiyadPay | Cultural E-Cards & Instant Remittance',
-      banner: '✨ Welcome to HadiyadPay • Heritage E-Cards & Celebration Hub',
-      heading: 'Digital Greetings & Cultural Experiences',
-      desc: 'Create and send thoughtful digital greeting cards seamlessly integrated with instant remittance.'
-    },
-    nl: {
-      title: 'HadiyadPay | Culturele E-Cards & Overboeking',
-      banner: '✨ Welkom bij HadiyadPay • Culturele E-Cards & Vieringen Platform',
-      heading: 'Digitale Groeten & Culturele Ervaring',
-      desc: 'Creëer doordachte digitale wenskaarten gecombineerd met directe overboekingen.'
-    }
-  };
+const navigation: Record<Language, { label: string; occasions: string; cards: string; top: string; language: string }> = {
+  so: { label: 'Hagidda bogga', occasions: 'Munaasabadaha', cards: 'Kaararka', top: 'Bilowga bogga', language: 'Dooro luqadda' },
+  en: { label: 'Main navigation', occasions: 'Occasions', cards: 'Cards', top: 'Back to top', language: 'Choose language' },
+  nl: { label: 'Hoofdnavigatie', occasions: 'Gelegenheden', cards: 'Kaarten', top: 'Naar boven', language: 'Kies een taal' },
+};
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const langParam = params.get('lang') as Language;
-    if (langParam === 'so' || langParam === 'en' || langParam === 'nl') {
-      setCurrentLanguage(langParam);
-    }
-  }, []);
+function isLanguage(value: string | null): value is Language {
+  return value === 'so' || value === 'en' || value === 'nl';
+}
+
+function HomeContent() {
+  const searchParams = useSearchParams();
+  const queryLanguage = searchParams.get('lang');
+  const [selectedLanguage, setSelectedLanguage] = useState<Language | null>(null);
+  const currentLanguage = selectedLanguage ?? (isLanguage(queryLanguage) ? queryLanguage : 'so');
 
   useEffect(() => {
     document.title = content[currentLanguage].title;
-    let metaDesc = document.querySelector('meta[name="description"]');
+    document.documentElement.lang = currentLanguage;
+    const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) {
       metaDesc.setAttribute('content', content[currentLanguage].desc);
     }
   }, [currentLanguage]);
 
   return (
-    <main 
-      className="min-h-screen text-stone-800 selection:bg-amber-400 selection:text-stone-900 pb-20 relative overflow-x-hidden"
-      style={{
-        backgroundColor: '#faf8f5',
-        backgroundImage: 'radial-gradient(circle at 50% 0%, #fffbf5 0%, #f7f3ed 60%, #eee8df 100%)',
-        backgroundAttachment: 'fixed'
-      }}
-    >
-      
-      <Suspense fallback={null}>
-        <ReceivedCardModal currentLanguage={currentLanguage} />
-      </Suspense>
+    <>
+      <ReceivedCardModal currentLanguage={currentLanguage} />
+      <a
+        href="#main-content"
+        className="sr-only z-[100] rounded-md bg-white px-4 py-3 text-[#243d34] focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+      >
+        {content[currentLanguage].skip}
+      </a>
+      <div className="min-h-screen bg-background">
 
-      {/* Frisse, vrolijke topbalk in warme zand- en goudtinten */}
-      <div className="w-full bg-[#f3efe6] border-b border-stone-200 text-xs py-2.5 px-4 text-center text-stone-600 font-medium tracking-wide shadow-xs">
-        {content[currentLanguage].banner}
-      </div>
+        <div role="note" className="border-b border-[#e7e2d7] bg-[#eee8dc] px-4 py-2.5 text-center text-xs font-medium tracking-wide text-[#59655d]">
+          {content[currentLanguage].banner}
+        </div>
 
-      <header className="max-w-7xl mx-auto px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-stone-200/80 mb-8">
-        <div className="flex items-center gap-3.5">
-          <img 
-            src="/images/logo.jpg" 
-            alt="HadiyadPay Logo" 
-            className="w-12 h-12 rounded-2xl object-cover shadow-md border border-amber-300 bg-white"
-          />
-          <div>
-            <h1 className="text-2xl font-black tracking-tight text-stone-900">
-              Hadiyad<span className="text-amber-600">Pay</span>
-            </h1>
-            <p className="text-[10px] text-stone-500 font-bold uppercase tracking-widest">Modern Cultural E-Cards</p>
+        <header className="border-b border-[#e8e4dc] bg-[#fbfaf7]">
+          <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+            <a href="#hero" className="flex w-fit items-center gap-3 rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#285347]">
+              <Image
+                src="/images/logo.jpg"
+                alt=""
+                aria-hidden="true"
+                width={44}
+                height={44}
+                className="h-11 w-11 rounded-xl border border-[#d6c6a9] bg-white object-cover"
+              />
+              <span className="text-xl font-bold tracking-tight text-[#233c35]">
+                Hadiyad<span className="text-[#9b7450]">Pay</span>
+              </span>
+            </a>
+
+            <nav aria-label={navigation[currentLanguage].label} className="flex flex-wrap items-center justify-between gap-3 sm:justify-end">
+              <div className="flex items-center gap-4 text-sm font-medium text-[#59655d]">
+                <a className="rounded px-1 py-2 hover:text-[#285347] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]" href="#occasions">
+                  {navigation[currentLanguage].occasions}
+                </a>
+                <a className="rounded px-1 py-2 hover:text-[#285347] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]" href="#card-catalog">
+                  {navigation[currentLanguage].cards}
+                </a>
+              </div>
+
+              <div role="group" aria-label={navigation[currentLanguage].language} className="flex rounded-full border border-[#e3ded4] bg-white p-1 text-xs font-semibold shadow-sm">
+                {(['so', 'en', 'nl'] as Language[]).map((lang) => (
+                  <button
+                    type="button"
+                    key={lang}
+                    aria-pressed={currentLanguage === lang}
+                    onClick={() => setSelectedLanguage(lang)}
+                    className={`min-h-9 min-w-10 rounded-full px-3 uppercase transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#285347] ${
+                      currentLanguage === lang
+                        ? 'bg-[#285347] text-white'
+                        : 'text-[#59655d] hover:bg-[#f1eee8]'
+                    }`}
+                  >
+                    {lang}
+                  </button>
+                ))}
+              </div>
+            </nav>
           </div>
-        </div>
+        </header>
 
-        {/* Vrolijke, moderne taalwisselaar */}
-        <div className="flex bg-white p-1 rounded-xl text-xs font-bold border border-stone-200 shadow-sm">
-          {(['so', 'en', 'nl'] as Language[]).map((lang) => (
-            <button
-              key={lang}
-              onClick={() => setCurrentLanguage(lang)}
-              className={`px-3.5 py-1.5 rounded-lg transition-all uppercase ${
-                currentLanguage === lang
-                  ? 'bg-amber-500 text-white font-black shadow-sm'
-                  : 'text-stone-500 hover:text-stone-900'
-              }`}
-            >
-              {lang}
-            </button>
-          ))}
-        </div>
-      </header>
+        <main id="main-content" className="px-0 pb-12 pt-6 sm:pt-8">
+          <CardBuilder currentLanguage={currentLanguage} />
+        </main>
 
-      <div className="w-full">
-        <CardBuilder currentLanguage={currentLanguage} />
+        <footer className="border-t border-[#e8e4dc] bg-[#fbfaf7]">
+          <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-3 px-4 py-6 text-sm text-[#69746c] sm:flex-row sm:items-center sm:px-6 lg:px-8">
+            <p>HadiyadPay · {content[currentLanguage].title.replace('HadiyadPay | ', '')}</p>
+            <a href="#hero" className="rounded underline-offset-4 hover:text-[#285347] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]">
+              {navigation[currentLanguage].top} ↑
+            </a>
+          </div>
+        </footer>
       </div>
-    </main>
+    </>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={null}>
+      <HomeContent />
+    </Suspense>
   );
 }

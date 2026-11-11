@@ -1,6 +1,35 @@
+export type CardCategory = 'celebrations' | 'milestones';
+
+export const cardOccasions = [
+  'birthday',
+  'wedding',
+  'henna',
+  'eid',
+  'heritage',
+  'encouragement',
+  'graduation',
+  'blessings',
+] as const;
+
+export type CardOccasion = (typeof cardOccasions)[number];
+
+export const occasionLabels: Record<CardOccasion, { so: string; en: string; nl: string }> = {
+  birthday: { so: 'Dhalasho', en: 'Birthday', nl: 'Verjaardag' },
+  wedding: { so: 'Aroos', en: 'Wedding', nl: 'Bruiloft' },
+  henna: { so: 'Henna', en: 'Henna night', nl: 'Hennafeest' },
+  eid: { so: 'Ciid', en: 'Eid', nl: 'Eid' },
+  heritage: { so: 'Hiddaha', en: 'Heritage', nl: 'Erfgoed' },
+  encouragement: { so: 'Dhiirigelin', en: 'Encouragement', nl: 'Aanmoediging' },
+  graduation: { so: 'Qalinjabin', en: 'Graduation', nl: 'Diploma' },
+  blessings: { so: 'Barako', en: 'Blessings', nl: 'Zegeningen' },
+};
+
 export interface CardOption {
   id: string;
-  category: 'dhaqan' | 'cities';
+  category: CardCategory;
+  occasion: CardOccasion;
+  searchTerms: string[];
+  featured?: boolean;
   badge: { so: string; en: string };
   title: { so: string; en: string };
   gradient?: string;
@@ -13,7 +42,10 @@ export interface CardOption {
 export const cardOptions: CardOption[] = [
   {
     id: 'dhalasho',
-    category: 'dhaqan',
+    category: 'celebrations',
+    occasion: 'birthday',
+    searchTerms: ['dhalasho', 'birthday', 'cake', 'celebration'],
+    featured: true,
     badge: { so: 'DHALASHO 🎂', en: 'BIRTHDAY 🎂' },
     title: { so: 'Dhalasho Wacan', en: 'Festive Birthday Celebration' },
     bgImage: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=800&auto=format&fit=crop',
@@ -26,7 +58,10 @@ export const cardOptions: CardOption[] = [
   },
   {
     id: 'aroos',
-    category: 'dhaqan',
+    category: 'celebrations',
+    occasion: 'wedding',
+    searchTerms: ['aroos', 'wedding', 'marriage', 'traditional'],
+    featured: true,
     badge: { so: 'AROOS & DHAQAN 🏺', en: 'WEDDING & HERITAGE 🏺' },
     title: { so: 'Xaflada Arooska & Dhaqanka', en: 'Traditional Somali Wedding' },
     bgImage: 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=800&auto=format&fit=crop',
@@ -39,7 +74,9 @@ export const cardOptions: CardOption[] = [
   },
   {
     id: 'henna',
-    category: 'dhaqan',
+    category: 'celebrations',
+    occasion: 'henna',
+    searchTerms: ['xafxad', 'henna', 'gold', 'celebration'],
     badge: { so: 'XAFXAD & HENNA ✨', en: 'HENNA NIGHT ✨' },
     title: { so: 'Habeenka Henna & Dahab', en: 'Henna & Gold Night' },
     bgImage: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=800&auto=format&fit=crop',
@@ -52,7 +89,9 @@ export const cardOptions: CardOption[] = [
   },
   {
     id: 'eid',
-    category: 'dhaqan',
+    category: 'celebrations',
+    occasion: 'eid',
+    searchTerms: ['ciid', 'eid', 'mubarak', 'blessed'],
     badge: { so: 'CIID WACAN 🌙', en: 'EID MUBARAK 🌙' },
     title: { so: 'Ciid Wacan & Barako', en: 'Blessed Eid Mubarak' },
     bgImage: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?q=80&w=800&auto=format&fit=crop',
@@ -65,7 +104,9 @@ export const cardOptions: CardOption[] = [
   },
   {
     id: 'haargab',
-    category: 'dhaqan',
+    category: 'celebrations',
+    occasion: 'heritage',
+    searchTerms: ['hiddha', 'heritage', 'craft', 'tradition'],
     badge: { so: 'HIDDHA & DHAQAN 🧺', en: 'HERITAGE ART 🧺' },
     title: { so: 'Dhaqanka Hiddaha Hooyo', en: 'Handicraft Heritage' },
     bgImage: 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?q=80&w=800&auto=format&fit=crop',
@@ -78,7 +119,9 @@ export const cardOptions: CardOption[] = [
   },
   {
     id: 'taageero',
-    category: 'cities',
+    category: 'milestones',
+    occasion: 'encouragement',
+    searchTerms: ['taageero', 'support', 'encouragement', 'strength'],
     badge: { so: 'TAAGEERO 🤝', en: 'SUPPORT 🤝' },
     title: { so: 'Taageero & Dhiirigelin', en: 'Strength & Encouragement' },
     bgImage: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=800&auto=format&fit=crop',
@@ -91,7 +134,9 @@ export const cardOptions: CardOption[] = [
   },
   {
     id: 'guul',
-    category: 'cities',
+    category: 'milestones',
+    occasion: 'graduation',
+    searchTerms: ['qalinjabin', 'graduation', 'success', 'graduate'],
     badge: { so: 'GUUL 🎓', en: 'SUCCESS 🎓' },
     title: { so: 'Qalinjabin & Guul', en: 'Graduation & Success' },
     bgImage: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=800&auto=format&fit=crop',
@@ -104,7 +149,9 @@ export const cardOptions: CardOption[] = [
   },
   {
     id: 'barako',
-    category: 'cities',
+    category: 'milestones',
+    occasion: 'blessings',
+    searchTerms: ['barako', 'blessings', 'peace', 'family'],
     badge: { so: 'BARAKO 🐪', en: 'BLESSINGS 🐪' },
     title: { so: 'Barako & Nabad', en: 'Nomadic Heritage Sunset' },
     bgImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=800&auto=format&fit=crop',

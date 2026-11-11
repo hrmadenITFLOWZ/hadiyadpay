@@ -1,34 +1,155 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { cardOptions, CardOption } from '../data/cardOptions';
+import React, { useState } from 'react';
+import Image from 'next/image';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import {
+  cardOccasions,
+  cardOptions,
+  occasionLabels,
+  type CardCategory,
+  type CardOccasion,
+  type CardOption,
+} from '../data/cardOptions';
 import CheckoutModal from './CheckoutModal';
+import CardProductCard from './CardProductCard';
+import CardCatalogControls, { type CardSort } from './CardCatalogControls';
+import EditorialSections from './EditorialSections';
+import OccasionNavigation from './OccasionNavigation';
+import StorefrontHero from './StorefrontHero';
+import useDialogAccessibility from '../hooks/useDialogAccessibility';
+
+type Language = 'so' | 'en' | 'nl';
+type CategoryFilter = 'all' | CardCategory;
+
+function isCardCategory(value: string | null): value is CardCategory {
+  return value === 'celebrations' || value === 'milestones';
+}
+
+function isCardOccasion(value: string | null): value is CardOccasion {
+  return value !== null && cardOccasions.some((occasion) => occasion === value);
+}
+
+function isCardSort(value: string | null): value is CardSort {
+  return value === 'featured' || value === 'name-asc' || value === 'name-desc';
+}
+
+function normalizeSearch(value: string) {
+  return value
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLocaleLowerCase()
+    .trim();
+}
 
 interface CardBuilderProps {
-  currentLanguage: string;
+  currentLanguage: Language;
+}
+
+interface UploadedImage {
+  src: string;
+  width: number;
+  height: number;
 }
 
 export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
-  const [activeCategory, setActiveCategory] = useState<string>('all');
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const rawCategory = searchParams.get('category');
+  const rawOccasion = searchParams.get('occasion');
+  const rawSort = searchParams.get('sort');
+  const activeCategory: CategoryFilter = isCardCategory(rawCategory) ? rawCategory : 'all';
+  const selectedOccasion = isCardOccasion(rawOccasion) ? rawOccasion : 'all';
+  const selectedSort = isCardSort(rawSort) ? rawSort : 'featured';
+  const searchQuery = (searchParams.get('q') ?? '').slice(0, 100);
   const [selectedCardForModal, setSelectedCardForModal] = useState<CardOption | null>(null);
   
-  const langKey = (currentLanguage === 'so' ? 'so' : 'en') as 'so' | 'en';
+  const langKey = currentLanguage === 'so' ? 'so' : 'en';
 
   const [recipientName, setRecipientName] = useState('');
   const [senderName, setSenderName] = useState('');
   const [message, setMessage] = useState('');
   
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null);
   const [imageScale, setImageScale] = useState<number>(1);
   const [imagePos, setImagePos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [dragStart, setDragStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const closeCardEditor = () => setSelectedCardForModal(null);
+  const editorDialogRef = useDialogAccessibility<HTMLDivElement>(
+    Boolean(selectedCardForModal) && !isCheckoutOpen,
+    closeCardEditor,
+  );
 
-  const filteredCards = activeCategory === 'all' 
-    ? cardOptions 
-    : cardOptions.filter((card) => card.category === activeCategory);
+  const updateCatalogParam = (key: string, value: string, defaultValue: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value === defaultValue) {
+      params.delete(key);
+    } else {
+      params.set(key, value);
+    }
+
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  };
+
+  const clearCatalogFilters = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    ['q', 'category', 'occasion', 'sort'].forEach((key) => params.delete(key));
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  };
+
+  const normalizedQuery = normalizeSearch(searchQuery);
+  const filteredCards = cardOptions.filter((card) => {
+    if (activeCategory !== 'all' && card.category !== activeCategory) return false;
+    if (selectedOccasion !== 'all' && card.occasion !== selectedOccasion) return false;
+    if (!normalizedQuery) return true;
+
+    const searchableText = [
+      card.title.so,
+      card.title.en,
+      card.badge.so,
+      card.badge.en,
+      card.occasion,
+      ...Object.values(occasionLabels[card.occasion]),
+      ...card.searchTerms,
+    ].map(normalizeSearch).join(' ');
+
+    return searchableText.includes(normalizedQuery);
+  });
+  const sortedCards = [...filteredCards];
+  if (selectedSort === 'name-asc' || selectedSort === 'name-desc') {
+    const collator = new Intl.Collator(currentLanguage, { sensitivity: 'base' });
+    sortedCards.sort((left, right) => {
+      const comparison = collator.compare(left.title[langKey], right.title[langKey]);
+      return selectedSort === 'name-asc' ? comparison : -comparison;
+    });
+  } else {
+    sortedCards.sort(
+      (left, right) =>
+        Number(Boolean(right.featured)) - Number(Boolean(left.featured)) ||
+        cardOptions.indexOf(left) - cardOptions.indexOf(right),
+    );
+  }
+
+  const showFeatured =
+    activeCategory === 'all' &&
+    selectedOccasion === 'all' &&
+    normalizedQuery === '' &&
+    selectedSort === 'featured';
+  const featuredCards = showFeatured ? sortedCards.filter((card) => card.featured) : [];
+  const catalogCards = showFeatured
+    ? sortedCards.filter((card) => !card.featured)
+    : sortedCards;
+  const hasCatalogFilters =
+    normalizedQuery !== '' ||
+    activeCategory !== 'all' ||
+    selectedOccasion !== 'all' ||
+    selectedSort !== 'featured';
 
   const handleOpenCustomize = (card: CardOption) => {
     setSelectedCardForModal(card);
@@ -40,15 +161,42 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUploadedImage(reader.result as string);
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert(currentLanguage === 'so' ? 'Fadlan dooro sawir.' : 'Please choose an image file.');
+      e.target.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onerror = () => {
+      alert(currentLanguage === 'so' ? 'Sawirka lama akhrin karin.' : 'The image could not be read.');
+    };
+    reader.onload = () => {
+      const imageSource = reader.result;
+      if (typeof imageSource !== 'string') {
+        alert(currentLanguage === 'so' ? 'Sawirka lama akhrin karin.' : 'The image could not be read.');
+        return;
+      }
+
+      const previewImage = new window.Image();
+      previewImage.onerror = () => {
+        alert(currentLanguage === 'so' ? 'Sawirkan lama furi karo.' : 'This image could not be opened.');
+      };
+      previewImage.onload = () => {
+        setUploadedImage({
+          src: imageSource,
+          width: previewImage.naturalWidth,
+          height: previewImage.naturalHeight,
+        });
         setImageScale(1);
         setImagePos({ x: 0, y: 0 });
       };
-      reader.readAsDataURL(file);
-    }
+      previewImage.src = imageSource;
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
   const handleRemoveImage = () => {
@@ -124,7 +272,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
   };
 
   const handleDownload = () => {
-    alert(currentLanguage === 'so' ? 'Kaarka waa la keydiyey! 📥' : 'Card saved successfully! 📥');
+    alert(currentLanguage === 'so' ? 'Soo dejinta kaarka wali lama heli karo.' : 'Card download is not available yet.');
   };
 
   const getCardStyle = (card: CardOption) => {
@@ -133,106 +281,125 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
         backgroundImage: `linear-gradient(to bottom, rgba(20,15,10,0.15), rgba(15,10,5,0.7)), url(${card.bgImage})`,
         backgroundColor: '#261e16',
         backgroundSize: 'cover',
-        backgroundPosition: 'center'
+        backgroundPosition: 'center',
       };
     }
+
     return {
-      background: card.gradient || 'linear-gradient(135deg, #b45309 0%, #78350f 100%)'
+      background: card.gradient || 'linear-gradient(135deg, #b45309 0%, #78350f 100%)',
     };
   };
 
   return (
     <div className="w-full max-w-[1500px] mx-auto px-4 lg:px-10 flex flex-col gap-8 pb-20">
-      
-      {/* Greenvelope-stijl Header & Categorie Filters */}
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white/90 backdrop-blur-xl p-6 rounded-3xl border border-stone-200 shadow-sm">
-        <div>
-          <h1 className="text-3xl font-black text-stone-900 tracking-tight">
-            {currentLanguage === 'so' ? 'Ururinta Kaarka Salaanta' : 'Curated E-Card Collection'}
-          </h1>
-          <p className="text-xs text-stone-500 mt-1">
-            {currentLanguage === 'so' 
-              ? 'Kaarar qurux badan oo loogu talagalay munaasabadahaaga gaarka ah.' 
-              : 'Stunning cultural designs crafted for your most cherished moments.'}
-          </p>
-        </div>
+      <StorefrontHero currentLanguage={currentLanguage} />
+      <OccasionNavigation
+        currentLanguage={currentLanguage}
+        activeCategory={activeCategory}
+        onCategoryChange={(category) => updateCatalogParam('category', category, 'all')}
+      />
 
-        <div className="flex flex-wrap items-center gap-2">
-          {[
-            { id: 'all', label: 'All Cards' },
-            { id: 'dhaqan', label: '🌸 Wedding & Celebrations' },
-            { id: 'cities', label: '🐪 Nomadic & Homeland' }
-          ].map((cat) => (
+      <div id="card-catalog" className="mx-auto flex w-full max-w-7xl scroll-mt-8 flex-col gap-10">
+      {featuredCards.length > 0 && (
+        <section aria-labelledby="featured-cards-heading" className="mx-auto w-full max-w-7xl">
+          <div className="mb-5 flex items-end justify-between gap-4">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#718078]">
+                {currentLanguage === 'nl' ? 'UITGELICHT' : currentLanguage === 'so' ? 'KAARAR LA DOORTAY' : 'A FEW TO START WITH'}
+              </p>
+              <h2 id="featured-cards-heading" className="mt-2 font-serif text-3xl text-[#263e36] sm:text-4xl">
+                {currentLanguage === 'nl' ? 'Uitgelichte kaarten' : currentLanguage === 'so' ? 'Kaararka la doortay' : 'Featured cards'}
+              </h2>
+            </div>
+            <a href="#all-cards" className="hidden text-sm font-semibold text-[#35594b] underline-offset-4 hover:underline sm:inline">
+              {currentLanguage === 'nl' ? 'Bekijk alle kaarten' : currentLanguage === 'so' ? 'Eeg dhammaan' : 'View all cards'}
+            </a>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2">
+            {featuredCards.map((card) => (
+              <CardProductCard
+                key={card.id}
+                card={card}
+                language={currentLanguage}
+                featured
+                onSelect={handleOpenCustomize}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section id="all-cards" aria-labelledby="card-catalog-heading" className="w-full scroll-mt-8">
+        <div className="mb-5">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#718078]">
+            {currentLanguage === 'nl' ? 'DE COLLECTIE' : currentLanguage === 'so' ? 'URURINTA' : 'THE COLLECTION'}
+          </p>
+          <h2 id="card-catalog-heading" className="mt-2 font-serif text-3xl text-[#263e36] sm:text-4xl">
+            {currentLanguage === 'nl' ? 'Alle kaarten' : currentLanguage === 'so' ? 'Dhammaan kaararka' : 'Explore the cards'}
+          </h2>
+        </div>
+        <CardCatalogControls
+          language={currentLanguage}
+          query={searchQuery}
+          occasion={selectedOccasion}
+          sort={selectedSort}
+          resultCount={filteredCards.length}
+          hasFilters={hasCatalogFilters}
+          onQueryChange={(value) => updateCatalogParam('q', value, '')}
+          onOccasionChange={(occasion) => updateCatalogParam('occasion', occasion, 'all')}
+          onSortChange={(sort) => updateCatalogParam('sort', sort, 'featured')}
+          onClear={clearCatalogFilters}
+        />
+        {filteredCards.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-[#cfd8d0] bg-white px-5 py-10 text-center">
+            <p className="font-semibold text-[#29443a]">
+              {currentLanguage === 'nl'
+                ? 'Geen kaarten gevonden. Pas je zoekopdracht of filters aan.'
+                : currentLanguage === 'so'
+                  ? 'Kaarka lama helin. Beddel raadinta ama shaandhooyinka.'
+                  : 'No cards found. Try changing your search or filters.'}
+            </p>
             <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 cursor-pointer ${
-                activeCategory === cat.id
-                  ? 'bg-amber-600 text-white shadow-md'
-                  : 'bg-stone-100 text-stone-600 hover:bg-stone-200 border border-stone-200'
-              }`}
+              type="button"
+              onClick={clearCatalogFilters}
+              className="mt-4 min-h-11 rounded-lg bg-[#285347] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1e4338] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
             >
-              {cat.label}
+              {currentLanguage === 'nl'
+                ? 'Wis filters'
+                : currentLanguage === 'so'
+                  ? 'Nadiifi shaandhooyinka'
+                  : 'Clear filters'}
             </button>
+          </div>
+        ) : (
+        <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {catalogCards.map((card) => (
+            <CardProductCard key={card.id} card={card} language={currentLanguage} onSelect={handleOpenCustomize} />
           ))}
         </div>
+        )}
+      </section>
       </div>
 
-      {/* Greenvelope-stijl Breed Raster (4 kolommen van prachtige e-cards) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-8">
-        {filteredCards.map((card) => (
-          <div
-            key={card.id}
-            onClick={() => handleOpenCustomize(card)}
-            className="group cursor-pointer bg-white rounded-3xl p-5 border border-stone-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center justify-between"
-          >
-            <div className="w-full h-80 rounded-2xl overflow-hidden relative shadow-md transition-transform duration-300 group-hover:scale-[1.02] flex flex-col justify-between p-6 text-white"
-                 style={getCardStyle(card)}>
-              <div className="flex justify-between items-center z-10">
-                <span className="text-[9px] font-black px-2.5 py-1 rounded-md bg-black/60 text-amber-300 uppercase shadow">
-                  {card.badge[langKey] || card.badge['en']}
-                </span>
-                <span className="w-7 h-7 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center text-xs shadow">
-                  ✨
-                </span>
-              </div>
-
-              <div className="text-center z-10 my-auto">
-                <p className="text-[10px] uppercase tracking-widest text-amber-200 font-bold drop-shadow">HADIYADPAY</p>
-                <h3 className="text-lg font-black mt-2 drop-shadow-lg text-white">
-                  {card.title[langKey] || card.title['en']}
-                </h3>
-              </div>
-
-              <div className="text-center z-10 pt-2 border-t border-white/20">
-                <span className="text-[10px] font-black uppercase tracking-wider text-amber-300 bg-black/40 px-3 py-1 rounded-full">
-                  Customize & Send →
-                </span>
-              </div>
-            </div>
-
-            <div className="w-full mt-4 flex items-center justify-between">
-              <div>
-                <h4 className="text-sm font-black text-stone-900 group-hover:text-amber-700 transition">
-                  {card.title[langKey] || card.title['en']}
-                </h4>
-                <p className="text-[11px] text-stone-400 font-medium">Digital E-Card • €2.00</p>
-              </div>
-              <span className="w-9 h-9 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-black group-hover:bg-amber-600 group-hover:text-white transition">
-                +
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
+      <EditorialSections currentLanguage={currentLanguage} />
 
       {/* Greenvelope-stijl Aanpas-Modal wanneer op een kaart geklikt wordt */}
       {selectedCardForModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-10 shadow-2xl relative border border-stone-200 my-8 flex flex-col lg:flex-row gap-8">
+          <div
+            ref={editorDialogRef}
+            tabIndex={-1}
+            role="dialog"
+            aria-modal={!isCheckoutOpen}
+            aria-hidden={isCheckoutOpen}
+            aria-labelledby="card-editor-heading"
+            className="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-10 shadow-2xl relative border border-stone-200 my-8 flex flex-col lg:flex-row gap-8"
+          >
             
             <button
+              type="button"
               onClick={() => setSelectedCardForModal(null)}
+              aria-label={currentLanguage === 'so' ? 'Xir tifaftiraha' : 'Close card editor'}
               className="absolute top-5 right-5 w-10 h-10 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-800 font-black flex items-center justify-center transition cursor-pointer z-20"
             >
               ✕
@@ -267,9 +434,12 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                     onMouseUp={handleMouseUp}
                     onMouseLeave={handleMouseUp}
                   >
-                    <img 
-                      src={uploadedImage} 
-                      alt="Preview" 
+                    <Image
+                      src={uploadedImage.src}
+                      alt="Uploaded card preview"
+                      width={uploadedImage.width}
+                      height={uploadedImage.height}
+                      unoptimized
                       className="absolute max-w-none pointer-events-none"
                       style={{
                         transform: `translate(${imagePos.x}px, ${imagePos.y}px) scale(${imageScale})`,
@@ -299,12 +469,14 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
               <div className="grid grid-cols-2 gap-3">
                 <button
+                  type="button"
                   onClick={handleDownload}
                   className="py-3 px-3 bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-bold rounded-xl transition border border-stone-200 flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   📥 Download
                 </button>
                 <button
+                  type="button"
                   onClick={handleShare}
                   className="py-3 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl transition flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
                 >
@@ -316,14 +488,15 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
             {/* Rechterkant van Modal: Formulier & Checkout */}
             <div className="w-full lg:w-1/2 flex flex-col justify-between gap-4">
               <div className="flex flex-col gap-4">
-                <h3 className="text-lg font-black text-stone-900 tracking-tight">
+                <h3 id="card-editor-heading" className="text-lg font-black text-stone-900 tracking-tight">
                   {currentLanguage === 'so' ? '✍️ Shakhsiyeey Kaarkaaga' : 'Personalize Your Card'}
                 </h3>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[10px] font-bold text-stone-600 uppercase mb-1">To (Recipient)</label>
+                    <label htmlFor="card-recipient" className="block text-[10px] font-bold text-stone-600 uppercase mb-1">To (Recipient)</label>
                     <input
+                      id="card-recipient"
                       type="text"
                       value={recipientName}
                       onChange={(e) => setRecipientName(e.target.value)}
@@ -331,8 +504,9 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-stone-600 uppercase mb-1">From (Sender)</label>
+                    <label htmlFor="card-sender" className="block text-[10px] font-bold text-stone-600 uppercase mb-1">From (Sender)</label>
                     <input
+                      id="card-sender"
                       type="text"
                       value={senderName}
                       onChange={(e) => setSenderName(e.target.value)}
@@ -342,8 +516,9 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-stone-600 uppercase mb-1">Message</label>
+                  <label htmlFor="card-message" className="block text-[10px] font-bold text-stone-600 uppercase mb-1">Message</label>
                   <textarea
+                    id="card-message"
                     rows={4}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
@@ -353,12 +528,13 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
 
                 <div>
                   <div className="flex justify-between items-center mb-1">
-                    <label className="block text-[10px] font-bold text-stone-600 uppercase">Photo (Optional)</label>
+                    <label htmlFor="card-photo" className="block text-[10px] font-bold text-stone-600 uppercase">Photo (Optional)</label>
                     {uploadedImage && (
-                      <button onClick={handleRemoveImage} className="text-[10px] text-rose-600 font-semibold cursor-pointer">Remove</button>
+                      <button type="button" onClick={handleRemoveImage} className="text-[10px] text-rose-600 font-semibold cursor-pointer">Remove</button>
                     )}
                   </div>
                   <input
+                    id="card-photo"
                     type="file"
                     accept="image/*"
                     onChange={handleImageUpload}
@@ -368,6 +544,7 @@ export default function CardBuilder({ currentLanguage }: CardBuilderProps) {
               </div>
 
               <button
+                type="button"
                 onClick={() => setIsCheckoutOpen(true)}
                 className="w-full py-4 px-4 font-black rounded-2xl shadow-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm text-white bg-amber-600 hover:bg-amber-700 shadow-amber-600/25 cursor-pointer uppercase tracking-wider mt-4"
               >
