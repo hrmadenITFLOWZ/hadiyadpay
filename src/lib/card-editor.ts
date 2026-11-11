@@ -44,10 +44,27 @@ export interface EditorDraft {
   inside: EditorSideState;
 }
 
+interface StoredEditorPhoto {
+  requiresReselection: true;
+  scale: number;
+  x: number;
+  y: number;
+  rotation: number;
+}
+
+interface StoredEditorSide extends Omit<EditorSideState, 'photo'> {
+  photo: StoredEditorPhoto | null;
+}
+
+interface StoredEditorDraftData extends Omit<EditorDraft, 'front' | 'inside'> {
+  front: StoredEditorSide;
+  inside: StoredEditorSide;
+}
+
 interface StoredEditorDraft {
   version: number;
   cardId: string;
-  draft: EditorDraft;
+  draft: StoredEditorDraftData;
 }
 
 export interface EditorRuntimeState {
@@ -78,20 +95,25 @@ export const editorAlignmentOptions: EditorTextAlign[] = ['left', 'center', 'rig
 export const editorFontOptions: EditorTextFontFamily[] = ['sans', 'serif', 'mono'];
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+const clampFinite = (value: number, min: number, max: number, fallback: number) =>
+  clamp(Number.isFinite(value) ? value : fallback, min, max);
+const clampPhotoOffset = (value: number) => clampFinite(value, -1000, 1000, 0);
+
+const createDefaultTextStyle = (): EditorTextStyle => ({
+  color: '#fef3c7',
+  align: 'left',
+  size: 30,
+  family: 'sans',
+  bold: false,
+  italic: false,
+  underline: false,
+});
 
 const createSideState = (card: CardOption, currentLanguage: CardLanguage): EditorSideState => ({
   recipient: card.defaultRecipient[currentLanguage],
   sender: card.defaultSender[currentLanguage],
   message: card.defaultMessage[currentLanguage],
-  textStyle: {
-    color: '#fef3c7',
-    align: 'left',
-    size: 30,
-    family: 'sans',
-    bold: false,
-    italic: false,
-    underline: false,
-  },
+  textStyle: createDefaultTextStyle(),
   photo: null,
 });
 
@@ -123,23 +145,22 @@ function normalizeTextStyle(style: unknown, fallback: EditorTextStyle): EditorTe
 }
 
 function normalizePhoto(rawPhoto: unknown): EditorPhotoLayer | null {
-  if (!rawPhoto || typeof rawPhoto !== 'object') return null;
+  if (!rawPhoto || typeof rawPhoto !== 'object' || Array.isArray(rawPhoto)) return null;
 
   const candidate = rawPhoto as Partial<EditorPhotoLayer>;
-  const hasBlobSource = typeof candidate.src === 'string' && candidate.src.startsWith('blob:');
+  const hasStoredSource = typeof candidate.src === 'string' && candidate.src.length > 0;
   const hasTransform = candidate.scale !== undefined || candidate.x !== undefined || candidate.y !== undefined || candidate.rotation !== undefined;
 
-  if (!hasBlobSource && !hasTransform && !candidate.requiresReselection) return null;
+  if (!hasStoredSource && !hasTransform && candidate.requiresReselection !== true) return null;
 
   return {
-    src: hasBlobSource ? candidate.src : undefined,
-    requiresReselection: Boolean(candidate.requiresReselection),
-    width: clamp(Number(candidate.width ?? 768), 1, 5000),
-    height: clamp(Number(candidate.height ?? 768), 1, 5000),
-    scale: clamp(Number(candidate.scale ?? 1), 0.5, 3),
-    x: Number(candidate.x ?? 0),
-    y: Number(candidate.y ?? 0),
-    rotation: clamp(Number(candidate.rotation ?? 0), -180, 180),
+    requiresReselection: true,
+    width: clampFinite(Number(candidate.width ?? 768), 1, 5000, 768),
+    height: clampFinite(Number(candidate.height ?? 768), 1, 5000, 768),
+    scale: clampFinite(Number(candidate.scale ?? 1), 0.5, 3, 1),
+    x: clampPhotoOffset(Number(candidate.x ?? 0)),
+    y: clampPhotoOffset(Number(candidate.y ?? 0)),
+    rotation: clampFinite(Number(candidate.rotation ?? 0), -180, 180, 0),
   };
 }
 
@@ -238,10 +259,10 @@ function withSidePhotoUpdate(state: EditorRuntimeState, photo: EditorPhotoLayer)
     photo: {
       ...photo,
       requiresReselection: false,
-      scale: clamp(Number(photo.scale ?? 1), 0.5, 3),
-      x: Number(photo.x ?? 0),
-      y: Number(photo.y ?? 0),
-      rotation: clamp(Number(photo.rotation ?? 0), -180, 180),
+      scale: clampFinite(Number(photo.scale ?? 1), 0.5, 3, 1),
+      x: clampPhotoOffset(Number(photo.x ?? 0)),
+      y: clampPhotoOffset(Number(photo.y ?? 0)),
+      rotation: clampFinite(Number(photo.rotation ?? 0), -180, 180, 0),
     },
   });
   return pushHistory(state, nextDraft);
@@ -282,13 +303,7 @@ export function editorReducer(state: EditorRuntimeState, action: EditorAction): 
       const currentState = getSideState(state.draft, state.draft.side);
       const nextDraft = setSideState(state.draft, state.draft.side, {
         ...currentState,
-        textStyle: {
-          ...currentState.textStyle,
-          family: 'sans',
-          bold: false,
-          italic: false,
-          underline: false,
-        },
+        textStyle: createDefaultTextStyle(),
       });
       return pushHistory(state, nextDraft);
     }
@@ -312,10 +327,10 @@ export function editorReducer(state: EditorRuntimeState, action: EditorAction): 
       const updatedPhoto = {
         ...currentState.photo,
         ...action.changes,
-        scale: clamp(Number(action.changes.scale ?? currentState.photo.scale), 0.5, 3),
-        x: Number(action.changes.x ?? currentState.photo.x),
-        y: Number(action.changes.y ?? currentState.photo.y),
-        rotation: clamp(Number(action.changes.rotation ?? currentState.photo.rotation), -180, 180),
+        scale: clampFinite(Number(action.changes.scale ?? currentState.photo.scale), 0.5, 3, 1),
+        x: clampPhotoOffset(Number(action.changes.x ?? currentState.photo.x)),
+        y: clampPhotoOffset(Number(action.changes.y ?? currentState.photo.y)),
+        rotation: clampFinite(Number(action.changes.rotation ?? currentState.photo.rotation), -180, 180, 0),
       };
       const nextDraft = setSideState(state.draft, state.draft.side, {
         ...currentState,
@@ -395,15 +410,7 @@ export function loadDraftFromStorage(card: CardOption, currentLanguage: CardLang
       return null;
     }
 
-    const storedDraft = normalizeDraft(record.draft, card, currentLanguage);
-    if (storedDraft.front.photo && storedDraft.front.photo.requiresReselection === false && storedDraft.front.photo.src) {
-      storedDraft.front.photo = { ...storedDraft.front.photo, src: undefined, requiresReselection: true };
-    }
-    if (storedDraft.inside.photo && storedDraft.inside.photo.requiresReselection === false && storedDraft.inside.photo.src) {
-      storedDraft.inside.photo = { ...storedDraft.inside.photo, src: undefined, requiresReselection: true };
-    }
-
-    return storedDraft;
+    return normalizeDraft(record.draft, card, currentLanguage);
   } catch {
     return null;
   }
@@ -412,42 +419,31 @@ export function loadDraftFromStorage(card: CardOption, currentLanguage: CardLang
 export function saveDraftToStorage(card: CardOption, draft: EditorDraft) {
   if (typeof window === 'undefined') return;
 
-  const persistableDraft: EditorDraft = {
-    ...draft,
-    front: {
-      ...draft.front,
-      photo: draft.front.photo
-        ? {
-            requiresReselection: Boolean(draft.front.photo.requiresReselection),
-            width: clamp(Number(draft.front.photo.width ?? 768), 1, 5000),
-            height: clamp(Number(draft.front.photo.height ?? 768), 1, 5000),
-            scale: clamp(Number(draft.front.photo.scale ?? 1), 0.5, 3),
-            x: Number(draft.front.photo.x ?? 0),
-            y: Number(draft.front.photo.y ?? 0),
-            rotation: clamp(Number(draft.front.photo.rotation ?? 0), -180, 180),
-          }
-        : null,
-    },
-    inside: {
-      ...draft.inside,
-      photo: draft.inside.photo
-        ? {
-            requiresReselection: Boolean(draft.inside.photo.requiresReselection),
-            width: clamp(Number(draft.inside.photo.width ?? 768), 1, 5000),
-            height: clamp(Number(draft.inside.photo.height ?? 768), 1, 5000),
-            scale: clamp(Number(draft.inside.photo.scale ?? 1), 0.5, 3),
-            x: Number(draft.inside.photo.x ?? 0),
-            y: Number(draft.inside.photo.y ?? 0),
-            rotation: clamp(Number(draft.inside.photo.rotation ?? 0), -180, 180),
-          }
-        : null,
-    },
-  };
+  const toStoredPhoto = (photo: EditorPhotoLayer | null): StoredEditorPhoto | null =>
+    photo
+      ? {
+          requiresReselection: true,
+          scale: clampFinite(Number(photo.scale ?? 1), 0.5, 3, 1),
+          x: clampPhotoOffset(Number(photo.x ?? 0)),
+          y: clampPhotoOffset(Number(photo.y ?? 0)),
+          rotation: clampFinite(Number(photo.rotation ?? 0), -180, 180, 0),
+        }
+      : null;
 
   const storageDraft: StoredEditorDraft = {
     version: DRAFT_STORAGE_VERSION,
     cardId: card.id,
-    draft: persistableDraft,
+    draft: {
+      ...draft,
+      front: {
+        ...draft.front,
+        photo: toStoredPhoto(draft.front.photo),
+      },
+      inside: {
+        ...draft.inside,
+        photo: toStoredPhoto(draft.inside.photo),
+      },
+    },
   };
 
   const key = `${DRAFT_STORAGE_PREFIX}:${card.id}`;

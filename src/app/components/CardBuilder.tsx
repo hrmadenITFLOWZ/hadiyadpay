@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useReducer, useRef, useState, type ChangeEvent, type PointerEvent, type WheelEvent } from 'react';
+import { useEffect, useReducer, useRef, useState, type ChangeEvent, type PointerEvent } from 'react';
 import Image from 'next/image';
 import type { CardLanguage, CardOption } from '../../lib/card-types';
 import {
@@ -39,6 +39,13 @@ const fontFamilyMap = {
   mono: '"Courier New", monospace',
 } as const;
 
+const MAX_IMAGE_SIZE_BYTES = 8 * 1024 * 1024;
+const SUPPORTED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+
+function revokeOwnedPhotoUrl(url: string, ownedUrls: Set<string>) {
+  if (ownedUrls.delete(url)) URL.revokeObjectURL(url);
+}
+
 export default function CardBuilder({ card, currentLanguage, onClose }: CardBuilderProps) {
   const initialState = () => {
     const savedDraft = loadDraftFromStorage(card, currentLanguage);
@@ -51,7 +58,8 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [shareNotice, setShareNotice] = useState<string | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const previewObjectUrlRef = useRef<string | null>(null);
+  const ownedPhotoUrlsRef = useRef(new Set<string>());
+  const isMountedRef = useRef(false);
   const dialogRef = useDialogAccessibility<HTMLDivElement>(!isCheckoutOpen, onClose);
 
   const draft = editorState.draft;
@@ -73,18 +81,29 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
   }, [card, draft]);
 
   useEffect(() => {
-    if (!activeSideData.photo?.src || activeSideData.photo.src.startsWith('blob:') === false) {
-      return;
+    const referencedUrls = new Set<string>();
+    for (const snapshot of [editorState.draft, ...editorState.history]) {
+      for (const side of [snapshot.front, snapshot.inside]) {
+        const source = side.photo?.src;
+        if (source?.startsWith('blob:')) referencedUrls.add(source);
+      }
     }
 
-    previewObjectUrlRef.current = activeSideData.photo.src;
-    return () => {
-      if (previewObjectUrlRef.current) {
-        URL.revokeObjectURL(previewObjectUrlRef.current);
-        previewObjectUrlRef.current = null;
+    for (const url of ownedPhotoUrlsRef.current) {
+      if (!referencedUrls.has(url)) {
+        revokeOwnedPhotoUrl(url, ownedPhotoUrlsRef.current);
       }
+    }
+  }, [editorState]);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    const ownedPhotoUrls = ownedPhotoUrlsRef.current;
+    return () => {
+      isMountedRef.current = false;
+      for (const url of ownedPhotoUrls) revokeOwnedPhotoUrl(url, ownedPhotoUrls);
     };
-  }, [activeSideData.photo?.src]);
+  }, []);
 
   useEffect(() => {
     if (!shareNotice) return;
@@ -163,7 +182,7 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
       shareUnavailable: 'La wadaaggu ma heli karo. Fariintaadu waxay ku sii jirtaa qalabkaaga.',
       downloadUnavailable: 'Soo dejintu wali lama heli karo.',
       personalize: 'Bixi €2.00 oo Dir Hadiyadda',
-      invalidImage: 'Fadlan dooro sawir sax ah.',
+      invalidImage: 'Dooro sawir JPEG, PNG ama WebP oo aan ka weynayn 8 MB.',
       imageError: 'Sawirka lama akhrin karin.',
       front: 'Hordhaca',
       inside: 'Gudaha',
@@ -186,6 +205,9 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
       moveDown: 'Goya hoos',
       rotateLeft: 'Wareeji bidix',
       rotateRight: 'Wareeji midig',
+      zoom: 'Cabbirka sawirka',
+      zoomIn: 'Weynee sawirka',
+      zoomOut: 'Yaree sawirka',
       resetTransform: 'Dib u celi qaabeynta',
       reselectPhoto: 'Sawirka hore waa in dib loo doorataa.',
     },
@@ -202,7 +224,7 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
       shareUnavailable: 'Secure sharing is not available yet. Your card stays on this device.',
       downloadUnavailable: 'Card download is not available yet.',
       personalize: 'Pay €2.00 & Send Card',
-      invalidImage: 'Please choose a valid image file.',
+      invalidImage: 'Choose a JPEG, PNG, or WebP image no larger than 8 MB.',
       imageError: 'The image could not be read.',
       front: 'Front',
       inside: 'Inside',
@@ -225,6 +247,9 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
       moveDown: 'Move down',
       rotateLeft: 'Rotate left',
       rotateRight: 'Rotate right',
+      zoom: 'Photo zoom',
+      zoomIn: 'Zoom in on photo',
+      zoomOut: 'Zoom out on photo',
       resetTransform: 'Reset transform',
       reselectPhoto: 'The previous photo needs to be selected again.',
     },
@@ -241,7 +266,7 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
       shareUnavailable: 'Veilig delen is nog niet beschikbaar. Je kaart blijft lokaal op dit apparaat.',
       downloadUnavailable: 'Downloaden is nog niet beschikbaar.',
       personalize: 'Betaal €2,00 en verstuur',
-      invalidImage: 'Kies een geldig afbeeldingsbestand.',
+      invalidImage: 'Kies een JPEG-, PNG- of WebP-afbeelding van maximaal 8 MB.',
       imageError: 'De afbeelding kon niet worden gelezen.',
       front: 'Voorkant',
       inside: 'Binnenkant',
@@ -264,6 +289,9 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
       moveDown: 'Omlaag',
       rotateLeft: 'Links draaien',
       rotateRight: 'Rechts draaien',
+      zoom: 'Fotozoom',
+      zoomIn: 'Foto inzoomen',
+      zoomOut: 'Foto uitzoomen',
       resetTransform: 'Transform resetten',
       reselectPhoto: 'De vorige foto moet opnieuw worden geselecteerd.',
     },
@@ -273,24 +301,27 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/') || file.size > 10 * 1024 * 1024) {
+    if (!SUPPORTED_IMAGE_TYPES.has(file.type) || file.size > MAX_IMAGE_SIZE_BYTES) {
       window.alert(text.invalidImage);
       event.target.value = '';
       return;
     }
 
     const nextUrl = URL.createObjectURL(file);
+    ownedPhotoUrlsRef.current.add(nextUrl);
     const savedTransform = activeSideData.photo ?? null;
-    if (previewObjectUrlRef.current && previewObjectUrlRef.current !== nextUrl) {
-      URL.revokeObjectURL(previewObjectUrlRef.current);
-    }
 
     const previewImage = new window.Image();
     previewImage.onerror = () => {
-      URL.revokeObjectURL(nextUrl);
+      revokeOwnedPhotoUrl(nextUrl, ownedPhotoUrlsRef.current);
       window.alert(text.imageError);
     };
     previewImage.onload = () => {
+      if (!isMountedRef.current) {
+        revokeOwnedPhotoUrl(nextUrl, ownedPhotoUrlsRef.current);
+        return;
+      }
+
       const photo: EditorPhotoLayer = {
         src: nextUrl,
         width: previewImage.naturalWidth,
@@ -307,10 +338,9 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
     event.target.value = '';
   };
 
-  const handleWheel = (event: WheelEvent<HTMLDivElement>) => {
+  const handleZoom = (amount: number) => {
     if (!activeSideData.photo) return;
-    event.preventDefault();
-    const nextScale = Number(Math.min(Math.max(0.5, activeSideData.photo.scale + (event.deltaY < 0 ? 0.1 : -0.1)), 3).toFixed(2));
+    const nextScale = Number(Math.min(Math.max(0.5, activeSideData.photo.scale + amount), 3).toFixed(2));
     commitAction({ type: 'ADJUST_PHOTO', changes: { scale: nextScale } });
   };
 
@@ -371,7 +401,7 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
     commitAction({ type: 'RESET_CARD', card, currentLanguage });
   };
 
-  const renderPreviewCard = (side: 'front' | 'inside', compact = false) => {
+  const renderPreviewCard = (side: 'front' | 'inside', compact = false, showEditGuides = draft.previewMode === 'edit') => {
     const sideData = side === 'front' ? draft.front : draft.inside;
     const sideStyle = getTextStyleForSide({ ...draft, side });
     const sideTextStyle = {
@@ -390,11 +420,11 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
     return (
       <div className={`${compact ? 'min-h-[220px]' : 'min-h-[360px]'} relative flex flex-col justify-between overflow-hidden rounded-[1.7rem] border border-white/20 p-5 text-white shadow-xl`}>
         <CardArtworkLayer artwork={card.artwork} language={currentLanguage} decorative={false} />
-        <div className="pointer-events-none absolute inset-[14px] rounded-[1.25rem] border border-white/25 bg-white/5" aria-hidden="true" />
-        {photo && !photo.requiresReselection && (
+        {showEditGuides && <div className="pointer-events-none absolute inset-[14px] rounded-[1.25rem] border border-white/25 bg-white/5" aria-hidden="true" />}
+        {photo?.src && !photo.requiresReselection && (
           <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center overflow-hidden">
             <Image
-              src={photo.src ?? ''}
+              src={photo.src}
               alt={currentLanguage === 'nl' ? 'Geüploade voorbeeldfoto' : currentLanguage === 'so' ? 'Sawirka la doortay' : 'Uploaded card preview'}
               width={photo.width}
               height={photo.height}
@@ -404,6 +434,7 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
               style={{
                 transform: imageTransform,
                 transformOrigin: 'center center',
+                width: 'auto',
                 maxHeight: '100%',
               }}
             />
@@ -434,7 +465,7 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
         ) : (
           <div className="relative z-20 my-2 flex flex-1 flex-col justify-between rounded-[1.4rem] border border-white/15 bg-black/30 p-5 backdrop-blur-md">
             <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.24em] text-amber-300">
-              <span>{text.safeArea}</span>
+              {showEditGuides && <span>{text.safeArea}</span>}
               <span>{card.badge[currentLanguage]}</span>
             </div>
             <div className="mt-4 rounded-xl border border-white/15 bg-white/10 p-4 shadow-inner">
@@ -478,15 +509,14 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
             </div>
 
             {draft.previewMode === 'full' ? (
-              <div className="grid gap-3 lg:grid-cols-2">{renderPreviewCard('front', true)}{renderPreviewCard('inside', true)}</div>
+              <div className="grid gap-3 lg:grid-cols-2">{renderPreviewCard('front', true, false)}{renderPreviewCard('inside', true, false)}</div>
             ) : (
               <div
                 className={draft.previewMode === 'clean' ? '' : 'relative'}
-                onWheel={handleWheel}
-                onPointerDown={handlePointerDown}
-                onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerUp}
-                onPointerLeave={handlePointerUp}
+                onPointerDown={draft.previewMode === 'edit' ? handlePointerDown : undefined}
+                onPointerMove={draft.previewMode === 'edit' ? handlePointerMove : undefined}
+                onPointerUp={draft.previewMode === 'edit' ? handlePointerUp : undefined}
+                onPointerLeave={draft.previewMode === 'edit' ? handlePointerUp : undefined}
               >
                 {renderPreviewCard(draft.side, false)}
               </div>
@@ -500,7 +530,7 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
 
           <section className="flex w-full flex-col justify-between gap-5 lg:w-1/2">
             <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between gap-3 pr-8">
+              <div className="flex flex-wrap items-center justify-between gap-3 pr-8">
                 <h2 id="card-editor-heading" className="text-lg font-black tracking-tight text-stone-900">{text.title}</h2>
                 <span className="rounded-full bg-stone-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-stone-700">{text.privacy}</span>
               </div>
@@ -566,6 +596,8 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
                 onRemove={() => commitAction({ type: 'REMOVE_PHOTO' })}
                 onMove={handleMove}
                 onRotate={handleRotate}
+                onZoom={handleZoom}
+                scale={activeSideData.photo?.scale ?? 1}
                 onResetTransform={() => commitAction({ type: 'RESET_PHOTO_TRANSFORM' })}
                 labels={{
                   photo: text.photo,
@@ -576,6 +608,9 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
                   moveDown: text.moveDown,
                   rotateLeft: text.rotateLeft,
                   rotateRight: text.rotateRight,
+                  zoom: text.zoom,
+                  zoomIn: text.zoomIn,
+                  zoomOut: text.zoomOut,
                   reset: text.resetTransform,
                 }}
               />

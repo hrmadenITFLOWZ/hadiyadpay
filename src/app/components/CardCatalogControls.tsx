@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import {
   cardColors,
-  cardOccasions,
   cardStyles,
+  occasionLabels,
   recipientTypes,
   type CardLanguage,
   type CatalogFilters,
 } from '../../lib/card-types';
+import { cardOptions } from '../data/cardOptions';
 import {
   isCardColor,
   isCardLanguage,
@@ -139,20 +140,7 @@ const colorLabels = {
   nl: { green: 'Groen', blue: 'Blauw', gold: 'Goud', rose: 'Roze', terracotta: 'Terracotta', neutral: 'Neutraal' },
 } satisfies Record<CardLanguage, Record<(typeof cardColors)[number], string>>;
 
-const occasionLabels = {
-  so: {
-    birthday: 'Dhalasho', wedding: 'Aroos', henna: 'Henna', eid: 'Ciid', heritage: 'Hiddaha',
-    encouragement: 'Dhiirigelin', graduation: 'Qalinjabin', blessings: 'Barako',
-  },
-  en: {
-    birthday: 'Birthday', wedding: 'Wedding', henna: 'Henna night', eid: 'Eid', heritage: 'Heritage',
-    encouragement: 'Encouragement', graduation: 'Graduation', blessings: 'Blessings',
-  },
-  nl: {
-    birthday: 'Verjaardag', wedding: 'Bruiloft', henna: 'Hennafeest', eid: 'Eid', heritage: 'Erfgoed',
-    encouragement: 'Aanmoediging', graduation: 'Diploma', blessings: 'Zegeningen',
-  },
-} satisfies Record<CardLanguage, Record<(typeof cardOccasions)[number], string>>;
+const catalogOccasions = [...new Set(cardOptions.map((card) => card.occasion))];
 
 export default function CardCatalogControls({
   language,
@@ -203,7 +191,7 @@ export default function CardCatalogControls({
           className="mt-1.5 min-h-12 w-full rounded-xl border border-[#d9ded8] bg-white px-4 text-sm font-normal text-[#243d34] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
         >
           <option value="all">{text.allOccasions}</option>
-          {cardOccasions.map((occasion) => <option key={occasion} value={occasion}>{occasionLabels[language][occasion]}</option>)}
+          {catalogOccasions.map((occasion) => <option key={occasion} value={occasion}>{occasionLabels[occasion][language]}</option>)}
         </select>
       </label>
 

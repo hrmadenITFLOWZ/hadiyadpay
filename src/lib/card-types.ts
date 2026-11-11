@@ -5,25 +5,59 @@ export type CardCategory = 'celebrations' | 'milestones';
 
 export const cardOccasions = [
   'birthday',
+  'birth',
   'wedding',
-  'henna',
+  'graduation',
+  'love',
+  'thanks',
+  'get-well',
+  'new-home',
   'eid',
+  'henna',
   'heritage',
   'encouragement',
-  'graduation',
   'blessings',
 ] as const;
 
 export type CardOccasion = (typeof cardOccasions)[number];
 
+export const occasionRouteMap = {
+  birthday: 'verjaardag',
+  birth: 'geboorte',
+  wedding: 'huwelijk',
+  graduation: 'afstuderen',
+  love: 'liefde',
+  thanks: 'bedankt',
+  'get-well': 'beterschap',
+  'new-home': 'nieuwe-woning',
+  eid: 'eid',
+  henna: 'hennafeest',
+  heritage: 'erfgoed',
+  encouragement: 'aanmoediging',
+  blessings: 'zegeningen',
+} as const satisfies Record<CardOccasion, string>;
+
+export function getOccasionFromRouteSlug(slug: string): CardOccasion | undefined {
+  return cardOccasions.find((occasion) => occasionRouteMap[occasion] === slug);
+}
+
+export function getOccasionRouteSlug(occasion: CardOccasion): string {
+  return occasionRouteMap[occasion];
+}
+
 export const occasionLabels: Record<CardOccasion, LocalizedText> = {
   birthday: { so: 'Dhalasho', en: 'Birthday', nl: 'Verjaardag' },
+  birth: { so: 'Dhalasho', en: 'Birth', nl: 'Geboorte' },
   wedding: { so: 'Aroos', en: 'Wedding', nl: 'Bruiloft' },
-  henna: { so: 'Henna', en: 'Henna night', nl: 'Hennafeest' },
+  graduation: { so: 'Qalinjabin', en: 'Graduation', nl: 'Diploma' },
+  love: { so: 'Jacayl', en: 'Love', nl: 'Liefde' },
+  thanks: { so: 'Mahadsanid', en: 'Thanks', nl: 'Bedankt' },
+  'get-well': { so: 'Caafimaad degdeg ah', en: 'Get well soon', nl: 'Beterschap' },
+  'new-home': { so: 'Guri cusub', en: 'New home', nl: 'Nieuwe woning' },
   eid: { so: 'Ciid', en: 'Eid', nl: 'Eid' },
+  henna: { so: 'Henna', en: 'Henna night', nl: 'Hennafeest' },
   heritage: { so: 'Hiddaha', en: 'Heritage', nl: 'Erfgoed' },
   encouragement: { so: 'Dhiirigelin', en: 'Encouragement', nl: 'Aanmoediging' },
-  graduation: { so: 'Qalinjabin', en: 'Graduation', nl: 'Diploma' },
   blessings: { so: 'Barako', en: 'Blessings', nl: 'Zegeningen' },
 };
 

@@ -2,12 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import type { CardOption } from '../../lib/card-types';
+import { getOccasionRouteSlug, occasionLabels, type CardOption } from '../../lib/card-types';
 import CardArtworkLayer from './CardArtworkLayer';
 import CardBuilder from './CardBuilder';
 import CardProductCard from './CardProductCard';
 import { cardOptions } from '../data/cardOptions';
-import { occasionLabels } from '../../lib/card-types';
 import { useStorefrontLanguage } from './StorefrontShell';
 
 export default function CardDetailExperience({ card }: { card: CardOption }) {
@@ -47,6 +46,8 @@ export default function CardDetailExperience({ card }: { card: CardOption }) {
           <li><Link href={`/?lang=${language}`} className="underline-offset-4 hover:underline">HadiyadPay</Link></li>
           <li aria-hidden="true">/</li>
           <li><Link href={`/kaarten?lang=${language}`} className="underline-offset-4 hover:underline">{labels.back}</Link></li>
+          <li aria-hidden="true">/</li>
+          <li><Link href={`/kaarten/${getOccasionRouteSlug(card.occasion)}?lang=${language}`} className="underline-offset-4 hover:underline">{labels.occasion}</Link></li>
           <li aria-hidden="true">/</li>
           <li aria-current="page" className="font-medium text-[#293d35]">{card.title[language]}</li>
         </ol>

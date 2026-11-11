@@ -24,7 +24,7 @@ export default function CardSideSelector({ currentLanguage, activeSide, onSelect
           role="tab"
           aria-selected={activeSide === side}
           onClick={() => onSelect(side)}
-          className={`flex-1 rounded-lg px-3 py-2 text-xs font-bold uppercase tracking-[0.18em] transition ${activeSide === side ? 'bg-white text-[#285347] shadow-sm' : 'text-stone-600'}`}
+          className={`min-h-11 min-w-0 flex-1 rounded-lg px-2 py-2 text-[10px] font-bold uppercase tracking-[0.08em] transition sm:px-3 sm:text-xs sm:tracking-[0.18em] ${activeSide === side ? 'bg-white text-[#285347] shadow-sm' : 'text-stone-600'}`}
         >
           {side === 'front' ? labels.front : labels.inside}
         </button>

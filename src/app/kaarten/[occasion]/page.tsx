@@ -4,8 +4,14 @@ import { Suspense } from 'react';
 import CardCatalog from '../../components/CardCatalog';
 import JsonLd from '../../components/JsonLd';
 import StorefrontShell from '../../components/StorefrontShell';
-import { getCardsByOccasion, isCardOccasion } from '../../../lib/catalog';
-import { cardOccasions, occasionLabels } from '../../../lib/card-types';
+import { getCardsByOccasion } from '../../../lib/catalog';
+import {
+  cardOccasions,
+  getOccasionFromRouteSlug,
+  getOccasionRouteSlug,
+  occasionLabels,
+  type CardOccasion,
+} from '../../../lib/card-types';
 import { absoluteSiteUrl, toBreadcrumbListJsonLd, toItemListJsonLd } from '../../../lib/seo';
 
 interface OccasionPageProps {
@@ -15,24 +21,31 @@ interface OccasionPageProps {
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return cardOccasions.map((occasion) => ({ occasion }));
+  return cardOccasions.map((occasion) => ({ occasion: getOccasionRouteSlug(occasion) }));
+}
+
+function getOccasionOrNotFound(slug: string): CardOccasion {
+  const occasion = getOccasionFromRouteSlug(slug);
+  if (!occasion) notFound();
+  return occasion;
 }
 
 export async function generateMetadata({ params }: OccasionPageProps): Promise<Metadata> {
   const { occasion: slug } = await params;
-  if (!isCardOccasion(slug)) notFound();
+  const occasion = getOccasionOrNotFound(slug);
+  const canonicalPath = `/kaarten/${getOccasionRouteSlug(occasion)}`;
 
-  const title = `${occasionLabels[slug].nl} kaarten`;
-  const description = `Bekijk digitale kaarten voor ${occasionLabels[slug].nl.toLocaleLowerCase()}.`;
+  const title = `${occasionLabels[occasion].nl} kaarten`;
+  const description = `Bekijk digitale kaarten voor ${occasionLabels[occasion].nl.toLocaleLowerCase()}.`;
 
   return {
     title,
     description,
-    alternates: { canonical: `/kaarten/${slug}` },
+    alternates: { canonical: canonicalPath },
     openGraph: {
       title: `${title} | HadiyadPay`,
       description,
-      url: `/kaarten/${slug}`,
+      url: canonicalPath,
       images: ['/images/logo.jpg'],
       type: 'website',
     },
@@ -41,10 +54,11 @@ export async function generateMetadata({ params }: OccasionPageProps): Promise<M
 
 export default async function OccasionPage({ params }: OccasionPageProps) {
   const { occasion: slug } = await params;
-  if (!isCardOccasion(slug)) notFound();
+  const occasion = getOccasionOrNotFound(slug);
+  const canonicalPath = `/kaarten/${getOccasionRouteSlug(occasion)}`;
 
-  const cards = getCardsByOccasion(slug);
-  const occasionName = occasionLabels[slug].nl;
+  const cards = getCardsByOccasion(occasion);
+  const occasionName = occasionLabels[occasion].nl;
 
   return (
     <Suspense fallback={<div className="min-h-screen bg-background" />}>
@@ -52,10 +66,10 @@ export default async function OccasionPage({ params }: OccasionPageProps) {
         <JsonLd data={toBreadcrumbListJsonLd([
           { name: 'HadiyadPay', url: absoluteSiteUrl('/') },
           { name: 'Kaarten', url: absoluteSiteUrl('/kaarten') },
-          { name: occasionName, url: absoluteSiteUrl(`/kaarten/${slug}`) },
+          { name: occasionName, url: absoluteSiteUrl(canonicalPath) },
         ])} />
         <JsonLd data={toItemListJsonLd(cards)} />
-        <CardCatalog defaultOccasion={slug} />
+        <CardCatalog defaultOccasion={occasion} />
       </StorefrontShell>
     </Suspense>
   );

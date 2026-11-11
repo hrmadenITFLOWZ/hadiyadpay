@@ -5,6 +5,7 @@ import CardDetailExperience from '../../components/CardDetailExperience';
 import JsonLd from '../../components/JsonLd';
 import StorefrontShell from '../../components/StorefrontShell';
 import { getCardBySlug } from '../../../lib/catalog';
+import { getOccasionRouteSlug, occasionLabels } from '../../../lib/card-types';
 import { cardOptions } from '../../data/cardOptions';
 import { absoluteSiteUrl, toBreadcrumbListJsonLd, toCardJsonLd } from '../../../lib/seo';
 
@@ -48,6 +49,10 @@ export default async function CardPage({ params }: CardPageProps) {
         <JsonLd data={toBreadcrumbListJsonLd([
           { name: 'HadiyadPay', url: absoluteSiteUrl('/') },
           { name: 'Kaarten', url: absoluteSiteUrl('/kaarten') },
+          {
+            name: occasionLabels[card.occasion].nl,
+            url: absoluteSiteUrl(`/kaarten/${getOccasionRouteSlug(card.occasion)}`),
+          },
           { name: card.title.nl, url: absoluteSiteUrl(`/kaart/${card.slug}`) },
         ])} />
         <JsonLd data={toCardJsonLd(card)} />
