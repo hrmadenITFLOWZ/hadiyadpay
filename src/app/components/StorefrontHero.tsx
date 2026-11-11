@@ -1,3 +1,6 @@
+import { cardOptions } from '../data/cardOptions';
+import CardArtworkLayer from './CardArtworkLayer';
+
 type Language = 'so' | 'en' | 'nl';
 
 interface StorefrontHeroProps {
@@ -85,13 +88,8 @@ export default function StorefrontHero({ currentLanguage }: StorefrontHeroProps)
         role="img"
         aria-label={text.previewAlt}
         className="relative mx-auto flex aspect-[1.08/1] w-full max-w-[31rem] items-center justify-center overflow-hidden rounded-[1.75rem] bg-[#d2bda0] p-5 sm:p-8"
-        style={{
-          backgroundImage:
-            'linear-gradient(145deg, rgba(33,62,52,0.12), rgba(33,62,52,0.45)), url(https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=1200&auto=format&fit=crop)',
-          backgroundPosition: 'center',
-          backgroundSize: 'cover',
-        }}
       >
+        <CardArtworkLayer artwork={cardOptions[0].artwork} language={currentLanguage} />
         <div aria-hidden="true" className="absolute inset-3 rounded-[1.4rem] border border-white/50" />
         <div className="relative w-full max-w-sm rounded-2xl border border-white/50 bg-[#fffdf8]/95 px-6 py-8 text-center shadow-2xl backdrop-blur-sm sm:px-9 sm:py-10">
           <p className="text-[0.65rem] font-bold uppercase tracking-[0.22em] text-[#8b7654]">

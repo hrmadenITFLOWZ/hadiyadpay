@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" fill="none">
+  <title>HadiyadPay encouragement greeting</title>
+  <defs>
+    <linearGradient id="bg" x1="118" y1="110" x2="1070" y2="850" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8FAF9A"/>
+      <stop offset="1" stop-color="#315D58"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#bg)" d="M0 0h1200v900H0z"/>
+  <circle cx="600" cy="390" r="198" fill="#E9C77E"/>
+  <path d="M0 650c150-111 285-111 435 0s285 111 435 0 220-111 330-40v290H0V650Z" fill="#416C60"/>
+  <path d="M0 750c160-95 300-95 460 0s300 95 460 0 200-95 280-45v195H0V750Z" fill="#294A48"/>
+  <path d="M315 520c67-66 138-66 205 0m160 0c67-66 138-66 205 0" stroke="#F8EBD0" stroke-width="16" stroke-linecap="round"/>
+  <path d="M600 130v-52m-270 162-37-37m614 37 37-37" stroke="#FFF4D8" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="600" cy="390" r="236" stroke="#F8EBD0" stroke-opacity=".65" stroke-width="10"/>
+</svg>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" fill="none">
+  <title>HadiyadPay Eid greeting</title>
+  <defs>
+    <linearGradient id="bg" x1="102" y1="32" x2="1090" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#244E66"/>
+      <stop offset="1" stop-color="#142C45"/>
+    </linearGradient>
+    <pattern id="stars" width="120" height="120" patternUnits="userSpaceOnUse">
+      <path d="m60 14 8 30 30 8-30 8-8 30-8-30-30-8 30-8 8-30Z" fill="#E9C77E" fill-opacity=".42"/>
+    </pattern>
+  </defs>
+  <path fill="url(#bg)" d="M0 0h1200v900H0z"/>
+  <path fill="url(#stars)" d="M0 0h1200v900H0z"/>
+  <circle cx="600" cy="390" r="208" fill="#F0D18B"/>
+  <circle cx="684" cy="330" r="190" fill="#1B3B55"/>
+  <path d="m408 646 30 58 65 9-47 45 11 64-59-30-58 30 11-64-47-45 65-9 29-58ZM862 570l20 38 43 6-31 30 7 43-39-20-38 20 7-43-31-30 43-6 19-38Z" fill="#F0D18B"/>
+  <path d="M180 760c132-73 236-73 368 0 132-73 236-73 368 0 40-22 74-38 104-47v187H180V760Z" fill="#346D6C"/>
+  <path d="M180 808c132-73 236-73 368 0 132-73 236-73 368 0 40-22 74-38 104-47" stroke="#8EBA9E" stroke-width="11" stroke-linecap="round"/>
+</svg>

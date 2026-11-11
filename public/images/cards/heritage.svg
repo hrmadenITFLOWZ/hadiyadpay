@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" fill="none">
+  <title>HadiyadPay heritage greeting</title>
+  <defs>
+    <linearGradient id="bg" x1="80" y1="80" x2="1110" y2="840" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D9B982"/>
+      <stop offset="1" stop-color="#8B654B"/>
+    </linearGradient>
+    <pattern id="weave" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M0 0h40v40H0zM40 40h40v40H40z" fill="#F3E4C5" fill-opacity=".26"/>
+      <path d="M40 0h40v40H40zM0 40h40v40H0z" fill="#633F39" fill-opacity=".18"/>
+    </pattern>
+  </defs>
+  <path fill="url(#bg)" d="M0 0h1200v900H0z"/>
+  <path fill="url(#weave)" d="M0 0h1200v900H0z"/>
+  <path d="M266 230h668v440H266z" rx="72" fill="#6F4A3F" fill-opacity=".7" stroke="#F4E3BD" stroke-width="14"/>
+  <path d="M316 286h568v328H316z" stroke="#E9C990" stroke-width="14"/>
+  <path d="M360 300v300m96-300v300m96-300v300m96-300v300m96-300v300m96-300v300" stroke="#F2D8A5" stroke-width="18" stroke-linecap="round"/>
+  <path d="M324 368h552m-552 92h552m-552 92h552" stroke="#B77C57" stroke-width="20" stroke-linecap="round"/>
+  <circle cx="600" cy="450" r="76" fill="#D9B982" stroke="#FFF0D0" stroke-width="12"/>
+  <path d="m600 395 17 38 42 5-31 29 8 41-36-20-37 20 7-41-30-29 42-5 18-38Z" fill="#FFF0D0"/>
+</svg>

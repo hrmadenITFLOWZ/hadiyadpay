@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" fill="none">
+  <title>HadiyadPay wedding celebration</title>
+  <defs>
+    <linearGradient id="bg" x1="90" y1="70" x2="1080" y2="850" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F0DFC0"/>
+      <stop offset="1" stop-color="#A9785B"/>
+    </linearGradient>
+    <pattern id="lines" width="90" height="90" patternUnits="userSpaceOnUse">
+      <path d="M0 90 90 0M-22 22 22-22M68 112l44-44" stroke="#FFF8E8" stroke-opacity=".22" stroke-width="8"/>
+    </pattern>
+  </defs>
+  <path fill="url(#bg)" d="M0 0h1200v900H0z"/>
+  <path fill="url(#lines)" d="M0 0h1200v900H0z"/>
+  <path d="M600 180c-140 0-254 114-254 254v34c0 140 114 254 254 254s254-114 254-254v-34c0-140-114-254-254-254Z" stroke="#FFF5D9" stroke-width="34"/>
+  <path d="M600 254c-99 0-180 81-180 180v34c0 99 81 180 180 180s180-81 180-180v-34c0-99-81-180-180-180Z" stroke="#BB8752" stroke-width="26"/>
+  <path d="M600 325v250M475 450h250" stroke="#FFF5D9" stroke-width="12" stroke-linecap="round" stroke-dasharray="2 30"/>
+  <circle cx="600" cy="450" r="20" fill="#BB8752"/>
+  <path d="m204 224 24 48 53 8-38 37 9 53-48-25-48 25 9-53-38-37 53-8 24-48ZM996 546l18 37 41 6-30 29 7 41-36-19-37 19 7-41-30-29 41-6 19-37Z" fill="#FFF2CE" fill-opacity=".88"/>
+</svg>

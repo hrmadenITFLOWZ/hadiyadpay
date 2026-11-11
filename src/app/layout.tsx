@@ -1,22 +1,10 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { cardOptions } from "./data/cardOptions";
+import { getSiteUrl } from "../lib/seo";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
-const metadataBase = new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.hadiyadpay.com');
-const cardCatalogJsonLd = JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "ItemList",
-  name: "HadiyadPay digital greeting cards",
-  numberOfItems: cardOptions.length,
-  itemListOrder: "https://schema.org/ItemListOrderAscending",
-  itemListElement: cardOptions.map((card, index) => ({
-    "@type": "ListItem",
-    position: index + 1,
-    name: card.title.en,
-  })),
-}).replace(/</g, "\\u003c");
+const metadataBase = getSiteUrl();
 
 export const metadata: Metadata = {
   title: {
@@ -67,10 +55,6 @@ export default function RootLayout({
   return (
     <html lang="so">
       <body className={`${inter.className} min-h-screen bg-background text-foreground antialiased selection:bg-amber-200 selection:text-[#203b32]`}>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: cardCatalogJsonLd }}
-        />
         {children}
       </body>
     </html>

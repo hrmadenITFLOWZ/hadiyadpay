@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" fill="none">
+  <title>HadiyadPay graduation greeting</title>
+  <defs>
+    <linearGradient id="bg" x1="100" y1="40" x2="1100" y2="870" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#345A78"/>
+      <stop offset="1" stop-color="#1D304B"/>
+    </linearGradient>
+    <pattern id="confetti" width="130" height="130" patternUnits="userSpaceOnUse">
+      <circle cx="22" cy="34" r="7" fill="#E8C77D" fill-opacity=".6"/>
+      <path d="m82 10 8 21m25 59-18 13M19 106l20-8" stroke="#F4E5C5" stroke-opacity=".55" stroke-width="7" stroke-linecap="round"/>
+    </pattern>
+  </defs>
+  <path fill="url(#bg)" d="M0 0h1200v900H0z"/>
+  <path fill="url(#confetti)" d="M0 0h1200v900H0z"/>
+  <path d="m600 242 330 150-330 150-330-150 330-150Z" fill="#E6C278"/>
+  <path d="m420 438 180 82 180-82v178c-100 91-260 91-360 0V438Z" fill="#F5E5C0"/>
+  <path d="M930 392v248" stroke="#F3D995" stroke-width="14" stroke-linecap="round"/>
+  <circle cx="930" cy="666" r="32" fill="#E6C278"/>
+  <path d="M390 690c132 81 288 81 420 0" stroke="#A6C5BB" stroke-width="16" stroke-linecap="round"/>
+</svg>

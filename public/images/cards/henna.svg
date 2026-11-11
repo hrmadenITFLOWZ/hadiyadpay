@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" fill="none">
+  <title>HadiyadPay henna night</title>
+  <defs>
+    <linearGradient id="bg" x1="130" y1="60" x2="1070" y2="860" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9D4F52"/>
+      <stop offset="1" stop-color="#542E3E"/>
+    </linearGradient>
+    <pattern id="tile" width="108" height="108" patternUnits="userSpaceOnUse">
+      <path d="m54 8 46 46-46 46L8 54 54 8Z" stroke="#E8BE8A" stroke-opacity=".38" stroke-width="5"/>
+      <circle cx="54" cy="54" r="9" fill="#F5D6A4" fill-opacity=".65"/>
+    </pattern>
+  </defs>
+  <path fill="url(#bg)" d="M0 0h1200v900H0z"/>
+  <path fill="url(#tile)" d="M0 0h1200v900H0z"/>
+  <circle cx="600" cy="450" r="246" fill="#7E4149" stroke="#F0CC91" stroke-width="12"/>
+  <circle cx="600" cy="450" r="204" stroke="#F0CC91" stroke-width="7" stroke-dasharray="3 20"/>
+  <circle cx="600" cy="450" r="155" stroke="#E6B77D" stroke-width="8"/>
+  <path d="M600 300c28 53 76 101 130 130-54 29-102 77-130 130-28-53-76-101-130-130 54-29 102-77 130-130Z" fill="#D99170" stroke="#F6D8AA" stroke-width="10"/>
+  <circle cx="600" cy="450" r="42" fill="#F5D6A4"/>
+  <path d="M600 170v64m0 432v64M320 450h64m432 0h64M402 252l46 46m304 304 46 46m0-396-46 46m-304 304-46 46" stroke="#F5D6A4" stroke-width="13" stroke-linecap="round"/>
+</svg>

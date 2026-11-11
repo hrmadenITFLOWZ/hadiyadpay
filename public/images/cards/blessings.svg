@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" fill="none">
+  <title>HadiyadPay peace and blessings</title>
+  <defs>
+    <linearGradient id="sky" x1="120" y1="60" x2="1050" y2="830" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D89976"/>
+      <stop offset=".58" stop-color="#B87562"/>
+      <stop offset="1" stop-color="#4F5550"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#sky)" d="M0 0h1200v900H0z"/>
+  <circle cx="840" cy="314" r="146" fill="#F0D39A" fill-opacity=".94"/>
+  <path d="M0 604c137-111 274-111 411 0s274 111 411 0 250-111 378-16v312H0V604Z" fill="#806457"/>
+  <path d="M0 700c167-92 325-92 492 0s325 92 492 0c73-40 145-60 216-51v251H0V700Z" fill="#454F49"/>
+  <path d="M0 790c155-60 300-60 455 0s300 60 455 0 200-60 290-30v140H0V790Z" fill="#293D3B"/>
+  <path d="M238 568c34-32 73-32 107 0m-76-50 24-43 24 43" stroke="#E8CFA5" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M628 570c34-32 73-32 107 0m-76-50 24-43 24 43" stroke="#E8CFA5" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,165 +1,312 @@
-export type CardCategory = 'celebrations' | 'milestones';
+import {
+  type CardOption,
+} from '../../lib/card-types';
 
-export const cardOccasions = [
-  'birthday',
-  'wedding',
-  'henna',
-  'eid',
-  'heritage',
-  'encouragement',
-  'graduation',
-  'blessings',
-] as const;
-
-export type CardOccasion = (typeof cardOccasions)[number];
-
-export const occasionLabels: Record<CardOccasion, { so: string; en: string; nl: string }> = {
-  birthday: { so: 'Dhalasho', en: 'Birthday', nl: 'Verjaardag' },
-  wedding: { so: 'Aroos', en: 'Wedding', nl: 'Bruiloft' },
-  henna: { so: 'Henna', en: 'Henna night', nl: 'Hennafeest' },
-  eid: { so: 'Ciid', en: 'Eid', nl: 'Eid' },
-  heritage: { so: 'Hiddaha', en: 'Heritage', nl: 'Erfgoed' },
-  encouragement: { so: 'Dhiirigelin', en: 'Encouragement', nl: 'Aanmoediging' },
-  graduation: { so: 'Qalinjabin', en: 'Graduation', nl: 'Diploma' },
-  blessings: { so: 'Barako', en: 'Blessings', nl: 'Zegeningen' },
-};
-
-export interface CardOption {
-  id: string;
-  category: CardCategory;
-  occasion: CardOccasion;
-  searchTerms: string[];
-  featured?: boolean;
-  badge: { so: string; en: string };
-  title: { so: string; en: string };
-  gradient?: string;
-  bgImage?: string;
-  defaultRecipient: { so: string; en: string };
-  defaultSender: { so: string; en: string };
-  defaultMessage: { so: string; en: string };
-}
+export {
+  cardOccasions,
+  occasionLabels,
+  type CardCategory,
+  type CardOccasion,
+  type CardOption,
+} from '../../lib/card-types';
 
 export const cardOptions: CardOption[] = [
   {
     id: 'dhalasho',
+    slug: 'birthday-greeting',
     category: 'celebrations',
     occasion: 'birthday',
     searchTerms: ['dhalasho', 'birthday', 'cake', 'celebration'],
+    recipientTypes: ['friend', 'family'],
+    styles: ['illustrated'],
+    colors: ['terracotta', 'gold'],
+    languages: ['so', 'en', 'nl'],
+    orientation: 'portrait',
     featured: true,
-    badge: { so: 'DHALASHO 🎂', en: 'BIRTHDAY 🎂' },
-    title: { so: 'Dhalasho Wacan', en: 'Festive Birthday Celebration' },
-    bgImage: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=800&auto=format&fit=crop',
-    defaultRecipient: { so: 'Saxiib Qaali', en: 'Dear Friend' },
-    defaultSender: { so: 'Walaalkaa / Saaxiibkaa', en: 'Your Friend' },
+    badge: { so: 'DHALASHO 🎂', en: 'BIRTHDAY 🎂', nl: 'VERJAARDAG 🎂' },
+    title: { so: 'Dhalasho Wacan', en: 'Festive Birthday Celebration', nl: 'Feestelijke verjaardag' },
+    description: {
+      so: 'Kaar farxad leh oo loogu dabaaldego maalinta dhalashada.',
+      en: 'A joyful card to celebrate someone’s birthday.',
+      nl: 'Een vrolijke kaart om een verjaardag te vieren.',
+    },
+    artwork: {
+      type: 'local-image',
+      src: '/images/cards/birthday.svg',
+      alt: {
+        so: 'Farshaxan dhalasho oo midabbo diirran leh',
+        en: 'Warm-toned original birthday artwork',
+        nl: 'Originele verjaardagsillustratie in warme tinten',
+      },
+      focalPoint: 'center',
+      owner: 'hadiyadpay',
+    },
+    defaultRecipient: { so: 'Saxiib Qaali', en: 'Dear Friend', nl: 'Lieve vriend' },
+    defaultSender: { so: 'Walaalkaa / Saaxiibkaa', en: 'Your Friend', nl: 'Je vriend' },
     defaultMessage: { 
       so: 'Waxaan kuu rajeynayaa caafimaad, barako, iyo sannad kale oo ay ka buuxaan farxad, qosol, iyo guul weyn. 🎂✨', 
-      en: 'Wishing you health, blessings, and another year filled with immense joy and success! 🎂✨' 
+      en: 'Wishing you health, blessings, and another year filled with immense joy and success! 🎂✨',
+      nl: 'Ik wens je gezondheid, zegeningen en een jaar vol plezier en mooie momenten! 🎂✨',
     }
   },
   {
     id: 'aroos',
+    slug: 'somali-wedding',
     category: 'celebrations',
     occasion: 'wedding',
     searchTerms: ['aroos', 'wedding', 'marriage', 'traditional'],
+    recipientTypes: ['partner', 'family'],
+    styles: ['traditional', 'ornamental'],
+    colors: ['gold', 'terracotta'],
+    languages: ['so', 'en', 'nl'],
+    orientation: 'landscape',
     featured: true,
-    badge: { so: 'AROOS & DHAQAN 🏺', en: 'WEDDING & HERITAGE 🏺' },
-    title: { so: 'Xaflada Arooska & Dhaqanka', en: 'Traditional Somali Wedding' },
-    bgImage: 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=800&auto=format&fit=crop',
-    defaultRecipient: { so: 'Arooska iyo Ardo', en: 'Bride & Groom' },
-    defaultSender: { so: 'Qoyskaaga', en: 'Your Family' },
+    badge: { so: 'AROOS & DHAQAN 🏺', en: 'WEDDING & HERITAGE 🏺', nl: 'BRUILOFT & ERFGOED 🏺' },
+    title: { so: 'Xaflada Arooska & Dhaqanka', en: 'Traditional Somali Wedding', nl: 'Traditionele Somalische bruiloft' },
+    description: {
+      so: 'Hambalyo aroos oo leh quruxda dhaqanka.',
+      en: 'A wedding greeting with a heritage-inspired design.',
+      nl: 'Een huwelijksgroet met een ontwerp geïnspireerd op erfgoed.',
+    },
+    artwork: {
+      type: 'local-image',
+      src: '/images/cards/wedding.svg',
+      alt: {
+        so: 'Farshaxan aroos oo dahab iyo ciid ah',
+        en: 'Original wedding artwork in gold and sand tones',
+        nl: 'Originele bruiloftsillustratie in goud- en zandtinten',
+      },
+      focalPoint: 'center',
+      owner: 'hadiyadpay',
+    },
+    defaultRecipient: { so: 'Arooska iyo Ardo', en: 'Bride & Groom', nl: 'Bruid en bruidegom' },
+    defaultSender: { so: 'Qoyskaaga', en: 'Your Family', nl: 'Je familie' },
     defaultMessage: { 
       so: 'Hambalyo! Illahay ha idinka dhigo kuwii isku waara ee isu naxariista, gurigooduna noqdo mid barako leh. 🏺💍', 
-      en: 'Congratulations! May Allah bless your union and fill your home with everlasting peace and happiness. 🏺💍' 
+      en: 'Congratulations! May Allah bless your union and fill your home with everlasting peace and happiness. 🏺💍',
+      nl: 'Van harte gefeliciteerd! Moge jullie huis gevuld zijn met vrede, liefde en geluk. 🏺💍',
     }
   },
   {
     id: 'henna',
+    slug: 'henna-night',
     category: 'celebrations',
     occasion: 'henna',
     searchTerms: ['xafxad', 'henna', 'gold', 'celebration'],
-    badge: { so: 'XAFXAD & HENNA ✨', en: 'HENNA NIGHT ✨' },
-    title: { so: 'Habeenka Henna & Dahab', en: 'Henna & Gold Night' },
-    bgImage: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=800&auto=format&fit=crop',
-    defaultRecipient: { so: 'Saxiibaddii Qaaliga ahayd', en: 'Dearest' },
-    defaultSender: { so: 'Asxaabtaada', en: 'Your Friends' },
+    recipientTypes: ['friend', 'family'],
+    styles: ['ornamental', 'floral'],
+    colors: ['terracotta', 'rose'],
+    languages: ['so', 'en', 'nl'],
+    orientation: 'portrait',
+    badge: { so: 'XAFXAD & HENNA ✨', en: 'HENNA NIGHT ✨', nl: 'HENNAFEEST ✨' },
+    title: { so: 'Habeenka Henna & Dahab', en: 'Henna & Gold Night', nl: 'Henna- en gouden avond' },
+    description: {
+      so: 'Naqshad qurux badan oo loogu dabaaldego habeenka henna.',
+      en: 'A celebratory design for a special henna night.',
+      nl: 'Een feestelijk ontwerp voor een bijzondere henna-avond.',
+    },
+    artwork: {
+      type: 'local-image',
+      src: '/images/cards/henna.svg',
+      alt: {
+        so: 'Farshaxan henna oo casaan iyo dahab ah',
+        en: 'Original henna artwork in rose and gold',
+        nl: 'Originele henna-illustratie in roze en goud',
+      },
+      focalPoint: 'center',
+      owner: 'hadiyadpay',
+    },
+    defaultRecipient: { so: 'Saxiibaddii Qaaliga ahayd', en: 'Dearest', nl: 'Lieve vriendin' },
+    defaultSender: { so: 'Asxaabtaada', en: 'Your Friends', nl: 'Je vrienden' },
     defaultMessage: { 
       so: 'Habeen qurux badan oo ay ka buuxaan heeso dhaqameed, farxad, iyo henna cajiib ah! ✨ Handasaad wacan! 🤎', 
-      en: 'A beautiful night filled with traditional songs, joy, and stunning henna patterns! ✨ Wishing you the best! 🤎' 
+      en: 'A beautiful night filled with traditional songs, joy, and stunning henna patterns! ✨ Wishing you the best! 🤎',
+      nl: 'Een mooie avond vol vreugde, muziek en prachtige hennapatronen! ✨ Geniet ervan! 🤎',
     }
   },
   {
     id: 'eid',
+    slug: 'eid-mubarak',
     category: 'celebrations',
     occasion: 'eid',
     searchTerms: ['ciid', 'eid', 'mubarak', 'blessed'],
-    badge: { so: 'CIID WACAN 🌙', en: 'EID MUBARAK 🌙' },
-    title: { so: 'Ciid Wacan & Barako', en: 'Blessed Eid Mubarak' },
-    bgImage: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?q=80&w=800&auto=format&fit=crop',
-    defaultRecipient: { so: 'Dhamaan Qoyska', en: 'Family & Loved Ones' },
-    defaultSender: { so: 'Aden & Qoyska', en: 'Aden & Family' },
+    recipientTypes: ['family', 'friend'],
+    styles: ['geometric', 'ornamental'],
+    colors: ['blue', 'gold'],
+    languages: ['so', 'en', 'nl'],
+    orientation: 'landscape',
+    badge: { so: 'CIID WACAN 🌙', en: 'EID MUBARAK 🌙', nl: 'EID MUBARAK 🌙' },
+    title: { so: 'Ciid Wacan & Barako', en: 'Blessed Eid Mubarak', nl: 'Gezegende Eid Mubarak' },
+    description: {
+      so: 'Kaar Ciid oo ay ku dheehan tahay nabad iyo barako.',
+      en: 'An Eid greeting celebrating peace and blessings.',
+      nl: 'Een Eid-groet vol wensen van vrede en zegeningen.',
+    },
+    artwork: {
+      type: 'local-image',
+      src: '/images/cards/eid.svg',
+      alt: {
+        so: 'Habeen buluug ah oo dayax iyo xiddigo leh',
+        en: 'Original night-sky artwork with a crescent and stars',
+        nl: 'Originele nachthemelillustratie met maan en sterren',
+      },
+      focalPoint: 'center',
+      owner: 'hadiyadpay',
+    },
+    defaultRecipient: { so: 'Dhamaan Qoyska', en: 'Family & Loved Ones', nl: 'Familie en dierbaren' },
+    defaultSender: { so: 'Aden & Qoyska', en: 'Aden & Family', nl: 'Aden en familie' },
     defaultMessage: { 
       so: 'Ciid Mubaarak! Illahay ha aqbalo amalkeenna suubban, idinkuna ciidda nabad iyo caafimaad ku gaadha. 🌙✨', 
-      en: 'Eid Mubarak! May Allah accept our good deeds and bring peace and prosperity to your household. 🌙✨' 
+      en: 'Eid Mubarak! May Allah accept our good deeds and bring peace and prosperity to your household. 🌙✨',
+      nl: 'Eid Mubarak! Moge deze dag vrede en voorspoed brengen voor jullie allemaal. 🌙✨',
     }
   },
   {
     id: 'haargab',
+    slug: 'heritage-craft',
     category: 'celebrations',
     occasion: 'heritage',
     searchTerms: ['hiddha', 'heritage', 'craft', 'tradition'],
-    badge: { so: 'HIDDHA & DHAQAN 🧺', en: 'HERITAGE ART 🧺' },
-    title: { so: 'Dhaqanka Hiddaha Hooyo', en: 'Handicraft Heritage' },
-    bgImage: 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?q=80&w=800&auto=format&fit=crop',
-    defaultRecipient: { so: 'Ehelka iyo Asxaabta', en: 'Family & Friends' },
-    defaultSender: { so: 'HadiyadPay', en: 'HadiyadPay Team' },
+    recipientTypes: ['family', 'friend'],
+    styles: ['traditional', 'geometric'],
+    colors: ['terracotta', 'neutral'],
+    languages: ['so', 'en', 'nl'],
+    orientation: 'portrait',
+    badge: { so: 'HIDDHA & DHAQAN 🧺', en: 'HERITAGE ART 🧺', nl: 'ERFGOED 🧺' },
+    title: { so: 'Dhaqanka Hiddaha Hooyo', en: 'Handicraft Heritage', nl: 'Handwerk en erfgoed' },
+    description: {
+      so: 'Naqshad xushmeyneysa hiddaha iyo farsamada gacanta.',
+      en: 'A design celebrating heritage and handcrafted patterns.',
+      nl: 'Een ontwerp dat erfgoed en handgemaakte patronen eert.',
+    },
+    artwork: {
+      type: 'local-image',
+      src: '/images/cards/heritage.svg',
+      alt: {
+        so: 'Farshaxan asal ah oo leh qaabab dhaxal dhaqameed',
+        en: 'Original artwork with heritage-inspired geometric patterns',
+        nl: 'Originele illustratie met geometrische erfgoedpatronen',
+      },
+      focalPoint: 'center',
+      owner: 'hadiyadpay',
+    },
+    defaultRecipient: { so: 'Ehelka iyo Asxaabta', en: 'Family & Friends', nl: 'Familie en vrienden' },
+    defaultSender: { so: 'HadiyadPay', en: 'HadiyadPay Team', nl: 'Team HadiyadPay' },
     defaultMessage: { 
       so: 'Qiimaha hiddaha iyo dhaqanka iyo xusuusta dalkeenna hooyo oo qalbiga ku weyn. 🧺🤎', 
-      en: 'Celebrating our rich heritage, traditions, and timeless cultural craftsmanship. 🧺🤎' 
+      en: 'Celebrating our rich heritage, traditions, and timeless cultural craftsmanship. 🧺🤎',
+      nl: 'Een groet die ons erfgoed, onze tradities en vakmanschap viert. 🧺🤎',
     }
   },
   {
     id: 'taageero',
+    slug: 'encouragement',
     category: 'milestones',
     occasion: 'encouragement',
     searchTerms: ['taageero', 'support', 'encouragement', 'strength'],
-    badge: { so: 'TAAGEERO 🤝', en: 'SUPPORT 🤝' },
-    title: { so: 'Taageero & Dhiirigelin', en: 'Strength & Encouragement' },
-    bgImage: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=800&auto=format&fit=crop',
-    defaultRecipient: { so: 'Saxiibkey', en: 'My Friend' },
-    defaultSender: { so: 'Walaalkii', en: 'Your Brother' },
+    recipientTypes: ['friend', 'colleague'],
+    styles: ['minimal', 'geometric'],
+    colors: ['green', 'blue'],
+    languages: ['so', 'en', 'nl'],
+    orientation: 'landscape',
+    badge: { so: 'TAAGEERO 🤝', en: 'SUPPORT 🤝', nl: 'STEUN 🤝' },
+    title: { so: 'Taageero & Dhiirigelin', en: 'Strength & Encouragement', nl: 'Kracht en aanmoediging' },
+    description: {
+      so: 'Fariin taageero iyo dhiirigelin u ah qof kuu dhow.',
+      en: 'A supportive note for someone who matters to you.',
+      nl: 'Een bemoedigende boodschap voor iemand die je dierbaar is.',
+    },
+    artwork: {
+      type: 'local-image',
+      src: '/images/cards/encouragement.svg',
+      alt: {
+        so: 'Qorrax soo bax cagaar iyo buluug ah',
+        en: 'Original sunrise artwork in green and blue',
+        nl: 'Originele zonsopgangillustratie in groen en blauw',
+      },
+      focalPoint: 'center',
+      owner: 'hadiyadpay',
+    },
+    defaultRecipient: { so: 'Saxiibkey', en: 'My Friend', nl: 'Mijn vriend' },
+    defaultSender: { so: 'Walaalkii', en: 'Your Brother', nl: 'Je broer' },
     defaultMessage: { 
       so: 'Mar walba garabkaaga ayaan taaganahay. Guul iyo gobanimo ayaan kuu rajeynayaa hawlahaaga cusub! 🤝🌟', 
-      en: 'Always standing by your side. Wishing you strength, success, and prosperity in all your endeavors! 🤝🌟' 
+      en: 'Always standing by your side. Wishing you strength, success, and prosperity in all your endeavors! 🤝🌟',
+      nl: 'Ik sta achter je. Ik wens je kracht, succes en vertrouwen bij alles wat je doet! 🤝🌟',
     }
   },
   {
     id: 'guul',
+    slug: 'graduation-success',
     category: 'milestones',
     occasion: 'graduation',
     searchTerms: ['qalinjabin', 'graduation', 'success', 'graduate'],
-    badge: { so: 'GUUL 🎓', en: 'SUCCESS 🎓' },
-    title: { so: 'Qalinjabin & Guul', en: 'Graduation & Success' },
-    bgImage: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=800&auto=format&fit=crop',
-    defaultRecipient: { so: 'Ardayga Guuleystay', en: 'Graduate' },
-    defaultSender: { so: 'Qoyska oo idil', en: 'Proud Family' },
+    recipientTypes: ['graduate', 'family'],
+    styles: ['illustrated', 'geometric'],
+    colors: ['blue', 'gold'],
+    languages: ['so', 'en', 'nl'],
+    orientation: 'portrait',
+    badge: { so: 'GUUL 🎓', en: 'SUCCESS 🎓', nl: 'SUCCES 🎓' },
+    title: { so: 'Qalinjabin & Guul', en: 'Graduation & Success', nl: 'Afstuderen en succes' },
+    description: {
+      so: 'Hambalyo guul waxbarasho iyo bilow cusub.',
+      en: 'Celebrate an academic milestone and a new beginning.',
+      nl: 'Vier een mijlpaal en een nieuw begin.',
+    },
+    artwork: {
+      type: 'local-image',
+      src: '/images/cards/graduation.svg',
+      alt: {
+        so: 'Koofiyad qalinjabin iyo xiddigo dahab ah',
+        en: 'Original graduation cap artwork with gold stars',
+        nl: 'Originele illustratie van een afstudeerhoed met gouden sterren',
+      },
+      focalPoint: 'center',
+      owner: 'hadiyadpay',
+    },
+    defaultRecipient: { so: 'Ardayga Guuleystay', en: 'Graduate', nl: 'Geslaagde' },
+    defaultSender: { so: 'Qoyska oo idil', en: 'Proud Family', nl: 'Trots van je familie' },
     defaultMessage: { 
       so: 'Hambalyo qalinjabinta! Tani waa bilowga safar dheer oo ay ka buuxaan guulo waaweyn iyo mustaqbal dhalaalaya. 🎓🎉', 
-      en: 'Congratulations on your graduation! This is just the beginning of an amazing journey of success. 🎓🎉' 
+      en: 'Congratulations on your graduation! This is just the beginning of an amazing journey of success. 🎓🎉',
+      nl: 'Gefeliciteerd met je diploma! Dit is het begin van een mooie reis vol nieuwe kansen. 🎓🎉',
     }
   },
   {
     id: 'barako',
+    slug: 'peace-and-blessings',
     category: 'milestones',
     occasion: 'blessings',
     searchTerms: ['barako', 'blessings', 'peace', 'family'],
-    badge: { so: 'BARAKO 🐪', en: 'BLESSINGS 🐪' },
-    title: { so: 'Barako & Nabad', en: 'Nomadic Heritage Sunset' },
-    bgImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=800&auto=format&fit=crop',
-    defaultRecipient: { so: 'Reer Xamar / Reer Baadiye', en: 'Dear Family' },
-    defaultSender: { so: 'Qoyska Yurub', en: 'The Family Abroad' },
+    recipientTypes: ['family', 'friend'],
+    styles: ['ornamental', 'minimal'],
+    colors: ['terracotta', 'gold'],
+    languages: ['so', 'en', 'nl'],
+    orientation: 'landscape',
+    badge: { so: 'BARAKO 🐪', en: 'BLESSINGS 🐪', nl: 'ZEGENINGEN 🐪' },
+    title: { so: 'Barako & Nabad', en: 'Nomadic Heritage Sunset', nl: 'Zonsondergang en zegeningen' },
+    description: {
+      so: 'Fariin nabad, caafimaad iyo barako.',
+      en: 'A warm message wishing peace, health, and blessings.',
+      nl: 'Een warme wens voor vrede, gezondheid en zegeningen.',
+    },
+    artwork: {
+      type: 'local-image',
+      src: '/images/cards/blessings.svg',
+      alt: {
+        so: 'Qorrax dhac ku dul dhacaysa buuraha saxaraha',
+        en: 'Original sunset artwork over desert hills',
+        nl: 'Originele zonsondergang boven woestijnheuvels',
+      },
+      focalPoint: 'center',
+      owner: 'hadiyadpay',
+    },
+    defaultRecipient: { so: 'Reer Xamar / Reer Baadiye', en: 'Dear Family', nl: 'Lieve familie' },
+    defaultSender: { so: 'Qoyska Yurub', en: 'The Family Abroad', nl: 'De familie in Europa' },
     defaultMessage: { 
       so: 'Nabad, barako, iyo caafimaad ha dego gurigiinna. Waxaan idinkoo nabad qaba idiin rajeynayaa maalin wacan. 🐪🌿', 
-      en: 'May peace, blessings, and good health dwell in your home. Wishing you a wonderful day ahead. 🐪🌿' 
+      en: 'May peace, blessings, and good health dwell in your home. Wishing you a wonderful day ahead. 🐪🌿',
+      nl: 'Moge vrede, zegeningen en gezondheid bij jullie thuis zijn. Ik wens jullie een mooie dag. 🐪🌿',
     }
   }
 ];

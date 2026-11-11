@@ -1,11 +1,13 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { cardOptions } from '../data/cardOptions';
 import useDialogAccessibility from '../hooks/useDialogAccessibility';
+import CardArtworkLayer from './CardArtworkLayer';
+import type { CardLanguage } from '../../lib/card-types';
 
-type Language = 'so' | 'en' | 'nl';
+type Language = CardLanguage;
 
 interface ReceivedCardData {
   cardId: string;
@@ -55,15 +57,27 @@ function decodeCardData(encodedData: string | null): ReceivedCardData | null {
 
 export default function ReceivedCardModal({ currentLanguage }: ReceivedCardModalProps) {
   const searchParams = useSearchParams();
-  const dataParam = searchParams.get('data');
+  const legacyDataParam = searchParams.get('data');
+  const [hashDataParam, setHashDataParam] = useState<string | null>(null);
+
+  useEffect(() => {
+    const readCardHash = () => {
+      const hashParams = new URLSearchParams(window.location.hash.slice(1));
+      setHashDataParam(hashParams.get('card'));
+    };
+
+    readCardHash();
+    window.addEventListener('hashchange', readCardHash);
+    return () => window.removeEventListener('hashchange', readCardHash);
+  }, []);
+
+  const dataParam = legacyDataParam ?? hashDataParam;
   const cardData = useMemo(() => decodeCardData(dataParam), [dataParam]);
   const langParam = searchParams.get('lang');
-  const cardLang: 'so' | 'en' =
-    langParam === 'so' || langParam === 'en'
+  const cardLang: Language =
+    langParam === 'so' || langParam === 'en' || langParam === 'nl'
       ? langParam
-      : currentLanguage === 'so'
-        ? 'so'
-        : 'en';
+      : currentLanguage;
   const [dismissedData, setDismissedData] = useState<string | null>(null);
   const isOpen = Boolean(cardData && dataParam && dataParam !== dismissedData);
   const handleClose = () => {
@@ -72,8 +86,12 @@ export default function ReceivedCardModal({ currentLanguage }: ReceivedCardModal
     const params = new URLSearchParams(window.location.search);
     params.delete('data');
     const query = params.toString();
-    const nextUrl = `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`;
+    const hashParams = new URLSearchParams(window.location.hash.slice(1));
+    hashParams.delete('card');
+    const hash = hashParams.toString();
+    const nextUrl = `${window.location.pathname}${query ? `?${query}` : ''}${hash ? `#${hash}` : ''}`;
     window.history.replaceState({}, document.title, nextUrl);
+    setHashDataParam(null);
   };
   const dialogRef = useDialogAccessibility<HTMLElement>(isOpen, handleClose);
 
@@ -81,20 +99,6 @@ export default function ReceivedCardModal({ currentLanguage }: ReceivedCardModal
 
   const selectedCardOption = cardOptions.find((option) => option.id === cardData.cardId) ?? cardOptions[0];
   const langKey = cardLang;
-
-  const getCardStyle = () => {
-    if (selectedCardOption.bgImage) {
-      return {
-        backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.8)), url(${selectedCardOption.bgImage})`,
-        backgroundColor: '#1f2937',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      };
-    }
-    return {
-      background: selectedCardOption.gradient || '#be185d',
-    };
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
@@ -131,8 +135,8 @@ export default function ReceivedCardModal({ currentLanguage }: ReceivedCardModal
 
         <div
           className="w-full p-6 rounded-2xl text-white shadow-2xl flex flex-col justify-between relative overflow-hidden min-h-[340px]"
-          style={getCardStyle()}
         >
+          <CardArtworkLayer artwork={selectedCardOption.artwork} language={cardLang} />
           <div className="flex justify-between items-center z-10">
             <span className="text-[10px] tracking-widest uppercase bg-black/30 px-3 py-1 rounded-md backdrop-blur-md font-bold border border-white/20">
               HADIYADPAY • {selectedCardOption.badge[langKey] || selectedCardOption.badge.en}
