@@ -5,7 +5,6 @@ import Image from 'next/image';
 import type { CardLanguage, CardOption } from '../../lib/card-types';
 import {
   createEditorRuntimeState,
-  editorAlignmentOptions,
   editorColorOptions,
   editorReducer,
   getActiveSideData,
@@ -15,7 +14,9 @@ import {
   type EditorAction,
   type EditorPhotoLayer,
   type EditorPreviewMode,
+  type EditorTextLayer,
 } from '../../lib/card-editor';
+import { serializeEditorDraft } from '../../lib/card-order';
 import CheckoutModal from './CheckoutModal';
 import CardArtworkLayer from './CardArtworkLayer';
 import useDialogAccessibility from '../hooks/useDialogAccessibility';
@@ -40,10 +41,46 @@ const fontFamilyMap = {
 } as const;
 
 const MAX_IMAGE_SIZE_BYTES = 8 * 1024 * 1024;
+const MAX_ORDER_PHOTO_BYTES = 1800 * 1024;
 const SUPPORTED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
-function revokeOwnedPhotoUrl(url: string, ownedUrls: Set<string>) {
-  if (ownedUrls.delete(url)) URL.revokeObjectURL(url);
+function revokeOwnedPhotoUrl(url: string, ownedUrls: Set<string>, files: Map<string, File>) {
+  if (ownedUrls.delete(url)) {
+    URL.revokeObjectURL(url);
+    files.delete(url);
+  }
+}
+
+async function compressPhotoForOrder(file: File): Promise<File> {
+  const image = await createImageBitmap(file);
+  const longestSide = Math.max(image.width, image.height);
+  let scale = Math.min(1, 1800 / longestSide);
+  let blob: Blob | null = null;
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(image.width * scale));
+    canvas.height = Math.max(1, Math.round(image.height * scale));
+    const context = canvas.getContext('2d');
+    if (!context) {
+      image.close();
+      throw new Error('Photo could not be prepared for checkout');
+    }
+
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.86 - attempt * 0.08));
+    if (blob && blob.size <= MAX_ORDER_PHOTO_BYTES) break;
+    scale *= 0.82;
+  }
+  image.close();
+
+  if (!blob || blob.size > MAX_ORDER_PHOTO_BYTES) {
+    throw new Error('Photo could not be reduced to the secure upload limit');
+  }
+
+  return new File([blob], 'card-photo.jpg', { type: 'image/jpeg' });
 }
 
 export default function CardBuilder({ card, currentLanguage, onClose }: CardBuilderProps) {
@@ -54,17 +91,32 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
   };
 
   const [editorState, dispatch] = useReducer(editorReducer, { card, currentLanguage }, initialState);
-  const [dragStart, setDragStart] = useState<{ pointerId: number; x: number; y: number } | null>(null);
+  const [dragStart, setDragStart] = useState<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    originX: number;
+    originY: number;
+    layer: 'photo' | 'text';
+    textLayer?: EditorTextLayer;
+  } | null>(null);
+  const [activeTextLayer, setActiveTextLayer] = useState<EditorTextLayer>('message');
+  const [selectedLayer, setSelectedLayer] = useState<'photo' | 'text'>('text');
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const [shareNotice, setShareNotice] = useState<string | null>(null);
+  const [isCheckoutSubmitting, setIsCheckoutSubmitting] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const ownedPhotoUrlsRef = useRef(new Set<string>());
+  const photoFilesRef = useRef(new Map<string, File>());
+  const dragMovedRef = useRef(false);
+  const checkoutSubmittingRef = useRef(false);
   const isMountedRef = useRef(false);
+  const previewRef = useRef<HTMLDivElement>(null);
   const dialogRef = useDialogAccessibility<HTMLDivElement>(!isCheckoutOpen, onClose);
 
   const draft = editorState.draft;
   const activeSideData = getActiveSideData(draft);
-  const currentTextStyle = getTextStyleForSide(draft);
+  const currentTextStyle = getTextStyleForSide(draft, activeTextLayer);
 
   const commitAction = (action: EditorAction) => {
     dispatch(action);
@@ -91,7 +143,7 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
 
     for (const url of ownedPhotoUrlsRef.current) {
       if (!referencedUrls.has(url)) {
-        revokeOwnedPhotoUrl(url, ownedPhotoUrlsRef.current);
+        revokeOwnedPhotoUrl(url, ownedPhotoUrlsRef.current, photoFilesRef.current);
       }
     }
   }, [editorState]);
@@ -99,17 +151,12 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
   useEffect(() => {
     isMountedRef.current = true;
     const ownedPhotoUrls = ownedPhotoUrlsRef.current;
+    const photoFiles = photoFilesRef.current;
     return () => {
       isMountedRef.current = false;
-      for (const url of ownedPhotoUrls) revokeOwnedPhotoUrl(url, ownedPhotoUrls);
+      for (const url of ownedPhotoUrls) revokeOwnedPhotoUrl(url, ownedPhotoUrls, photoFiles);
     };
   }, []);
-
-  useEffect(() => {
-    if (!shareNotice) return;
-    const timer = window.setTimeout(() => setShareNotice(null), 2600);
-    return () => window.clearTimeout(timer);
-  }, [shareNotice]);
 
   useEffect(() => {
     if (!hasUnsavedChanges) return;
@@ -123,6 +170,7 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (isCheckoutOpen) return;
       const target = event.target as HTMLElement | null;
       const isTypingTarget = Boolean(target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable));
       if (isTypingTarget) return;
@@ -143,30 +191,41 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
         return;
       }
 
-      if (!activeSideData.photo) return;
-      const step = event.shiftKey ? 18 : 8;
+      const direction = {
+        ArrowLeft: [-1, 0],
+        ArrowRight: [1, 0],
+        ArrowUp: [0, -1],
+        ArrowDown: [0, 1],
+      }[event.key];
+      if (!direction) return;
 
-      if (event.key === 'ArrowLeft') {
-        event.preventDefault();
-        commitAction({ type: 'ADJUST_PHOTO', changes: { x: (activeSideData.photo.x ?? 0) - step } });
+      event.preventDefault();
+      const step = event.shiftKey ? 5 : 1.5;
+      if (selectedLayer === 'photo' && activeSideData.photo && !activeSideData.photo.requiresReselection) {
+        commitAction({
+          type: 'ADJUST_PHOTO',
+          changes: {
+            x: activeSideData.photo.x + direction[0] * step,
+            y: activeSideData.photo.y + direction[1] * step,
+          },
+        });
+        return;
       }
-      if (event.key === 'ArrowRight') {
-        event.preventDefault();
-        commitAction({ type: 'ADJUST_PHOTO', changes: { x: (activeSideData.photo.x ?? 0) + step } });
-      }
-      if (event.key === 'ArrowUp') {
-        event.preventDefault();
-        commitAction({ type: 'ADJUST_PHOTO', changes: { y: (activeSideData.photo.y ?? 0) - step } });
-      }
-      if (event.key === 'ArrowDown') {
-        event.preventDefault();
-        commitAction({ type: 'ADJUST_PHOTO', changes: { y: (activeSideData.photo.y ?? 0) + step } });
-      }
+
+      const position = activeSideData.textPositions[activeTextLayer];
+      commitAction({
+        type: 'SET_TEXT_POSITION',
+        layer: activeTextLayer,
+        position: {
+          x: position.x + direction[0] * step,
+          y: position.y + direction[1] * step,
+        },
+      });
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeSideData.photo, draft]);
+  }, [activeSideData, activeTextLayer, isCheckoutOpen, selectedLayer]);
 
   const text = {
     so: {
@@ -181,7 +240,7 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
       share: 'La wadaag',
       shareUnavailable: 'La wadaaggu ma heli karo. Fariintaadu waxay ku sii jirtaa qalabkaaga.',
       downloadUnavailable: 'Soo dejintu wali lama heli karo.',
-      personalize: 'Bixi €2.00 oo Dir Hadiyadda',
+      personalize: 'Bixi €2.00 oo soo dejiso',
       invalidImage: 'Dooro sawir JPEG, PNG ama WebP oo aan ka weynayn 8 MB.',
       imageError: 'Sawirka lama akhrin karin.',
       front: 'Hordhaca',
@@ -210,6 +269,7 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
       zoomOut: 'Yaree sawirka',
       resetTransform: 'Dib u celi qaabeynta',
       reselectPhoto: 'Sawirka hore waa in dib loo doorataa.',
+      drag: 'Jiido qoraalka ama sawirka si aad u dhaqaajiso',
     },
     en: {
       title: 'Personalize your card',
@@ -223,7 +283,7 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
       share: 'Share card',
       shareUnavailable: 'Secure sharing is not available yet. Your card stays on this device.',
       downloadUnavailable: 'Card download is not available yet.',
-      personalize: 'Pay €2.00 & Send Card',
+      personalize: 'Pay €2.00 to download',
       invalidImage: 'Choose a JPEG, PNG, or WebP image no larger than 8 MB.',
       imageError: 'The image could not be read.',
       front: 'Front',
@@ -252,6 +312,7 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
       zoomOut: 'Zoom out on photo',
       resetTransform: 'Reset transform',
       reselectPhoto: 'The previous photo needs to be selected again.',
+      drag: 'Drag text or photo to reposition',
     },
     nl: {
       title: 'Personaliseer je kaart',
@@ -265,7 +326,7 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
       share: 'Kaart delen',
       shareUnavailable: 'Veilig delen is nog niet beschikbaar. Je kaart blijft lokaal op dit apparaat.',
       downloadUnavailable: 'Downloaden is nog niet beschikbaar.',
-      personalize: 'Betaal €2,00 en verstuur',
+      personalize: 'Betaal €2,00 en download',
       invalidImage: 'Kies een JPEG-, PNG- of WebP-afbeelding van maximaal 8 MB.',
       imageError: 'De afbeelding kon niet worden gelezen.',
       front: 'Voorkant',
@@ -294,6 +355,7 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
       zoomOut: 'Foto uitzoomen',
       resetTransform: 'Transform resetten',
       reselectPhoto: 'De vorige foto moet opnieuw worden geselecteerd.',
+      drag: 'Sleep tekst of foto om te verplaatsen',
     },
   }[currentLanguage];
 
@@ -309,16 +371,17 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
 
     const nextUrl = URL.createObjectURL(file);
     ownedPhotoUrlsRef.current.add(nextUrl);
+    photoFilesRef.current.set(nextUrl, file);
     const savedTransform = activeSideData.photo ?? null;
 
     const previewImage = new window.Image();
     previewImage.onerror = () => {
-      revokeOwnedPhotoUrl(nextUrl, ownedPhotoUrlsRef.current);
+      revokeOwnedPhotoUrl(nextUrl, ownedPhotoUrlsRef.current, photoFilesRef.current);
       window.alert(text.imageError);
     };
     previewImage.onload = () => {
       if (!isMountedRef.current) {
-        revokeOwnedPhotoUrl(nextUrl, ownedPhotoUrlsRef.current);
+        revokeOwnedPhotoUrl(nextUrl, ownedPhotoUrlsRef.current, photoFilesRef.current);
         return;
       }
 
@@ -327,8 +390,8 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
         width: previewImage.naturalWidth,
         height: previewImage.naturalHeight,
         scale: savedTransform?.scale ?? 1,
-        x: savedTransform?.x ?? 0,
-        y: savedTransform?.y ?? 0,
+        x: savedTransform?.x ?? 84,
+        y: savedTransform?.y ?? 80,
         rotation: savedTransform?.rotation ?? 0,
         requiresReselection: false,
       };
@@ -345,51 +408,128 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
   };
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    if (!activeSideData.photo || activeSideData.photo.requiresReselection) return;
-    event.currentTarget.setPointerCapture(event.pointerId);
-    setDragStart({ pointerId: event.pointerId, x: event.clientX - activeSideData.photo.x, y: event.clientY - activeSideData.photo.y });
+    if (draft.previewMode !== 'edit') return;
+    const target = event.target as HTMLElement;
+    const layerElement = target.closest<HTMLElement>('[data-editor-layer]');
+    if (!layerElement) return;
+
+    const layer = layerElement.dataset.editorLayer;
+    if (layer === 'photo') {
+      if (!activeSideData.photo || activeSideData.photo.requiresReselection) return;
+      setSelectedLayer('photo');
+      dragMovedRef.current = false;
+      event.currentTarget.setPointerCapture(event.pointerId);
+      setDragStart({
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        originX: activeSideData.photo.x,
+        originY: activeSideData.photo.y,
+        layer: 'photo',
+      });
+      return;
+    }
+
+    if (layer === 'text') {
+      const textLayer = layerElement.dataset.textLayer as EditorTextLayer | undefined;
+      if (!textLayer) return;
+      const position = activeSideData.textPositions[textLayer];
+      setActiveTextLayer(textLayer);
+      setSelectedLayer('text');
+      dragMovedRef.current = false;
+      event.currentTarget.setPointerCapture(event.pointerId);
+      setDragStart({
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        originX: position.x,
+        originY: position.y,
+        layer: 'text',
+        textLayer,
+      });
+    }
   };
 
   const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    if (!activeSideData.photo || !dragStart || dragStart.pointerId !== event.pointerId || activeSideData.photo.requiresReselection) return;
-    commitAction({
-      type: 'ADJUST_PHOTO',
-      changes: {
-        x: event.clientX - dragStart.x,
-        y: event.clientY - dragStart.y,
-      },
-    });
+    if (!dragStart || dragStart.pointerId !== event.pointerId) return;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    if (bounds.width === 0 || bounds.height === 0) return;
+    const x = dragStart.originX + ((event.clientX - dragStart.startX) / bounds.width) * 100;
+    const y = dragStart.originY + ((event.clientY - dragStart.startY) / bounds.height) * 100;
+
+    if (dragStart.layer === 'photo') {
+      dragMovedRef.current = true;
+      commitAction({ type: 'ADJUST_PHOTO', changes: { x, y }, recordHistory: false });
+    } else if (dragStart.textLayer) {
+      dragMovedRef.current = true;
+      commitAction({
+        type: 'SET_TEXT_POSITION',
+        layer: dragStart.textLayer,
+        position: { x, y },
+        recordHistory: false,
+      });
+    }
   };
 
-  const handlePointerUp = () => {
+  const handlePointerUp = (event: PointerEvent<HTMLDivElement>) => {
+    if (dragStart?.pointerId !== event.pointerId) return;
+    if (dragMovedRef.current) dispatch({ type: 'COMMIT_DRAFT' });
+    dragMovedRef.current = false;
     setDragStart(null);
-  };
-
-  const handleShare = () => {
-    setShareNotice(text.shareUnavailable);
-    window.alert(text.shareUnavailable);
-  };
-
-  const handleDownload = () => {
-    setShareNotice(text.downloadUnavailable);
-    window.alert(text.downloadUnavailable);
-  };
-
-  const handleMove = (deltaX: number, deltaY: number) => {
-    if (!activeSideData.photo) return;
-    commitAction({
-      type: 'ADJUST_PHOTO',
-      changes: {
-        x: (activeSideData.photo.x ?? 0) + deltaX,
-        y: (activeSideData.photo.y ?? 0) + deltaY,
-      },
-    });
   };
 
   const handleRotate = (amount: number) => {
     if (!activeSideData.photo) return;
     const nextRotation = Math.min(Math.max((activeSideData.photo.rotation ?? 0) + amount, -180), 180);
     commitAction({ type: 'ADJUST_PHOTO', changes: { rotation: nextRotation } });
+  };
+
+  const handleCheckout = async () => {
+    if (checkoutSubmittingRef.current) return;
+    checkoutSubmittingRef.current = true;
+    setCheckoutError(null);
+    setIsCheckoutSubmitting(true);
+
+    try {
+      const formData = new FormData();
+      formData.set('cardId', card.id);
+      formData.set('language', currentLanguage);
+      formData.set('draft', JSON.stringify(serializeEditorDraft(draft)));
+
+      for (const [sideName, side] of [['front', draft.front], ['inside', draft.inside]] as const) {
+        if (!side.photo) continue;
+        if (side.photo.requiresReselection || !side.photo.src) {
+          throw new Error(text.reselectPhoto);
+        }
+        const sourceFile = photoFilesRef.current.get(side.photo.src);
+        if (!sourceFile) throw new Error(text.reselectPhoto);
+        formData.set(`photo${sideName === 'front' ? 'Front' : 'Inside'}`, await compressPhotoForOrder(sourceFile));
+      }
+
+      const response = await fetch('/api/orders', { method: 'POST', body: formData });
+      const result: unknown = await response.json().catch(() => null);
+      if (!response.ok || !result || typeof result !== 'object' || !('checkoutUrl' in result) || typeof result.checkoutUrl !== 'string') {
+        const message = result && typeof result === 'object' && 'error' in result && typeof result.error === 'string'
+          ? result.error
+          : 'Checkout could not be started. Please try again later.';
+        throw new Error(message);
+      }
+
+      const checkoutUrl = new URL(result.checkoutUrl);
+      if (
+        checkoutUrl.protocol !== 'https:' ||
+        checkoutUrl.hostname !== 'checkout.stripe.com' ||
+        checkoutUrl.username ||
+        checkoutUrl.password
+      ) {
+        throw new Error('The secure checkout URL was not valid');
+      }
+      window.location.assign(checkoutUrl.toString());
+    } catch (error) {
+      checkoutSubmittingRef.current = false;
+      setCheckoutError(error instanceof Error ? error.message : 'Checkout could not be started. Please try again later.');
+      setIsCheckoutSubmitting(false);
+    }
   };
 
   const handleResetActiveSide = () => {
@@ -401,28 +541,87 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
     commitAction({ type: 'RESET_CARD', card, currentLanguage });
   };
 
-  const renderPreviewCard = (side: 'front' | 'inside', compact = false, showEditGuides = draft.previewMode === 'edit') => {
+  const renderPreviewCard = (side: 'front' | 'inside', showEditGuides = draft.previewMode === 'edit') => {
     const sideData = side === 'front' ? draft.front : draft.inside;
-    const sideStyle = getTextStyleForSide({ ...draft, side });
-    const sideTextStyle = {
-      color: sideStyle.color,
-      textAlign: sideStyle.align,
-      fontSize: `${sideStyle.size}px`,
-      fontFamily: fontFamilyMap[sideStyle.family],
-      fontWeight: sideStyle.bold ? 700 : 400,
-      fontStyle: sideStyle.italic ? 'italic' : 'normal',
-      textDecoration: sideStyle.underline ? 'underline' : 'none',
-    } as const;
-
     const photo = sideData.photo;
-    const imageTransform = photo ? `translate(${photo.x}px, ${photo.y}px) scale(${photo.scale}) rotate(${photo.rotation ?? 0}deg)` : 'none';
+    const renderTextLayer = (layer: EditorTextLayer) => {
+      const style = getTextStyleForSide({ ...draft, side }, layer);
+      const position = sideData.textPositions[layer];
+      const value = sideData[layer];
+      const layerLabel = layer === 'recipient' ? text.recipient : layer === 'sender' ? text.sender : text.message;
+      const isActive = side === draft.side && activeTextLayer === layer && selectedLayer === 'text';
+
+      return (
+        <button
+          key={layer}
+          type="button"
+          data-editor-layer="text"
+          data-text-layer={layer}
+          aria-label={`${layerLabel}: ${value || text.message}`}
+          aria-pressed={isActive}
+          tabIndex={draft.previewMode === 'edit' && side === draft.side ? 0 : -1}
+          onFocus={() => {
+            setActiveTextLayer(layer);
+            setSelectedLayer('text');
+          }}
+          onClick={() => {
+            setActiveTextLayer(layer);
+            setSelectedLayer('text');
+          }}
+          className={`absolute z-20 max-w-[86%] -translate-x-1/2 -translate-y-1/2 cursor-grab overflow-hidden whitespace-pre-wrap break-words rounded-lg px-2 text-center leading-tight active:cursor-grabbing ${
+            showEditGuides ? 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white' : ''
+          } ${isActive && showEditGuides ? 'ring-1 ring-white/70' : ''}`}
+          style={{
+            left: `${position.x}%`,
+            top: `${position.y}%`,
+            width: '86%',
+            height: `${layer === 'recipient' ? 18 : layer === 'message' ? 28 : 16}%`,
+            color: style.color,
+            textAlign: style.align,
+            fontSize: `${style.size / 4}cqw`,
+            fontFamily: fontFamilyMap[style.family],
+            fontWeight: style.bold ? 700 : 400,
+            fontStyle: style.italic ? 'italic' : 'normal',
+            textDecoration: style.underline ? 'underline' : 'none',
+            textShadow: '0 2px 8px rgba(0,0,0,.8), 0 1px 2px rgba(0,0,0,.9)',
+            backgroundColor: layer === 'message' && value ? 'rgba(20, 28, 23, .28)' : 'transparent',
+            touchAction: showEditGuides ? 'none' : undefined,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            lineHeight: 1.18,
+          }}
+        >
+          {value || (showEditGuides ? layerLabel : '')}
+        </button>
+      );
+    };
 
     return (
-      <div className={`${compact ? 'min-h-[220px]' : 'min-h-[360px]'} relative flex flex-col justify-between overflow-hidden rounded-[1.7rem] border border-white/20 p-5 text-white shadow-xl`}>
-        <CardArtworkLayer artwork={card.artwork} language={currentLanguage} decorative={false} />
+      <div className={`relative w-full overflow-hidden rounded-[1.7rem] border border-white/20 text-white shadow-xl ${card.orientation === 'portrait' ? 'aspect-[1200/1464]' : 'aspect-[1200/968]'}`} style={{ containerType: 'inline-size' }}>
+        <CardArtworkLayer artwork={card.artwork} language={currentLanguage} decorative={false} overlay={false} />
+        <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-[1]"
+        style={{ background: 'linear-gradient(to bottom, rgba(16, 23, 19, .12) 0%, rgba(16, 23, 19, .02) 48%, rgba(16, 23, 19, .48) 100%)' }}
+        />
         {showEditGuides && <div className="pointer-events-none absolute inset-[14px] rounded-[1.25rem] border border-white/25 bg-white/5" aria-hidden="true" />}
         {photo?.src && !photo.requiresReselection && (
-          <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center overflow-hidden">
+          <button
+            type="button"
+            data-editor-layer="photo"
+            aria-label={currentLanguage === 'nl' ? 'Foto selecteren en verplaatsen' : currentLanguage === 'so' ? 'Dooro oo dhaqaaji sawirka' : 'Select and move photo'}
+            aria-pressed={side === draft.side && selectedLayer === 'photo'}
+            tabIndex={draft.previewMode === 'edit' && side === draft.side ? 0 : -1}
+            onFocus={() => setSelectedLayer('photo')}
+            onClick={() => setSelectedLayer('photo')}
+            className={`absolute z-10 aspect-square w-[22%] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-full border-[3px] border-white/90 bg-white shadow-lg ${
+              showEditGuides ? 'touch-none' : ''
+            } ${
+              showEditGuides ? 'cursor-grab active:cursor-grabbing focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white' : ''
+            } ${side === draft.side && selectedLayer === 'photo' && showEditGuides ? 'ring-2 ring-white/70' : ''}`}
+            style={{ left: `${photo.x}%`, top: `${photo.y}%` }}
+          >
             <Image
               src={photo.src}
               alt={currentLanguage === 'nl' ? 'Geüploade voorbeeldfoto' : currentLanguage === 'so' ? 'Sawirka la doortay' : 'Uploaded card preview'}
@@ -430,59 +629,25 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
               height={photo.height}
               unoptimized
               draggable={false}
-              className="pointer-events-none absolute max-w-none object-cover"
+              className="h-full w-full object-cover"
               style={{
-                transform: imageTransform,
+                transform: `scale(${photo.scale}) rotate(${photo.rotation}deg)`,
                 transformOrigin: 'center center',
-                width: 'auto',
-                maxHeight: '100%',
               }}
             />
-          </div>
+          </button>
         )}
 
-        {side === 'front' ? (
-          <>
-            <div className="relative z-20 flex items-center justify-between">
-              <span className="rounded-lg bg-black/60 px-3 py-1 text-[10px] font-black tracking-[0.18em] text-amber-300">HADIYADPAY</span>
-              <span className="text-lg" aria-hidden="true">✦</span>
-            </div>
-            <div className="relative z-20 my-4 flex flex-col gap-2">
-              <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-300">{currentLanguage === 'nl' ? 'VOOR:' : currentLanguage === 'so' ? 'KU:' : 'TO:'}</p>
-              <h2 className="text-2xl font-black tracking-wide text-white drop-shadow-xl sm:text-3xl" style={sideTextStyle}>{sideData.recipient}</h2>
-            </div>
-            <div className="relative z-20 my-2 rounded-xl border border-white/20 bg-black/40 p-4">
-              <p className="text-sm italic font-light leading-relaxed text-amber-50 drop-shadow" style={sideTextStyle}>&ldquo;{sideData.message}&rdquo;</p>
-            </div>
-            <div className="relative z-20 mt-4 flex items-end justify-between border-t border-white/20 pt-3">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-200">{currentLanguage === 'nl' ? 'VAN:' : currentLanguage === 'so' ? 'KA:' : 'FROM:'}</p>
-                <p className="text-xs font-black text-white" style={sideTextStyle}>{sideData.sender}</p>
-              </div>
-              <span className="rounded bg-white/20 px-2.5 py-0.5 text-[10px] font-black tracking-[0.18em] text-amber-300">HADIYADPAY</span>
-            </div>
-          </>
-        ) : (
-          <div className="relative z-20 my-2 flex flex-1 flex-col justify-between rounded-[1.4rem] border border-white/15 bg-black/30 p-5 backdrop-blur-md">
-            <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.24em] text-amber-300">
-              {showEditGuides && <span>{text.safeArea}</span>}
-              <span>{card.badge[currentLanguage]}</span>
-            </div>
-            <div className="mt-4 rounded-xl border border-white/15 bg-white/10 p-4 shadow-inner">
-              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-amber-200">{currentLanguage === 'nl' ? 'Bericht' : currentLanguage === 'so' ? 'Fariinta' : 'Message'}</p>
-              <p className="mt-3 whitespace-pre-wrap text-base leading-relaxed text-white" style={sideTextStyle}>{sideData.message}</p>
-            </div>
-            <div className="mt-4 flex items-end justify-between border-t border-white/10 pt-3">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-amber-200">{currentLanguage === 'nl' ? 'Aan' : currentLanguage === 'so' ? 'Ku' : 'To'}</p>
-                <p className="text-sm font-black text-white">{sideData.recipient}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-amber-200">{currentLanguage === 'nl' ? 'Van' : currentLanguage === 'so' ? 'Ka' : 'From'}</p>
-                <p className="text-sm font-black text-white">{sideData.sender}</p>
-              </div>
-            </div>
-          </div>
+        {side === 'front' && (
+          <span className="pointer-events-none absolute left-[6%] top-[5%] z-20 px-2.5 py-1 text-[10px] font-black tracking-[0.18em] text-amber-100 [text-shadow:0_2px_8px_#000,0_1px_2px_#000] sm:text-xs">
+            HADIYADPAY
+          </span>
+        )}
+        {(['recipient', 'message', 'sender'] as const).map(renderTextLayer)}
+        {showEditGuides && (
+          <span className="pointer-events-none absolute bottom-3 right-4 z-20 rounded-full bg-black/45 px-2.5 py-1 text-[10px] font-semibold text-white/85">
+            {text.drag}
+          </span>
         )}
       </div>
     );
@@ -500,32 +665,28 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
           aria-labelledby="card-editor-heading"
           className="relative my-4 flex max-h-[calc(100vh-2rem)] w-full max-w-5xl flex-col gap-8 overflow-y-auto rounded-3xl border border-stone-200 bg-white p-5 shadow-2xl sm:my-8 sm:max-h-[calc(100vh-4rem)] sm:p-8 lg:flex-row"
         >
-          <button type="button" onClick={onClose} aria-label={text.close} className="absolute right-4 top-4 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-stone-100 text-stone-800 transition hover:bg-stone-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]">×</button>
+          <button type="button" onClick={onClose} disabled={isCheckoutSubmitting} aria-label={text.close} className="card-editor-close-button absolute right-4 top-4 z-30 flex h-11 w-11 items-center justify-center rounded-full bg-stone-100 text-stone-800 transition hover:bg-stone-200 disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]">×</button>
 
-          <section aria-label={currentLanguage === 'nl' ? 'Kaartvoorbeeld' : currentLanguage === 'so' ? 'Tusaalaha kaarka' : 'Card preview'} className="flex w-full flex-col gap-4 lg:w-1/2">
+          <section ref={previewRef} aria-label={currentLanguage === 'nl' ? 'Kaartvoorbeeld' : currentLanguage === 'so' ? 'Tusaalaha kaarka' : 'Card preview'} className="flex w-full flex-col gap-4 self-start lg:sticky lg:top-4 lg:w-1/2">
             <div className="flex items-center justify-between gap-3 pr-12">
               <span className="text-xs font-black uppercase tracking-wider text-stone-800">{currentLanguage === 'nl' ? 'Live voorbeeld' : currentLanguage === 'so' ? 'Tusaalaha tooska ah' : 'Live card preview'}</span>
               <span className="rounded-full bg-amber-100 px-3 py-1 text-[10px] font-bold text-amber-900">{card.badge[currentLanguage]}</span>
             </div>
 
             {draft.previewMode === 'full' ? (
-              <div className="grid gap-3 lg:grid-cols-2">{renderPreviewCard('front', true, false)}{renderPreviewCard('inside', true, false)}</div>
+              <div className="grid gap-3 lg:grid-cols-2">{renderPreviewCard('front', false)}{renderPreviewCard('inside', false)}</div>
             ) : (
               <div
                 className={draft.previewMode === 'clean' ? '' : 'relative'}
                 onPointerDown={draft.previewMode === 'edit' ? handlePointerDown : undefined}
                 onPointerMove={draft.previewMode === 'edit' ? handlePointerMove : undefined}
                 onPointerUp={draft.previewMode === 'edit' ? handlePointerUp : undefined}
-                onPointerLeave={draft.previewMode === 'edit' ? handlePointerUp : undefined}
+                onPointerCancel={draft.previewMode === 'edit' ? handlePointerUp : undefined}
               >
-                {renderPreviewCard(draft.side, false)}
+                {renderPreviewCard(draft.side)}
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-3">
-              <button type="button" onClick={handleDownload} className="min-h-11 rounded-xl border border-stone-200 bg-stone-100 px-3 text-xs font-bold text-stone-800 transition hover:bg-stone-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]">{text.download}</button>
-              <button type="button" onClick={handleShare} className="min-h-11 rounded-xl bg-emerald-700 px-3 text-xs font-black text-white transition hover:bg-emerald-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]">{text.share}</button>
-            </div>
           </section>
 
           <section className="flex w-full flex-col justify-between gap-5 lg:w-1/2">
@@ -543,74 +704,40 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
                 labels={{ edit: text.edit, clean: text.clean, full: text.full }}
               />
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <label htmlFor="card-recipient" className="text-xs font-bold uppercase text-stone-600">
-                  {text.recipient}
-                  <input
-                    id="card-recipient"
-                    type="text"
-                    value={activeSideData.recipient}
-                    onChange={(event) => commitAction({ type: 'SET_FIELD', field: 'recipient', value: event.target.value })}
-                    className="mt-1.5 min-h-11 w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 text-sm font-medium normal-case text-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
-                  />
-                </label>
-                <label htmlFor="card-sender" className="text-xs font-bold uppercase text-stone-600">
-                  {text.sender}
-                  <input
-                    id="card-sender"
-                    type="text"
-                    value={activeSideData.sender}
-                    onChange={(event) => commitAction({ type: 'SET_FIELD', field: 'sender', value: event.target.value })}
-                    className="mt-1.5 min-h-11 w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 text-sm font-medium normal-case text-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
-                  />
-                </label>
-              </div>
-
-              <label htmlFor="card-message" className="text-xs font-bold uppercase text-stone-600">
-                {text.message}
-                <textarea
-                  id="card-message"
-                  rows={4}
-                  value={activeSideData.message}
-                  onChange={(event) => commitAction({ type: 'SET_FIELD', field: 'message', value: event.target.value })}
-                  className="mt-1.5 w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm font-medium normal-case text-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
-                />
-              </label>
-
               <TextControls
                 currentLanguage={currentLanguage}
-                value={currentTextStyle}
-                onColorSelect={(color) => commitAction({ type: 'SET_TEXT_STYLE', style: { color } })}
-                onAlignSelect={(align) => commitAction({ type: 'SET_TEXT_STYLE', style: { align } })}
-                onSizeChange={(size) => commitAction({ type: 'SET_TEXT_STYLE', style: { size } })}
-                onFontFamilyChange={(family) => commitAction({ type: 'SET_TEXT_FORMAT', field: 'family', value: family })}
-                onToggleStyle={(field) => commitAction({ type: 'SET_TEXT_FORMAT', field, value: !currentTextStyle[field] })}
-                onResetStyle={() => commitAction({ type: 'RESET_TEXT_STYLE' })}
+                activeLayer={activeTextLayer}
+                value={activeSideData[activeTextLayer]}
+                style={currentTextStyle}
+                onLayerSelect={(layer) => {
+                  setActiveTextLayer(layer);
+                  setSelectedLayer('text');
+                }}
+                onValueChange={(value) => commitAction({ type: 'SET_FIELD', field: activeTextLayer, value })}
+                onColorSelect={(color) => commitAction({ type: 'SET_TEXT_STYLE', layer: activeTextLayer, style: { color } })}
+                onAlignSelect={(align) => commitAction({ type: 'SET_TEXT_STYLE', layer: activeTextLayer, style: { align } })}
+                onSizeChange={(size) => commitAction({ type: 'SET_TEXT_STYLE', layer: activeTextLayer, style: { size } })}
+                onFontFamilyChange={(family) => commitAction({ type: 'SET_TEXT_FORMAT', layer: activeTextLayer, field: 'family', value: family })}
+                onToggleStyle={(field) => commitAction({ type: 'SET_TEXT_FORMAT', layer: activeTextLayer, field, value: !currentTextStyle[field] })}
+                onResetStyle={() => commitAction({ type: 'RESET_TEXT_STYLE', layer: activeTextLayer })}
                 colorOptions={editorColorOptions}
-                alignmentOptions={editorAlignmentOptions}
               />
 
               <PhotoControls
                 hasPhoto={Boolean(activeSideData.photo && !activeSideData.photo.requiresReselection)}
                 onUpload={handleImageUpload}
                 onRemove={() => commitAction({ type: 'REMOVE_PHOTO' })}
-                onMove={handleMove}
                 onRotate={handleRotate}
                 onZoom={handleZoom}
                 scale={activeSideData.photo?.scale ?? 1}
+                rotation={activeSideData.photo?.rotation ?? 0}
                 onResetTransform={() => commitAction({ type: 'RESET_PHOTO_TRANSFORM' })}
                 labels={{
                   photo: text.photo,
                   remove: text.remove,
-                  moveLeft: text.moveLeft,
-                  moveRight: text.moveRight,
-                  moveUp: text.moveUp,
-                  moveDown: text.moveDown,
-                  rotateLeft: text.rotateLeft,
-                  rotateRight: text.rotateRight,
+                  adjust: currentLanguage === 'nl' ? 'Foto aanpassen' : currentLanguage === 'so' ? 'Hagaaji sawirka' : 'Adjust photo',
+                  rotate: currentLanguage === 'nl' ? 'Rotatie' : currentLanguage === 'so' ? 'Wareeg' : 'Rotation',
                   zoom: text.zoom,
-                  zoomIn: text.zoomIn,
-                  zoomOut: text.zoomOut,
                   reset: text.resetTransform,
                 }}
               />
@@ -631,11 +758,10 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
             />
 
             <div className="grid grid-cols-2 gap-3">
-              <button type="button" onClick={() => setIsCheckoutOpen(true)} className="min-h-14 rounded-2xl bg-amber-700 px-4 text-sm font-black uppercase tracking-wider text-white shadow-lg transition hover:bg-amber-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]">{text.personalize}</button>
-              <button type="button" aria-live="polite" onClick={handleShare} className="min-h-14 rounded-2xl border border-emerald-700 bg-emerald-50 px-4 text-sm font-black uppercase tracking-wider text-emerald-800 transition hover:bg-emerald-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]">{text.share}</button>
+              <button type="button" onClick={() => { setCheckoutError(null); setIsCheckoutOpen(true); }} className="col-span-2 min-h-14 rounded-2xl bg-[#285347] px-4 text-sm font-black uppercase tracking-wider text-white shadow-lg transition hover:bg-[#1e4338] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]">{text.personalize}</button>
             </div>
 
-            <EditorStatus currentLanguage={currentLanguage} shareNotice={shareNotice} photoRequiresReselection={Boolean(activeSideData.photo?.requiresReselection)} />
+            <EditorStatus currentLanguage={currentLanguage} shareNotice={null} photoRequiresReselection={Boolean(activeSideData.photo?.requiresReselection)} />
           </section>
         </div>
       </div>
@@ -649,6 +775,9 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
         message={activeSideData.message}
         cardPrice={2}
         initialLanguage={currentLanguage}
+        isSubmitting={isCheckoutSubmitting}
+        error={checkoutError}
+        onPay={handleCheckout}
       />
     </>
   );

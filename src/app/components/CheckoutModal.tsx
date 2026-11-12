@@ -2,6 +2,7 @@
 
 import type { CardOption } from '../data/cardOptions';
 import useDialogAccessibility from '../hooks/useDialogAccessibility';
+import type { CardLanguage } from '../../lib/card-types';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -11,7 +12,10 @@ interface CheckoutModalProps {
   senderName: string;
   message: string;
   cardPrice: number;
-  initialLanguage?: string;
+  initialLanguage: CardLanguage;
+  isSubmitting: boolean;
+  error: string | null;
+  onPay: () => void;
 }
 
 export default function CheckoutModal({
@@ -22,35 +26,55 @@ export default function CheckoutModal({
   senderName,
   message,
   cardPrice,
-  initialLanguage = 'so',
+  initialLanguage,
+  isSubmitting,
+  error,
+  onPay,
 }: CheckoutModalProps) {
   const dialogRef = useDialogAccessibility<HTMLElement>(isOpen, onClose);
 
   if (!isOpen) return null;
 
-  const lang = initialLanguage === 'so' ? 'so' : 'en';
+  const lang = initialLanguage;
   const content = {
     so: {
       title: 'Dhammee Hadiyadada',
-      description: 'Hubi faahfaahinta kaarkaaga ka hor inta aan lacag-bixinta la heli karin.',
+      description: 'Hubi faahfaahinta kaarkaaga. Lacag-bixinta waxaa si ammaan ah u maamusha Stripe.',
       card: 'Kaarka',
       recipient: 'Qaataha',
       sender: 'Diraha',
       message: 'Fariinta',
       price: 'Qiimaha kaarka',
-      unavailable: 'Lacag-bixinta kaarka wali lama heli karo.',
+      pay: 'U gudub lacag-bixinta',
+      waiting: 'Diyaarinta lacag-bixinta…',
+      unavailable: 'Lacag-bixinta si ku-meel-gaar ah looma heli karo.',
       close: 'Xir',
     },
     en: {
       title: 'Review your e-card',
-      description: 'Review your card details. E-card checkout is not available yet.',
+      description: 'Review your card details. Payment is securely handled by Stripe.',
       card: 'Card',
       recipient: 'Recipient',
       sender: 'Sender',
       message: 'Message',
       price: 'Card price',
-      unavailable: 'E-card checkout is not available yet.',
+      pay: 'Continue to payment',
+      waiting: 'Preparing secure checkout…',
+      unavailable: 'Secure checkout is temporarily unavailable.',
       close: 'Close',
+    },
+    nl: {
+      title: 'Controleer je kaart',
+      description: 'Controleer je kaartgegevens. Stripe verwerkt de betaling veilig.',
+      card: 'Kaart',
+      recipient: 'Ontvanger',
+      sender: 'Verzender',
+      message: 'Bericht',
+      price: 'Prijs van de kaart',
+      pay: 'Verder naar betalen',
+      waiting: 'Veilige betaling voorbereiden…',
+      unavailable: 'Veilig afrekenen is tijdelijk niet beschikbaar.',
+      close: 'Sluiten',
     },
   }[lang];
 
@@ -77,8 +101,9 @@ export default function CheckoutModal({
           <button
             type="button"
             onClick={onClose}
+            disabled={isSubmitting}
             aria-label={content.close}
-            className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition"
+            className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
           >
             ✕
           </button>
@@ -105,15 +130,14 @@ export default function CheckoutModal({
             <span>{content.price}</span>
             <span>€{cardPrice.toFixed(2)}</span>
           </div>
-          <p role="status" className="rounded-xl bg-amber-50 p-3 text-amber-900">
-            {content.unavailable}
-          </p>
+          {error && <p role="alert" className="rounded-xl bg-rose-50 p-3 text-rose-800">{error}</p>}
           <button
             type="button"
-            disabled
-            className="w-full py-4 bg-gray-300 text-gray-600 font-bold rounded-2xl cursor-not-allowed"
+            onClick={onPay}
+            disabled={isSubmitting}
+            className="min-h-12 w-full rounded-2xl bg-[#285347] px-4 py-3 font-bold text-white transition-colors hover:bg-[#1e4338] disabled:cursor-wait disabled:opacity-70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
           >
-            {content.unavailable}
+            {isSubmitting ? content.waiting : content.pay}
           </button>
         </div>
       </section>

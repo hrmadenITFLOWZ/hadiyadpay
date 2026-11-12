@@ -37,6 +37,8 @@ const copy = {
     search: 'Raadi kaarar',
     searchPlaceholder: 'Raadi munaasabad ama naqshad',
     filters: 'Shaandhooyin',
+    moreFilters: 'Shaandhooyin kale',
+    fewerFilters: 'Qari shaandhooyinka',
     category: 'Qaybta',
     allCategories: 'Dhammaan qaybaha',
     celebrations: 'Dabaaldegyo',
@@ -66,6 +68,8 @@ const copy = {
     search: 'Search cards',
     searchPlaceholder: 'Search occasions or designs',
     filters: 'Filters',
+    moreFilters: 'More filters',
+    fewerFilters: 'Fewer filters',
     category: 'Category',
     allCategories: 'All categories',
     celebrations: 'Celebrations',
@@ -95,6 +99,8 @@ const copy = {
     search: 'Kaarten zoeken',
     searchPlaceholder: 'Zoek op gelegenheid of ontwerp',
     filters: 'Filters',
+    moreFilters: 'Meer filters',
+    fewerFilters: 'Minder filters',
     category: 'Categorie',
     allCategories: 'Alle categorieën',
     celebrations: 'Feestelijke momenten',
@@ -152,6 +158,7 @@ export default function CardCatalogControls({
   onClear,
 }: CardCatalogControlsProps) {
   const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
+  const [isMoreFiltersOpen, setIsMoreFiltersOpen] = useState(false);
   const text = copy[language];
   const closeMobileDialog = () => setIsMobileDialogOpen(false);
   const dialogRef = useDialogAccessibility<HTMLDivElement>(isMobileDialogOpen, closeMobileDialog);
@@ -160,7 +167,25 @@ export default function CardCatalogControls({
     onChange({ ...filters, [key]: value });
   };
 
-  const renderFilterFields = (prefix: string) => (
+  const renderOccasionFilter = (prefix: string) => (
+    <label className="block min-w-0 flex-1 text-sm font-semibold text-[#29443a]">
+      {text.occasion}
+      <select
+        id={`${prefix}-occasion`}
+        value={filters.occasion}
+        onChange={(event) => {
+          const value = event.target.value;
+          update('occasion', value === 'all' ? 'all' : isCardOccasion(value) ? value : 'all');
+        }}
+        className="mt-1.5 min-h-12 w-full rounded-xl border border-[#d9ded8] bg-white px-4 text-sm font-normal text-[#243d34] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
+      >
+        <option value="all">{text.allOccasions}</option>
+        {catalogOccasions.map((occasion) => <option key={occasion} value={occasion}>{occasionLabels[occasion][language]}</option>)}
+      </select>
+    </label>
+  );
+
+  const renderFilterFields = (prefix: string, includeOccasion = true) => (
     <>
       <label className="block text-sm font-semibold text-[#29443a]">
         {text.category}
@@ -179,21 +204,7 @@ export default function CardCatalogControls({
         </select>
       </label>
 
-      <label className="block text-sm font-semibold text-[#29443a]">
-        {text.occasion}
-        <select
-          id={`${prefix}-occasion`}
-          value={filters.occasion}
-          onChange={(event) => {
-            const value = event.target.value;
-            update('occasion', value === 'all' ? 'all' : isCardOccasion(value) ? value : 'all');
-          }}
-          className="mt-1.5 min-h-12 w-full rounded-xl border border-[#d9ded8] bg-white px-4 text-sm font-normal text-[#243d34] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
-        >
-          <option value="all">{text.allOccasions}</option>
-          {catalogOccasions.map((occasion) => <option key={occasion} value={occasion}>{occasionLabels[occasion][language]}</option>)}
-        </select>
-      </label>
+      {includeOccasion && renderOccasionFilter(prefix)}
 
       <label className="block text-sm font-semibold text-[#29443a]">
         {text.recipient}
@@ -324,9 +335,25 @@ export default function CardCatalogControls({
         </button>
       </div>
 
-      <div className="hidden grid-cols-2 gap-3 md:grid lg:grid-cols-4">
-        {renderFilterFields('desktop')}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+        {renderOccasionFilter('primary')}
+        <button
+          type="button"
+          onClick={() => setIsMoreFiltersOpen((open) => !open)}
+          aria-expanded={isMoreFiltersOpen}
+          aria-controls="catalog-more-filters"
+          className="hidden min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl border border-[#cad5cc] bg-white px-4 text-sm font-semibold text-[#29443a] hover:bg-[#f5f7f4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347] md:inline-flex"
+        >
+          {isMoreFiltersOpen ? text.fewerFilters : text.moreFilters}
+          {activeFilterCount > 0 && <span className="rounded-full bg-[#285347] px-2 py-0.5 text-xs text-white">{activeFilterCount}</span>}
+        </button>
       </div>
+
+      {isMoreFiltersOpen && (
+        <div id="catalog-more-filters" className="hidden grid-cols-2 gap-3 rounded-2xl border border-[#e1e5df] bg-white/70 p-4 md:grid lg:grid-cols-4">
+          {renderFilterFields('desktop', false)}
+        </div>
+      )}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p role="status" aria-live="polite" className="text-sm text-[#68756c]">
@@ -365,7 +392,7 @@ export default function CardCatalogControls({
               </button>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
-              {renderFilterFields('mobile')}
+              {renderFilterFields('mobile', false)}
             </div>
             <div className="mt-5 grid grid-cols-2 gap-3">
               <button
