@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useReducer, useRef, useState, type ChangeEvent, type PointerEvent } from 'react';
-import Image from 'next/image';
 import type { CardLanguage, CardOption } from '../../lib/card-types';
+import { getCardComposition } from '../../lib/card-composition';
 import {
   createEditorRuntimeState,
   editorColorOptions,
@@ -11,6 +11,8 @@ import {
   getTextStyleForSide,
   loadDraftFromStorage,
   saveDraftToStorage,
+  PHOTO_SCALE_MAX,
+  PHOTO_SCALE_MIN,
   type EditorAction,
   type EditorPhotoLayer,
   type EditorPreviewMode,
@@ -18,7 +20,7 @@ import {
 } from '../../lib/card-editor';
 import { serializeEditorDraft } from '../../lib/card-order';
 import CheckoutModal from './CheckoutModal';
-import CardArtworkLayer from './CardArtworkLayer';
+import CardComposition from './CardComposition';
 import useDialogAccessibility from '../hooks/useDialogAccessibility';
 import CardSideSelector from './editor/CardSideSelector';
 import TextControls from './editor/TextControls';
@@ -33,12 +35,6 @@ interface CardBuilderProps {
   currentLanguage: CardLanguage;
   onClose: () => void;
 }
-
-const fontFamilyMap = {
-  sans: 'Arial, Helvetica, sans-serif',
-  serif: 'Georgia, "Times New Roman", serif',
-  mono: '"Courier New", monospace',
-} as const;
 
 const MAX_IMAGE_SIZE_BYTES = 8 * 1024 * 1024;
 const MAX_ORDER_PHOTO_BYTES = 1800 * 1024;
@@ -373,6 +369,7 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
     ownedPhotoUrlsRef.current.add(nextUrl);
     photoFilesRef.current.set(nextUrl, file);
     const savedTransform = activeSideData.photo ?? null;
+    const defaultPhotoPosition = getCardComposition(card, draft.side).defaultPhotoPosition;
 
     const previewImage = new window.Image();
     previewImage.onerror = () => {
@@ -390,8 +387,8 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
         width: previewImage.naturalWidth,
         height: previewImage.naturalHeight,
         scale: savedTransform?.scale ?? 1,
-        x: savedTransform?.x ?? 84,
-        y: savedTransform?.y ?? 80,
+        x: savedTransform?.x ?? defaultPhotoPosition.x,
+        y: savedTransform?.y ?? defaultPhotoPosition.y,
         rotation: savedTransform?.rotation ?? 0,
         requiresReselection: false,
       };
@@ -401,9 +398,9 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
     event.target.value = '';
   };
 
-  const handleZoom = (amount: number) => {
+  const handleZoom = (scale: number) => {
     if (!activeSideData.photo) return;
-    const nextScale = Number(Math.min(Math.max(0.5, activeSideData.photo.scale + amount), 3).toFixed(2));
+    const nextScale = Number(Math.min(Math.max(PHOTO_SCALE_MIN, scale), PHOTO_SCALE_MAX).toFixed(2));
     commitAction({ type: 'ADJUST_PHOTO', changes: { scale: nextScale } });
   };
 
@@ -543,113 +540,23 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
 
   const renderPreviewCard = (side: 'front' | 'inside', showEditGuides = draft.previewMode === 'edit') => {
     const sideData = side === 'front' ? draft.front : draft.inside;
-    const photo = sideData.photo;
-    const renderTextLayer = (layer: EditorTextLayer) => {
-      const style = getTextStyleForSide({ ...draft, side }, layer);
-      const position = sideData.textPositions[layer];
-      const value = sideData[layer];
-      const layerLabel = layer === 'recipient' ? text.recipient : layer === 'sender' ? text.sender : text.message;
-      const isActive = side === draft.side && activeTextLayer === layer && selectedLayer === 'text';
-
-      return (
-        <button
-          key={layer}
-          type="button"
-          data-editor-layer="text"
-          data-text-layer={layer}
-          aria-label={`${layerLabel}: ${value || text.message}`}
-          aria-pressed={isActive}
-          tabIndex={draft.previewMode === 'edit' && side === draft.side ? 0 : -1}
-          onFocus={() => {
-            setActiveTextLayer(layer);
-            setSelectedLayer('text');
-          }}
-          onClick={() => {
-            setActiveTextLayer(layer);
-            setSelectedLayer('text');
-          }}
-          className={`absolute z-20 max-w-[86%] -translate-x-1/2 -translate-y-1/2 cursor-grab overflow-hidden whitespace-pre-wrap break-words rounded-lg px-2 text-center leading-tight active:cursor-grabbing ${
-            showEditGuides ? 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white' : ''
-          } ${isActive && showEditGuides ? 'ring-1 ring-white/70' : ''}`}
-          style={{
-            left: `${position.x}%`,
-            top: `${position.y}%`,
-            width: '86%',
-            height: `${layer === 'recipient' ? 18 : layer === 'message' ? 28 : 16}%`,
-            color: style.color,
-            textAlign: style.align,
-            fontSize: `${style.size / 4}cqw`,
-            fontFamily: fontFamilyMap[style.family],
-            fontWeight: style.bold ? 700 : 400,
-            fontStyle: style.italic ? 'italic' : 'normal',
-            textDecoration: style.underline ? 'underline' : 'none',
-            textShadow: '0 2px 8px rgba(0,0,0,.8), 0 1px 2px rgba(0,0,0,.9)',
-            backgroundColor: layer === 'message' && value ? 'rgba(20, 28, 23, .28)' : 'transparent',
-            touchAction: showEditGuides ? 'none' : undefined,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            lineHeight: 1.18,
-          }}
-        >
-          {value || (showEditGuides ? layerLabel : '')}
-        </button>
-      );
-    };
 
     return (
-      <div className={`relative w-full overflow-hidden rounded-[1.7rem] border border-white/20 text-white shadow-xl ${card.orientation === 'portrait' ? 'aspect-[1200/1464]' : 'aspect-[1200/968]'}`} style={{ containerType: 'inline-size' }}>
-        <CardArtworkLayer artwork={card.artwork} language={currentLanguage} decorative={false} overlay={false} />
-        <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[1]"
-        style={{ background: 'linear-gradient(to bottom, rgba(16, 23, 19, .12) 0%, rgba(16, 23, 19, .02) 48%, rgba(16, 23, 19, .48) 100%)' }}
-        />
-        {showEditGuides && <div className="pointer-events-none absolute inset-[14px] rounded-[1.25rem] border border-white/25 bg-white/5" aria-hidden="true" />}
-        {photo?.src && !photo.requiresReselection && (
-          <button
-            type="button"
-            data-editor-layer="photo"
-            aria-label={currentLanguage === 'nl' ? 'Foto selecteren en verplaatsen' : currentLanguage === 'so' ? 'Dooro oo dhaqaaji sawirka' : 'Select and move photo'}
-            aria-pressed={side === draft.side && selectedLayer === 'photo'}
-            tabIndex={draft.previewMode === 'edit' && side === draft.side ? 0 : -1}
-            onFocus={() => setSelectedLayer('photo')}
-            onClick={() => setSelectedLayer('photo')}
-            className={`absolute z-10 aspect-square w-[22%] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-full border-[3px] border-white/90 bg-white shadow-lg ${
-              showEditGuides ? 'touch-none' : ''
-            } ${
-              showEditGuides ? 'cursor-grab active:cursor-grabbing focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white' : ''
-            } ${side === draft.side && selectedLayer === 'photo' && showEditGuides ? 'ring-2 ring-white/70' : ''}`}
-            style={{ left: `${photo.x}%`, top: `${photo.y}%` }}
-          >
-            <Image
-              src={photo.src}
-              alt={currentLanguage === 'nl' ? 'Geüploade voorbeeldfoto' : currentLanguage === 'so' ? 'Sawirka la doortay' : 'Uploaded card preview'}
-              width={photo.width}
-              height={photo.height}
-              unoptimized
-              draggable={false}
-              className="h-full w-full object-cover"
-              style={{
-                transform: `scale(${photo.scale}) rotate(${photo.rotation}deg)`,
-                transformOrigin: 'center center',
-              }}
-            />
-          </button>
-        )}
-
-        {side === 'front' && (
-          <span className="pointer-events-none absolute left-[6%] top-[5%] z-20 px-2.5 py-1 text-[10px] font-black tracking-[0.18em] text-amber-100 [text-shadow:0_2px_8px_#000,0_1px_2px_#000] sm:text-xs">
-            HADIYADPAY
-          </span>
-        )}
-        {(['recipient', 'message', 'sender'] as const).map(renderTextLayer)}
-        {showEditGuides && (
-          <span className="pointer-events-none absolute bottom-3 right-4 z-20 rounded-full bg-black/45 px-2.5 py-1 text-[10px] font-semibold text-white/85">
-            {text.drag}
-          </span>
-        )}
-      </div>
+      <CardComposition
+        card={card}
+        language={currentLanguage}
+        cardSide={side}
+        side={sideData}
+        interactive={showEditGuides && draft.previewMode === 'edit' && side === draft.side}
+        showEditGuides={showEditGuides}
+        activeTextLayer={activeTextLayer}
+        selectedLayer={selectedLayer}
+        onTextSelect={(layer) => {
+          setActiveTextLayer(layer);
+          setSelectedLayer('text');
+        }}
+        onPhotoSelect={() => setSelectedLayer('photo')}
+      />
     );
   };
 
@@ -731,7 +638,10 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
                 onZoom={handleZoom}
                 scale={activeSideData.photo?.scale ?? 1}
                 rotation={activeSideData.photo?.rotation ?? 0}
-                onResetTransform={() => commitAction({ type: 'RESET_PHOTO_TRANSFORM' })}
+                onResetTransform={() => commitAction({
+                  type: 'RESET_PHOTO_TRANSFORM',
+                  position: getCardComposition(card, draft.side).defaultPhotoPosition,
+                })}
                 labels={{
                   photo: text.photo,
                   remove: text.remove,
@@ -770,14 +680,13 @@ export default function CardBuilder({ card, currentLanguage, onClose }: CardBuil
         isOpen={isCheckoutOpen}
         onClose={() => setIsCheckoutOpen(false)}
         selectedOccasion={card}
-        recipientName={activeSideData.recipient}
-        senderName={activeSideData.sender}
-        message={activeSideData.message}
+        draft={draft}
         cardPrice={2}
         initialLanguage={currentLanguage}
         isSubmitting={isCheckoutSubmitting}
         error={checkoutError}
         onPay={handleCheckout}
+        onEdit={() => setIsCheckoutOpen(false)}
       />
     </>
   );

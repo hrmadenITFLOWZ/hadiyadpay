@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1464" viewBox="0 0 1200 1464" fill="none">
   <title>HadiyadPay birthday celebration</title>
   <defs>
     <linearGradient id="bg" x1="120" y1="80" x2="1090" y2="850" gradientUnits="userSpaceOnUse">
@@ -9,8 +9,8 @@
       <circle cx="8" cy="8" r="3" fill="#F8E8C8" fill-opacity=".4"/>
     </pattern>
   </defs>
-  <path fill="url(#bg)" d="M0 0h1200v900H0z"/>
-  <path fill="url(#dots)" d="M0 0h1200v900H0z"/>
+  <path fill="url(#bg)" d="M0 0h1200v1464H0z"/>
+  <path fill="url(#dots)" d="M0 0h1200v920H0z"/>
   <circle cx="180" cy="180" r="112" fill="#E9B56D" fill-opacity=".82"/>
   <circle cx="1020" cy="170" r="146" fill="#91A48B" fill-opacity=".88"/>
   <circle cx="940" cy="660" r="205" fill="#D87970" fill-opacity=".8"/>
@@ -20,4 +20,9 @@
   <path d="M592 228v120m-18-120h36l-18-48-18 48Z" stroke="#FFF5D9" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M315 702h550" stroke="#A85F54" stroke-width="18" stroke-linecap="round"/>
   <path d="m210 340 30 55m-30-55 54 22m-54-22 8 62M930 345l30 55m-30-55 54 22m-54-22 8 62" stroke="#F8E8C8" stroke-width="12" stroke-linecap="round"/>
+  <path d="M0 876c173-42 335-42 510 0 221 53 439 50 690-8v596H0V876Z" fill="#F6DDB0"/>
+  <path d="M0 912c188-42 342-38 518 4 216 52 436 47 682-10" stroke="#FFF2D6" stroke-width="13" opacity=".8"/>
+  <path d="M84 1086h160m712 0h160M84 1377h160m712 0h160" stroke="#A85F54" stroke-width="4" stroke-linecap="round" opacity=".55"/>
+  <circle cx="600" cy="1086" r="7" fill="#A85F54"/>
+  <circle cx="600" cy="1377" r="7" fill="#A85F54"/>
 </svg>

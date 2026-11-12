@@ -1,13 +1,14 @@
 'use client';
 
 import type { ChangeEvent } from 'react';
+import { PHOTO_SCALE_MAX, PHOTO_SCALE_MIN } from '../../../lib/card-editor';
 
 interface PhotoControlsProps {
   hasPhoto: boolean;
   onUpload: (event: ChangeEvent<HTMLInputElement>) => void;
   onRemove: () => void;
   onRotate: (amount: number) => void;
-  onZoom: (amount: number) => void;
+  onZoom: (scale: number) => void;
   scale: number;
   rotation: number;
   onResetTransform: () => void;
@@ -60,12 +61,12 @@ export default function PhotoControls({
               </span>
               <input
                 type="range"
-                min={0.5}
-                max={3}
+                min={PHOTO_SCALE_MIN}
+                max={PHOTO_SCALE_MAX}
                 step={0.1}
                 value={scale}
                 aria-label={labels.zoom}
-                onChange={(event) => onZoom(Number(event.target.value) - scale)}
+                onChange={(event) => onZoom(Number(event.target.value))}
                 className="mt-2 w-full accent-[#285347]"
               />
             </label>

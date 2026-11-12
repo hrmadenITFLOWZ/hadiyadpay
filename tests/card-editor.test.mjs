@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createEditorRuntimeState, editorReducer } from '../src/lib/card-editor.ts';
+import { createEditorRuntimeState, editorReducer, loadDraftFromStorage } from '../src/lib/card-editor.ts';
 
 const localized = { so: 'Qaate', en: 'Recipient', nl: 'Ontvanger' };
 const card = {
@@ -70,4 +70,36 @@ test('photo movement and transforms stay within editor limits', () => {
     },
     { x: 100, y: 0, scale: 3, rotation: 180 },
   );
+
+  const minimumScale = editorReducer(withPhoto, {
+    type: 'ADJUST_PHOTO',
+    changes: { scale: 0 },
+  });
+  assert.equal(minimumScale.draft.front.photo?.scale, 0.5);
+});
+
+test('version 4 default text positions migrate to the separate card-side layouts', () => {
+  const birthdayCard = { ...card, id: 'dhalasho' };
+  const draft = createEditorRuntimeState(birthdayCard, 'nl').draft;
+  draft.front.textPositions = {
+    recipient: { x: 50, y: 14 },
+    message: { x: 50, y: 70 },
+    sender: { x: 50, y: 92 },
+  };
+  draft.inside.textPositions = { ...draft.front.textPositions };
+  const previousWindow = globalThis.window;
+  globalThis.window = {
+    sessionStorage: {
+      getItem: () => JSON.stringify({ version: 4, cardId: birthdayCard.id, draft }),
+    },
+  };
+
+  try {
+    const migrated = loadDraftFromStorage(birthdayCard, 'nl');
+    assert.deepEqual(migrated?.front.textPositions.message, { x: 50, y: 80 });
+    assert.deepEqual(migrated?.inside.textPositions.message, { x: 50, y: 53 });
+  } finally {
+    if (previousWindow === undefined) delete globalThis.window;
+    else globalThis.window = previousWindow;
+  }
 });

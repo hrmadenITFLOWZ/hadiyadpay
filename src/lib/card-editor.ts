@@ -1,7 +1,10 @@
 import type { CardLanguage, CardOption } from './card-types';
+import { getCardComposition } from './card-composition.ts';
 
-export const DRAFT_STORAGE_VERSION = 4;
+export const DRAFT_STORAGE_VERSION = 6;
 export const DRAFT_STORAGE_PREFIX = 'hadiyadpay:editor-draft';
+export const PHOTO_SCALE_MIN = 0.5;
+export const PHOTO_SCALE_MAX = 3;
 
 export type EditorSide = 'front' | 'inside';
 export type EditorTextLayer = 'recipient' | 'sender' | 'message';
@@ -113,7 +116,7 @@ export type EditorAction =
   | { type: 'UPLOAD_PHOTO'; photo: EditorPhotoLayer }
   | { type: 'REMOVE_PHOTO' }
   | { type: 'ADJUST_PHOTO'; changes: Partial<Pick<EditorPhotoLayer, 'scale' | 'x' | 'y' | 'rotation'>>; recordHistory?: boolean }
-  | { type: 'RESET_PHOTO_TRANSFORM' }
+  | { type: 'RESET_PHOTO_TRANSFORM'; position?: EditorPosition }
   | { type: 'UNDO' }
   | { type: 'REDO' }
   | { type: 'COMMIT_DRAFT' }
@@ -130,8 +133,8 @@ const clampFinite = (value: number, min: number, max: number, fallback: number) 
   clamp(Number.isFinite(value) ? value : fallback, min, max);
 const clampPosition = (value: number) => clampFinite(value, 0, 100, 50);
 
-const createDefaultTextStyle = (): EditorTextStyle => ({
-  color: '#fef3c7',
+const createDefaultTextStyle = (color = '#fef3c7'): EditorTextStyle => ({
+  color,
   align: 'left',
   size: 30,
   family: 'sans',
@@ -140,23 +143,32 @@ const createDefaultTextStyle = (): EditorTextStyle => ({
   underline: false,
 });
 
-const createSideState = (card: CardOption, currentLanguage: CardLanguage): EditorSideState => ({
-  recipient: card.defaultRecipient[currentLanguage],
-  sender: card.defaultSender[currentLanguage],
-  message: card.defaultMessage[currentLanguage],
-  textStyle: createDefaultTextStyle(),
-  textStyles: {
-    recipient: createDefaultTextStyle(),
-    sender: createDefaultTextStyle(),
-    message: createDefaultTextStyle(),
-  },
-  textPositions: {
-    recipient: { x: 50, y: 14 },
-    message: { x: 50, y: 70 },
-    sender: { x: 50, y: 92 },
-  },
-  photo: null,
-});
+const createSideState = (
+  card: CardOption,
+  currentLanguage: CardLanguage,
+  side: 'front' | 'inside',
+): EditorSideState => {
+  const layout = getCardComposition(card, side);
+  const defaultAlignment: EditorTextAlign = layout.protectsBirthdayArtwork ? 'center' : 'left';
+  const createSideTextStyle = () => ({
+    ...createDefaultTextStyle(layout.defaultTextColor),
+    align: defaultAlignment,
+  });
+  const defaultStyle = createSideTextStyle();
+  return {
+    recipient: card.defaultRecipient[currentLanguage],
+    sender: card.defaultSender[currentLanguage],
+    message: card.defaultMessage[currentLanguage],
+    textStyle: defaultStyle,
+    textStyles: {
+      recipient: createSideTextStyle(),
+      sender: createSideTextStyle(),
+      message: createSideTextStyle(),
+    },
+    textPositions: layout.defaultTextPositions,
+    photo: null,
+  };
+};
 
 function getSideState(draft: EditorDraft, side: EditorSide): EditorSideState {
   return side === 'front' ? draft.front : draft.inside;
@@ -170,12 +182,19 @@ function setSideState(draft: EditorDraft, side: EditorSide, nextSideState: Parti
   } as EditorDraft;
 }
 
-function normalizeTextStyle(style: unknown, fallback: EditorTextStyle): EditorTextStyle {
+function normalizeTextStyle(
+  style: unknown,
+  fallback: EditorTextStyle,
+  migrateDefaultTextColor: boolean,
+): EditorTextStyle {
   const safeStyle = style && typeof style === 'object' ? (style as Partial<EditorTextStyle>) : {};
   const familyValue = safeStyle.family === 'serif' || safeStyle.family === 'mono' ? safeStyle.family : 'sans';
 
   return {
-    color: typeof safeStyle.color === 'string' ? safeStyle.color : fallback.color,
+    color: typeof safeStyle.color === 'string' &&
+      !(migrateDefaultTextColor && safeStyle.color === '#fef3c7')
+      ? safeStyle.color
+      : fallback.color,
     align: safeStyle.align === 'center' || safeStyle.align === 'right' ? safeStyle.align : 'left',
     size: clamp(Number(safeStyle.size ?? fallback.size), 18, 52),
     family: familyValue,
@@ -196,14 +215,14 @@ function normalizePhoto(rawPhoto: unknown, storageVersion: number): EditorPhotoL
 
   const legacyX = clampFinite(Number(candidate.x ?? 0), -1000, 1000, 0);
   const legacyY = clampFinite(Number(candidate.y ?? 0), -1000, 1000, 0);
-  const x = storageVersion < DRAFT_STORAGE_VERSION ? 50 + legacyX / 4 : Number(candidate.x ?? 50);
-  const y = storageVersion < DRAFT_STORAGE_VERSION ? 50 + legacyY / 3.6 : Number(candidate.y ?? 50);
+  const x = storageVersion < 4 ? 50 + legacyX / 4 : Number(candidate.x ?? 50);
+  const y = storageVersion < 4 ? 50 + legacyY / 3.6 : Number(candidate.y ?? 50);
 
   return {
     requiresReselection: true,
     width: clampFinite(Number(candidate.width ?? 768), 1, 5000, 768),
     height: clampFinite(Number(candidate.height ?? 768), 1, 5000, 768),
-    scale: clampFinite(Number(candidate.scale ?? 1), 0.5, 3, 1),
+    scale: clampFinite(Number(candidate.scale ?? 1), PHOTO_SCALE_MIN, PHOTO_SCALE_MAX, 1),
     x: clampPosition(x),
     y: clampPosition(y),
     rotation: clampFinite(Number(candidate.rotation ?? 0), -180, 180, 0),
@@ -215,12 +234,20 @@ function normalizeSideState(
   card: CardOption,
   currentLanguage: CardLanguage,
   storageVersion: number,
+  side: 'front' | 'inside',
 ): EditorSideState {
-  const fallback = createSideState(card, currentLanguage);
+  const fallback = createSideState(card, currentLanguage, side);
   if (!rawSideState || typeof rawSideState !== 'object') return fallback;
 
   const candidate = rawSideState as Partial<EditorSideState>;
-  const legacyStyle = normalizeTextStyle(candidate.textStyle, fallback.textStyle);
+  const migrateDefaultTextColor = storageVersion < DRAFT_STORAGE_VERSION &&
+    fallback.textStyle.color !== '#fef3c7';
+  const legacyPositions: Record<EditorTextLayer, EditorPosition> = {
+    recipient: { x: 50, y: 14 },
+    message: { x: 50, y: 70 },
+    sender: { x: 50, y: 92 },
+  };
+  const legacyStyle = normalizeTextStyle(candidate.textStyle, fallback.textStyle, migrateDefaultTextColor);
   const candidateStyles = candidate.textStyles;
   const textStyle = (layer: EditorTextLayer) =>
     normalizeTextStyle(
@@ -228,14 +255,24 @@ function normalizeSideState(
         ? (candidateStyles as Partial<Record<EditorTextLayer, EditorTextStyle>>)[layer]
         : candidate.textStyle,
       legacyStyle,
+      migrateDefaultTextColor,
     );
   const candidatePositions = candidate.textPositions;
   const textPositions = (['recipient', 'sender', 'message'] as const).reduce(
     (positions, layer) => {
       const position = candidatePositions?.[layer];
+      const savedPosition = {
+        x: Number(position?.x ?? fallback.textPositions[layer].x),
+        y: Number(position?.y ?? fallback.textPositions[layer].y),
+      };
+      const wasDefaultPosition = savedPosition.x === legacyPositions[layer].x &&
+        savedPosition.y === legacyPositions[layer].y;
+      const normalizedPosition = storageVersion < DRAFT_STORAGE_VERSION && wasDefaultPosition
+        ? fallback.textPositions[layer]
+        : savedPosition;
       positions[layer] = {
-        x: clampPosition(Number(position?.x ?? fallback.textPositions[layer].x)),
-        y: clampPosition(Number(position?.y ?? fallback.textPositions[layer].y)),
+        x: clampPosition(normalizedPosition.x),
+        y: clampPosition(normalizedPosition.y),
       };
       return positions;
     },
@@ -263,20 +300,19 @@ function normalizeDraft(
   currentLanguage: CardLanguage,
   storageVersion: number,
 ): EditorDraft {
-  const fallbackSide = createSideState(card, currentLanguage);
   const fallback: EditorDraft = {
     side: 'front',
     previewMode: 'edit',
-    front: fallbackSide,
-    inside: fallbackSide,
+    front: createSideState(card, currentLanguage, 'front'),
+    inside: createSideState(card, currentLanguage, 'inside'),
   };
 
   if (!rawDraft || typeof rawDraft !== 'object') return fallback;
 
   const candidate = rawDraft as Partial<EditorDraft>;
   const sideValue = candidate.side === 'inside' ? 'inside' : 'front';
-  const frontState = normalizeSideState(candidate.front, card, currentLanguage, storageVersion);
-  const insideState = normalizeSideState(candidate.inside, card, currentLanguage, storageVersion);
+  const frontState = normalizeSideState(candidate.front, card, currentLanguage, storageVersion, 'front');
+  const insideState = normalizeSideState(candidate.inside, card, currentLanguage, storageVersion, 'inside');
 
   return {
     side: sideValue,
@@ -290,8 +326,8 @@ export function createEditorRuntimeState(card: CardOption, currentLanguage: Card
   const draft: EditorDraft = {
     side: 'front',
     previewMode: 'edit',
-    front: createSideState(card, currentLanguage),
-    inside: createSideState(card, currentLanguage),
+    front: createSideState(card, currentLanguage, 'front'),
+    inside: createSideState(card, currentLanguage, 'inside'),
   };
 
   return {
@@ -348,7 +384,7 @@ function withSidePhotoUpdate(state: EditorRuntimeState, photo: EditorPhotoLayer)
     photo: {
       ...photo,
       requiresReselection: false,
-      scale: clampFinite(Number(photo.scale ?? 1), 0.5, 3, 1),
+      scale: clampFinite(Number(photo.scale ?? 1), PHOTO_SCALE_MIN, PHOTO_SCALE_MAX, 1),
       x: clampPosition(Number(photo.x ?? 50)),
       y: clampPosition(Number(photo.y ?? 50)),
       rotation: clampFinite(Number(photo.rotation ?? 0), -180, 180, 0),
@@ -425,7 +461,7 @@ export function editorReducer(state: EditorRuntimeState, action: EditorAction): 
       const updatedPhoto = {
         ...currentState.photo,
         ...action.changes,
-        scale: clampFinite(Number(action.changes.scale ?? currentState.photo.scale), 0.5, 3, 1),
+        scale: clampFinite(Number(action.changes.scale ?? currentState.photo.scale), PHOTO_SCALE_MIN, PHOTO_SCALE_MAX, 1),
         x: clampPosition(Number(action.changes.x ?? currentState.photo.x)),
         y: clampPosition(Number(action.changes.y ?? currentState.photo.y)),
         rotation: clampFinite(Number(action.changes.rotation ?? currentState.photo.rotation), -180, 180, 0),
@@ -443,8 +479,8 @@ export function editorReducer(state: EditorRuntimeState, action: EditorAction): 
         ...currentState,
         photo: {
           ...currentState.photo,
-          x: 84,
-          y: 80,
+          x: action.position?.x ?? 84,
+          y: action.position?.y ?? 80,
           scale: 1,
           rotation: 0,
         },
@@ -475,7 +511,7 @@ export function editorReducer(state: EditorRuntimeState, action: EditorAction): 
     case 'RESET_ACTIVE_SIDE': {
       const nextDraft = {
         ...state.draft,
-        [state.draft.side]: createSideState(action.card, action.currentLanguage),
+        [state.draft.side]: createSideState(action.card, action.currentLanguage, state.draft.side),
       } as EditorDraft;
       return pushHistory(state, nextDraft);
     }
@@ -508,7 +544,7 @@ export function loadDraftFromStorage(card: CardOption, currentLanguage: CardLang
 
     const record = parsed as Partial<StoredEditorDraft>;
     if (
-      (record.version !== DRAFT_STORAGE_VERSION && record.version !== 3) ||
+      (record.version !== DRAFT_STORAGE_VERSION && record.version !== 5 && record.version !== 4 && record.version !== 3) ||
       record.cardId !== card.id ||
       !record.draft
     ) {
@@ -528,7 +564,7 @@ export function saveDraftToStorage(card: CardOption, draft: EditorDraft) {
     photo
       ? {
           requiresReselection: true,
-          scale: clampFinite(Number(photo.scale ?? 1), 0.5, 3, 1),
+          scale: clampFinite(Number(photo.scale ?? 1), PHOTO_SCALE_MIN, PHOTO_SCALE_MAX, 1),
           x: clampPosition(Number(photo.x ?? 50)),
           y: clampPosition(Number(photo.y ?? 50)),
           rotation: clampFinite(Number(photo.rotation ?? 0), -180, 180, 0),

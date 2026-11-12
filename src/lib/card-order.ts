@@ -1,6 +1,8 @@
 import {
   editorColorOptions,
   createEditorRuntimeState,
+  PHOTO_SCALE_MAX,
+  PHOTO_SCALE_MIN,
   type EditorDraft,
   type EditorPhotoLayer,
   type EditorPosition,
@@ -96,7 +98,7 @@ function parseSide(
     photo = {
       width: boundedNumber(value.photo.width, 1, 5000, 768),
       height: boundedNumber(value.photo.height, 1, 5000, 768),
-      scale: boundedNumber(value.photo.scale, 0.5, 3, 1),
+      scale: boundedNumber(value.photo.scale, PHOTO_SCALE_MIN, PHOTO_SCALE_MAX, 1),
       x: boundedNumber(value.photo.x, 0, 100, 50),
       y: boundedNumber(value.photo.y, 0, 100, 50),
       rotation: boundedNumber(value.photo.rotation, -180, 180, 0),

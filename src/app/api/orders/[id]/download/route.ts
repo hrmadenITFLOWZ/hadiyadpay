@@ -73,7 +73,7 @@ export async function GET(
     const photoDataUrl = photo && photoMime
       ? `data:${photoMime};base64,${photo.toString('base64')}`
       : undefined;
-    const svg = renderCardSvg(card, paidOrder.language, selectedSide, artworkDataUrl, photoDataUrl);
+    const svg = renderCardSvg(card, paidOrder.language, sideName, selectedSide, artworkDataUrl, photoDataUrl);
     const filename = `${card.slug}-${sideName}.svg`;
 
     return new Response(svg, {
