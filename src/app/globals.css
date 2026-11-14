@@ -31,6 +31,77 @@ body {
   outline-offset: 3px;
 }
 
+/*
+ * HadiyadPay editorial card showcase
+ *
+ * Two identical sets of cards sit next to each other inside the track.
+ * Translating the track by exactly half its total width therefore creates
+ * a continuous loop without a visible jump.
+ */
+
+.hadiyad-showcase-mask {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.hadiyad-showcase-mask::before,
+.hadiyad-showcase-mask::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 10;
+  width: clamp(1.5rem, 6vw, 7rem);
+  pointer-events: none;
+}
+
+.hadiyad-showcase-mask::before {
+  left: 0;
+  background: linear-gradient(
+    to right,
+    #fffdf8 0%,
+    rgba(255, 253, 248, 0.88) 28%,
+    rgba(255, 253, 248, 0) 100%
+  );
+}
+
+.hadiyad-showcase-mask::after {
+  right: 0;
+  background: linear-gradient(
+    to left,
+    #fffdf8 0%,
+    rgba(255, 253, 248, 0.88) 28%,
+    rgba(255, 253, 248, 0) 100%
+  );
+}
+
+.hadiyad-showcase-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  animation: hadiyad-showcase-scroll 50s linear infinite;
+}
+
+/*
+ * Let visitors inspect and click a specific card without the collection
+ * continuing to move underneath the pointer or keyboard focus.
+ */
+.hadiyad-showcase-mask:hover .hadiyad-showcase-track,
+.hadiyad-showcase-mask:focus-within .hadiyad-showcase-track {
+  animation-play-state: paused;
+}
+
+@keyframes hadiyad-showcase-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
 @media (max-width: 1023px) {
   .card-editor-close-button {
     position: sticky;
@@ -39,6 +110,21 @@ body {
     align-self: flex-end;
     margin-left: auto;
     margin-bottom: -2.75rem;
+  }
+
+  .hadiyad-showcase-track {
+    animation-duration: 42s;
+  }
+}
+
+@media (max-width: 640px) {
+  .hadiyad-showcase-mask::before,
+  .hadiyad-showcase-mask::after {
+    width: 1.5rem;
+  }
+
+  .hadiyad-showcase-track {
+    animation-duration: 36s;
   }
 }
 
@@ -50,5 +136,15 @@ body {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .hadiyad-showcase-track {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .hadiyad-showcase-mask {
+    overflow-x: auto;
+    scrollbar-width: thin;
   }
 }

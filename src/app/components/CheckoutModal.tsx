@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+
 import type { CardOption } from '../data/cardOptions';
 import useDialogAccessibility from '../hooks/useDialogAccessibility';
 import type { CardLanguage } from '../../lib/card-types';
 import type { EditorDraft } from '../../lib/card-editor';
+
 import CardComposition from './CardComposition';
 
 interface CheckoutModalProps {
@@ -33,15 +35,23 @@ export default function CheckoutModal({
   onPay,
 }: CheckoutModalProps) {
   const [previewSide, setPreviewSide] = useState<'front' | 'inside'>('front');
-  const dialogRef = useDialogAccessibility<HTMLElement>(isOpen, onClose);
 
-  if (!isOpen) return null;
+  const dialogRef = useDialogAccessibility<HTMLElement>(
+    isOpen,
+    onClose,
+  );
+
+  if (!isOpen) {
+    return null;
+  }
 
   const lang = initialLanguage;
+
   const content = {
     so: {
       title: 'Hubi kaarkaaga',
-      description: 'Eeg kaarkaaga gaarka ah ka hor intaadan u gudbin lacag-bixinta Stripe.',
+      description:
+        'Eeg kaarkaaga gaarka ah ka hor intaadan u gudbin lacag-bixinta.',
       preview: 'Tusaalaha kaarka',
       front: 'Hordhaca',
       inside: 'Gudaha',
@@ -51,13 +61,16 @@ export default function CheckoutModal({
       message: 'Fariinta',
       price: 'Qiimaha kaarka',
       edit: 'Wax kale beddel',
-      pay: 'Si ammaan ah ugu bixi Stripe',
-      waiting: 'Diyaarinta lacag-bixinta…',
+      pay: 'Bixi',
+      waiting: 'Lacag-bixinta diyaarinaysa…',
       close: 'Xir',
+      empty: 'Lama gelin',
     },
+
     en: {
       title: 'Review your card',
-      description: 'Preview your personalized card before continuing to secure Stripe checkout.',
+      description:
+        'Preview your personalized card before continuing to payment.',
       preview: 'Card preview',
       front: 'Front',
       inside: 'Inside',
@@ -67,13 +80,16 @@ export default function CheckoutModal({
       message: 'Message',
       price: 'Card price',
       edit: 'Make another change',
-      pay: 'Pay securely with Stripe',
-      waiting: 'Preparing secure checkout…',
+      pay: 'Pay',
+      waiting: 'Preparing payment…',
       close: 'Close',
+      empty: 'Not added',
     },
+
     nl: {
       title: 'Controleer je kaart',
-      description: 'Bekijk je persoonlijke kaart voordat je veilig verdergaat naar de betaling.',
+      description:
+        'Bekijk je persoonlijke kaart voordat je verdergaat naar de betaling.',
       preview: 'Kaartvoorbeeld',
       front: 'Voorkant',
       inside: 'Binnenkant',
@@ -83,15 +99,28 @@ export default function CheckoutModal({
       message: 'Bericht',
       price: 'Kaartprijs',
       edit: 'Nog iets aanpassen',
-      pay: 'Veilig betalen met Stripe',
-      waiting: 'Veilige betaling voorbereiden…',
+      pay: 'Betalen',
+      waiting: 'Betaling voorbereiden…',
       close: 'Sluiten',
+      empty: 'Niet ingevuld',
     },
   }[lang];
-  const preview = previewSide === 'front' ? draft.front : draft.inside;
+
+  const preview =
+    previewSide === 'front'
+      ? draft.front
+      : draft.inside;
+
   const formattedPrice = new Intl.NumberFormat(
-    lang === 'nl' ? 'nl-NL' : lang === 'so' ? 'so-SO' : 'en-IE',
-    { style: 'currency', currency: 'EUR' },
+    lang === 'nl'
+      ? 'nl-NL'
+      : lang === 'so'
+        ? 'so-SO'
+        : 'en-IE',
+    {
+      style: 'currency',
+      currency: 'EUR',
+    },
   ).format(cardPrice);
 
   return (
@@ -107,13 +136,21 @@ export default function CheckoutModal({
       >
         <div className="flex items-start justify-between gap-4 border-b border-gray-100 p-5 sm:p-6">
           <div>
-            <h2 id="checkout-title" className="text-xl font-black text-gray-900">
+            <h2
+              id="checkout-title"
+              className="text-xl font-black text-gray-900"
+            >
               {content.title}
             </h2>
-            <p id="checkout-description" className="mt-1 text-sm text-gray-600">
+
+            <p
+              id="checkout-description"
+              className="mt-1 text-sm text-gray-600"
+            >
               {content.description}
             </p>
           </div>
+
           <button
             type="button"
             onClick={onClose}
@@ -126,16 +163,21 @@ export default function CheckoutModal({
         </div>
 
         <div className="grid gap-6 p-5 sm:p-6 md:grid-cols-[minmax(190px,0.8fr)_minmax(0,1.2fr)]">
-          <section aria-label={content.preview} className="mx-auto w-full max-w-[230px]">
+          <section
+            aria-label={content.preview}
+            className="mx-auto w-full max-w-[230px]"
+          >
             <h3 className="mb-3 text-center text-xs font-bold uppercase tracking-wider text-gray-500">
               {content.preview}
             </h3>
+
             <CardComposition
               card={selectedOccasion}
               language={lang}
               cardSide={previewSide}
               side={preview}
             />
+
             <div className="mt-3 grid grid-cols-2 gap-1 rounded-xl bg-stone-100 p-1">
               {(['front', 'inside'] as const).map((side) => (
                 <button
@@ -144,7 +186,9 @@ export default function CheckoutModal({
                   aria-pressed={previewSide === side}
                   onClick={() => setPreviewSide(side)}
                   className={`min-h-10 rounded-lg px-2 text-xs font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#285347] ${
-                    previewSide === side ? 'bg-white text-[#285347] shadow-sm' : 'text-stone-600'
+                    previewSide === side
+                      ? 'bg-white text-[#285347] shadow-sm'
+                      : 'text-stone-600'
                   }`}
                 >
                   {content[side]}
@@ -155,26 +199,59 @@ export default function CheckoutModal({
 
           <div className="flex min-w-0 flex-col gap-4 text-sm text-gray-700">
             <div>
-              <p className="text-xs font-bold uppercase text-gray-500">{content.card}</p>
-              <p className="font-semibold text-gray-900">{selectedOccasion.title[lang]}</p>
+              <p className="text-xs font-bold uppercase text-gray-500">
+                {content.card}
+              </p>
+
+              <p className="font-semibold text-gray-900">
+                {selectedOccasion.title[lang]}
+              </p>
             </div>
+
             <div>
-              <p className="text-xs font-bold uppercase text-gray-500">{content.recipient}</p>
-              <p className="break-words text-gray-900">{preview.recipient}</p>
+              <p className="text-xs font-bold uppercase text-gray-500">
+                {content.recipient}
+              </p>
+
+              <p className="break-words text-gray-900">
+                {preview.recipient.trim() || content.empty}
+              </p>
             </div>
+
             <div>
-              <p className="text-xs font-bold uppercase text-gray-500">{content.sender}</p>
-              <p className="break-words text-gray-900">{preview.sender}</p>
+              <p className="text-xs font-bold uppercase text-gray-500">
+                {content.sender}
+              </p>
+
+              <p className="break-words text-gray-900">
+                {preview.sender.trim() || content.empty}
+              </p>
             </div>
+
             <div>
-              <p className="text-xs font-bold uppercase text-gray-500">{content.message}</p>
-              <p className="max-h-28 overflow-y-auto whitespace-pre-wrap break-words text-gray-900">{preview.message}</p>
+              <p className="text-xs font-bold uppercase text-gray-500">
+                {content.message}
+              </p>
+
+              <p className="max-h-28 overflow-y-auto whitespace-pre-wrap break-words text-gray-900">
+                {preview.message.trim() || content.empty}
+              </p>
             </div>
+
             <div className="mt-auto flex justify-between border-t border-gray-200 pt-3 font-bold text-gray-900">
               <span>{content.price}</span>
               <span>{formattedPrice}</span>
             </div>
-            {error && <p role="alert" className="rounded-xl bg-rose-50 p-3 text-rose-800">{error}</p>}
+
+            {error && (
+              <p
+                role="alert"
+                className="rounded-xl bg-rose-50 p-3 text-rose-800"
+              >
+                {error}
+              </p>
+            )}
+
             <button
               type="button"
               onClick={onEdit}
@@ -183,13 +260,16 @@ export default function CheckoutModal({
             >
               {content.edit}
             </button>
+
             <button
               type="button"
               onClick={onPay}
               disabled={isSubmitting}
               className="min-h-12 w-full rounded-2xl bg-[#285347] px-4 py-3 font-bold text-white transition-colors hover:bg-[#1e4338] disabled:cursor-wait disabled:opacity-70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
             >
-              {isSubmitting ? content.waiting : `${content.pay} — ${formattedPrice}`}
+              {isSubmitting
+                ? content.waiting
+                : `${content.pay} · ${formattedPrice}`}
             </button>
           </div>
         </div>
