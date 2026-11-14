@@ -9,7 +9,6 @@ import {
   serializeEditorDraft,
 } from '../../../lib/card-order';
 import type { CardLanguage } from '../../../lib/card-types';
-import { getSiteUrl } from '../../../lib/seo';
 import { getDatabasePool } from '../../../lib/server/database';
 import {
   createGuestOrderToken,
@@ -155,13 +154,34 @@ export async function POST(
     );
   }
 
-  const origin = request.headers.get('origin');
+  /*
+   * Validate the browser Origin.
+   *
+   * The validated Origin is also deliberately used as the
+   * Stripe return origin. This keeps Preview checkouts on
+   * the Preview deployment and Production checkouts on the
+   * Production domain.
+   */
+  const originHeader =
+    request.headers.get('origin');
+
+  let checkoutOrigin: string;
 
   try {
+    if (!originHeader) {
+      throw new Error(
+        'Origin header is missing',
+      );
+    }
+
+    const browserOrigin =
+      new URL(originHeader).origin;
+
+    const requestOrigin =
+      request.nextUrl.origin;
+
     if (
-      !origin ||
-      new URL(origin).origin !==
-        request.nextUrl.origin
+      browserOrigin !== requestOrigin
     ) {
       return NextResponse.json(
         {
@@ -173,6 +193,8 @@ export async function POST(
         },
       );
     }
+
+    checkoutOrigin = browserOrigin;
   } catch {
     return NextResponse.json(
       {
@@ -188,11 +210,13 @@ export async function POST(
   let formData: FormData;
 
   try {
-    formData = await request.formData();
+    formData =
+      await request.formData();
   } catch {
     return NextResponse.json(
       {
-        error: 'Invalid order request',
+        error:
+          'Invalid order request',
       },
       {
         status: 400,
@@ -200,10 +224,14 @@ export async function POST(
     );
   }
 
-  const cardId = formData.get('cardId');
+  const cardId =
+    formData.get('cardId');
+
   const languageValue =
     formData.get('language');
-  const draftValue = formData.get('draft');
+
+  const draftValue =
+    formData.get('draft');
 
   if (
     typeof cardId !== 'string' ||
@@ -217,7 +245,8 @@ export async function POST(
   ) {
     return NextResponse.json(
       {
-        error: 'Invalid order details',
+        error:
+          'Invalid order details',
       },
       {
         status: 400,
@@ -225,14 +254,17 @@ export async function POST(
     );
   }
 
-  const card = cardOptions.find(
-    (option) => option.id === cardId,
-  );
+  const card =
+    cardOptions.find(
+      (option) =>
+        option.id === cardId,
+    );
 
   if (!card) {
     return NextResponse.json(
       {
-        error: 'Card is unavailable',
+        error:
+          'Card is unavailable',
       },
       {
         status: 400,
@@ -255,8 +287,15 @@ export async function POST(
   try {
     [photoFront, photoInside] =
       await Promise.all([
-        getPhoto(formData, 'photoFront'),
-        getPhoto(formData, 'photoInside'),
+        getPhoto(
+          formData,
+          'photoFront',
+        ),
+
+        getPhoto(
+          formData,
+          'photoInside',
+        ),
       ]);
 
     const combinedPhotoSize =
@@ -279,7 +318,9 @@ export async function POST(
     }
 
     draft = parseOrderDraft(
-      JSON.parse(draftValue) as unknown,
+      JSON.parse(
+        draftValue,
+      ) as unknown,
       card,
       languageValue,
       photoFront !== null,
@@ -302,11 +343,14 @@ export async function POST(
   const developmentMode =
     isDevelopmentTestMode();
 
-  const orderId = randomUUID();
+  const orderId =
+    randomUUID();
+
   const guestToken =
     createGuestOrderToken();
 
   let pool: Pool | undefined;
+
   let checkoutSessionId:
     | string
     | null = null;
@@ -316,10 +360,6 @@ export async function POST(
   try {
     pool = getDatabasePool();
 
-    /*
-     * Local development orders are stored as paid.
-     * Production orders always start as pending.
-     */
     const initialStatus =
       developmentMode
         ? 'paid'
@@ -357,13 +397,17 @@ export async function POST(
        )`,
       [
         orderId,
-        hashGuestOrderToken(guestToken),
+        hashGuestOrderToken(
+          guestToken,
+        ),
         card.id,
         languageValue,
         CARD_PRICE_CENTS,
         initialStatus,
         JSON.stringify(
-          serializeEditorDraft(draft),
+          serializeEditorDraft(
+            draft,
+          ),
         ),
         photoFront?.buffer ?? null,
         photoFront?.type ?? null,
@@ -374,15 +418,12 @@ export async function POST(
 
     orderCreated = true;
 
-    /*
-     * Development mode skips Stripe and redirects directly
-     * to the existing order-status/download page.
-     */
     if (developmentMode) {
-      const developmentUrl = new URL(
-        `/bestelling/${orderId}`,
-        request.nextUrl.origin,
-      );
+      const developmentUrl =
+        new URL(
+          `/bestelling/${orderId}`,
+          checkoutOrigin,
+        );
 
       developmentUrl.searchParams.set(
         'language',
@@ -394,17 +435,18 @@ export async function POST(
         '1',
       );
 
-      const response = NextResponse.json(
-        {
-          checkoutUrl:
-            developmentUrl.toString(),
-          developmentMode: true,
-          orderId,
-        },
-        {
-          status: 201,
-        },
-      );
+      const response =
+        NextResponse.json(
+          {
+            checkoutUrl:
+              developmentUrl.toString(),
+            developmentMode: true,
+            orderId,
+          },
+          {
+            status: 201,
+          },
+        );
 
       response.headers.set(
         'Cache-Control',
@@ -422,17 +464,31 @@ export async function POST(
       return response;
     }
 
+    const stripe =
+      getStripeClient();
+
     /*
-     * Production still requires Stripe.
+     * Safe diagnostic information only.
+     * No Stripe key, guest token or database credentials are logged.
      */
-    const stripe = getStripeClient();
-    const siteUrl = getSiteUrl();
+    console.info(
+      'Creating Stripe checkout session',
+      {
+        orderId,
+        checkoutHost:
+          new URL(
+            checkoutOrigin,
+          ).host,
+      },
+    );
 
     const session =
       await stripe.checkout.sessions.create(
         {
           mode: 'payment',
-          client_reference_id: orderId,
+
+          client_reference_id:
+            orderId,
 
           metadata: {
             orderId,
@@ -445,6 +501,7 @@ export async function POST(
 
               price_data: {
                 currency: 'eur',
+
                 unit_amount:
                   CARD_PRICE_CENTS,
 
@@ -461,15 +518,17 @@ export async function POST(
             },
           ],
 
-          success_url: new URL(
-            `/bestelling/${orderId}?language=${languageValue}&session_id={CHECKOUT_SESSION_ID}`,
-            siteUrl,
-          ).toString(),
+          success_url:
+            new URL(
+              `/bestelling/${orderId}?language=${languageValue}&session_id={CHECKOUT_SESSION_ID}`,
+              checkoutOrigin,
+            ).toString(),
 
-          cancel_url: new URL(
-            `/bestelling/${orderId}?language=${languageValue}&cancelled=1`,
-            siteUrl,
-          ).toString(),
+          cancel_url:
+            new URL(
+              `/bestelling/${orderId}?language=${languageValue}&cancelled=1`,
+              checkoutOrigin,
+            ).toString(),
 
           expires_at:
             Math.floor(
@@ -489,7 +548,8 @@ export async function POST(
       );
     }
 
-    checkoutSessionId = session.id;
+    checkoutSessionId =
+      session.id;
 
     const savedSession =
       await pool.query(
@@ -506,22 +566,29 @@ export async function POST(
         ],
       );
 
-    if (savedSession.rowCount !== 1) {
+    if (
+      savedSession.rowCount !== 1
+    ) {
       throw new Error(
         'Stripe checkout session could not be attached to its order',
       );
     }
 
-    const response = NextResponse.json(
-      {
-        checkoutUrl: session.url,
-        developmentMode: false,
-        orderId,
-      },
-      {
-        status: 201,
-      },
-    );
+    const response =
+      NextResponse.json(
+        {
+          checkoutUrl:
+            session.url,
+
+          developmentMode:
+            false,
+
+          orderId,
+        },
+        {
+          status: 201,
+        },
+      );
 
     response.headers.set(
       'Cache-Control',
@@ -538,7 +605,10 @@ export async function POST(
 
     return response;
   } catch (error) {
-    if (pool && orderCreated) {
+    if (
+      pool &&
+      orderCreated
+    ) {
       try {
         await pool.query(
           `UPDATE card_orders
@@ -563,6 +633,7 @@ export async function POST(
           'Unable to close failed card order',
           {
             orderId,
+
             errorType:
               cleanupError instanceof Error
                 ? cleanupError.name
@@ -576,7 +647,9 @@ export async function POST(
       'Unable to create card checkout',
       {
         orderId,
+
         developmentMode,
+
         errorType:
           error instanceof Error
             ? error.name
