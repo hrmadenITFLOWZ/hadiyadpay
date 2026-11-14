@@ -7,19 +7,16 @@ import {
 } from 'node:crypto';
 
 /*
- * New Hadiyad share links use 72 bits of
+ * New Hadiyad share links use 128 bits of
  * cryptographically secure randomness.
  *
- * 9 random bytes encoded with base64url produce
- * approximately 12 URL-safe characters.
+ * 16 random bytes encoded with base64url produce
+ * approximately 22 URL-safe characters.
  *
- * Example:
- * https://www.hadiyadpay.com/h/A7kP3mQ9xT2n
- *
- * Older, longer Hadiyad links remain valid because
- * validation accepts tokens up to 256 characters.
+ * Existing shorter and older longer Hadiyad links
+ * remain valid.
  */
-const SHARE_TOKEN_BYTES = 9;
+const SHARE_TOKEN_BYTES = 16;
 
 const MIN_SHARE_TOKEN_LENGTH = 12;
 const MAX_SHARE_TOKEN_LENGTH = 256;
