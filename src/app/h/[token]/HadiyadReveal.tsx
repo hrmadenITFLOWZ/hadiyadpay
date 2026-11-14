@@ -29,23 +29,23 @@ const copy = {
     eyebrow:
       'Gaar ahaan adiga',
     closedTitle:
-      'Hadiyad ayaa kuu diyaar ah',
+      'Wax gaar ah ayaa kuu yimid',
     closedMessage:
-      'Qof ayaa kuu sameeyey kaar gaar ah.',
+      'Qof ayaa si gaar ah kuugu sameeyey Hadiyad.',
     openButton:
-      'Fur Hadiyadda',
+      'Fur Hadiyaddayda',
     opening:
       'Hadiyaddaada ayaa furmaysa…',
     revealed:
       'Hadiyaddaada',
+    moment:
+      'Xusuustan hayso',
     save:
       'Kaydi kaarka',
     saveHint:
-      'Ku hay qalabkaaga si aad mar walba u daawato.',
+      'Ku kaydi qalabkaaga si aad mar walba u daawato.',
     footer:
       'Waxaa lagu sameeyey HadiyadPay',
-    unavailable:
-      'Kaarka lama furi karin. Mar kale isku day.',
   },
 
   en: {
@@ -54,23 +54,23 @@ const copy = {
     eyebrow:
       'Especially for you',
     closedTitle:
-      'A Hadiyad is waiting for you',
+      'Something special has arrived',
     closedMessage:
-      'Someone created a personal card especially for you.',
+      'Someone created a personal Hadiyad especially for you.',
     openButton:
-      'Open your Hadiyad',
+      'Open my Hadiyad',
     opening:
       'Opening your Hadiyad…',
     revealed:
       'Your Hadiyad',
+    moment:
+      'Keep this moment',
     save:
       'Save card',
     saveHint:
-      'Keep the card on your device and revisit it whenever you like.',
+      'Save the card to your device and revisit it whenever you like.',
     footer:
       'Created with HadiyadPay',
-    unavailable:
-      'The card could not be opened. Please try again.',
   },
 
   nl: {
@@ -79,23 +79,23 @@ const copy = {
     eyebrow:
       'Speciaal voor jou',
     closedTitle:
-      'Er staat een Hadiyad voor je klaar',
+      'Er is iets bijzonders voor je gekomen',
     closedMessage:
-      'Iemand heeft speciaal voor jou een persoonlijke kaart gemaakt.',
+      'Iemand heeft speciaal voor jou een persoonlijke Hadiyad gemaakt.',
     openButton:
-      'Open je Hadiyad',
+      'Open mijn Hadiyad',
     opening:
       'Je Hadiyad wordt geopend…',
     revealed:
       'Jouw Hadiyad',
+    moment:
+      'Bewaar dit moment',
     save:
       'Kaart bewaren',
     saveHint:
       'Bewaar de kaart op je apparaat en bekijk haar wanneer je wilt.',
     footer:
       'Gemaakt met HadiyadPay',
-    unavailable:
-      'De kaart kon niet worden geopend. Probeer het opnieuw.',
   },
 } satisfies Record<
   CardLanguage,
@@ -121,16 +121,12 @@ export default function HadiyadReveal({
   cardTitle,
   orientation,
 }: HadiyadRevealProps) {
-  const [revealState, setRevealState] =
-    useState<RevealState>(
-      'closed',
-    );
-
   const [
-    openingError,
-    setOpeningError,
-  ] =
-    useState(false);
+    revealState,
+    setRevealState,
+  ] = useState<RevealState>(
+    'closed',
+  );
 
   const text =
     copy[language];
@@ -144,6 +140,12 @@ export default function HadiyadReveal({
   const downloadUrl =
     `${cardUrl}?download=1`;
 
+  const isOpening =
+    revealState === 'opening';
+
+  const isOpen =
+    revealState === 'open';
+
   const handleOpen =
     async () => {
       if (
@@ -153,16 +155,10 @@ export default function HadiyadReveal({
         return;
       }
 
-      setOpeningError(false);
       setRevealState(
         'opening',
       );
 
-      /*
-       * Start the visual reveal and record the open
-       * in parallel. Tracking failure must never stop
-       * the recipient from seeing the paid card.
-       */
       const trackingRequest =
         fetch(
           `/api/share/${encodedToken}/open`,
@@ -176,7 +172,7 @@ export default function HadiyadReveal({
 
       await Promise.all([
         trackingRequest,
-        sleep(1100),
+        sleep(2200),
       ]);
 
       setRevealState(
@@ -184,184 +180,1194 @@ export default function HadiyadReveal({
       );
     };
 
-  const isOpen =
-    revealState === 'open';
-
-  const isOpening =
-    revealState ===
-    'opening';
-
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#f4efe5] text-[#263e36]">
+    <main
+      className={`hadiyad-stage ${
+        isOpening
+          ? 'is-opening'
+          : ''
+      } ${
+        isOpen
+          ? 'is-open'
+          : ''
+      }`}
+    >
       <div
         aria-hidden="true"
-        className="absolute -left-20 -top-24 h-80 w-80 rounded-full bg-[#d8e5dd]/80 blur-3xl"
+        className="hadiyad-ambient hadiyad-ambient-left"
       />
 
       <div
         aria-hidden="true"
-        className="absolute -bottom-24 -right-20 h-96 w-96 rounded-full bg-[#ead7b8]/70 blur-3xl"
+        className="hadiyad-ambient hadiyad-ambient-right"
       />
 
       <div
         aria-hidden="true"
-        className={`absolute left-[12%] top-[18%] h-2 w-2 rounded-full bg-[#b88b45] transition-all duration-1000 ${
-          isOpen
-            ? 'translate-x-8 -translate-y-8 scale-150 opacity-0'
-            : 'opacity-60'
-        }`}
+        className="hadiyad-pattern"
       />
 
       <div
         aria-hidden="true"
-        className={`absolute right-[15%] top-[24%] h-1.5 w-1.5 rounded-full bg-[#b88b45] transition-all delay-150 duration-1000 ${
-          isOpen
-            ? '-translate-x-10 -translate-y-6 scale-150 opacity-0'
-            : 'opacity-50'
-        }`}
-      />
+        className="hadiyad-stars"
+      >
+        <span />
+        <span />
+        <span />
+        <span />
+        <span />
+        <span />
+      </div>
 
-      <div
-        aria-hidden="true"
-        className={`absolute bottom-[18%] left-[18%] h-2 w-2 rounded-full bg-[#b88b45] transition-all delay-300 duration-1000 ${
-          isOpen
-            ? 'translate-x-10 translate-y-5 scale-150 opacity-0'
-            : 'opacity-40'
-        }`}
-      />
+      <header className="hadiyad-brand">
+        <div className="hadiyad-monogram">
+          H
+        </div>
 
-      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-5xl flex-col px-5 py-7 sm:px-8 sm:py-10">
-        <header className="flex items-center justify-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[#d6d4c9] bg-white/80 font-serif text-lg font-bold text-[#285347] shadow-sm backdrop-blur">
-            H
-          </div>
+        <div>
+          <p className="hadiyad-brand-name">
+            HadiyadPay
+          </p>
 
-          <div>
-            <p className="font-serif text-lg leading-none text-[#263e36]">
-              HadiyadPay
+          <p className="hadiyad-brand-label">
+            {text.brandLabel}
+          </p>
+        </div>
+      </header>
+
+      <section className="hadiyad-content">
+        {!isOpen && (
+          <div className="hadiyad-intro">
+            <p className="hadiyad-eyebrow">
+              {text.eyebrow}
             </p>
 
-            <p className="mt-1 text-[0.6rem] font-bold uppercase tracking-[0.2em] text-[#8b8178]">
-              {text.brandLabel}
-            </p>
-          </div>
-        </header>
+            <h1 className="hadiyad-title">
+              {isOpening
+                ? text.opening
+                : text.closedTitle}
+            </h1>
 
-        <section className="flex flex-1 items-center justify-center py-10">
-          {!isOpen ? (
+            <p className="hadiyad-message">
+              {text.closedMessage}
+            </p>
+
+            <button
+              type="button"
+              onClick={() =>
+                void handleOpen()
+              }
+              disabled={isOpening}
+              className="hadiyad-open-button"
+            >
+              <span>
+                {isOpening
+                  ? text.opening
+                  : text.openButton}
+              </span>
+
+              {!isOpening && (
+                <span
+                  aria-hidden="true"
+                  className="hadiyad-button-star"
+                >
+                  ✦
+                </span>
+              )}
+            </button>
+          </div>
+        )}
+
+        {!isOpen && (
+          <div
+            aria-hidden="true"
+            className="gift-scene"
+          >
+            <div className="gift-glow" />
+
+            <div className="gift-card-shadow" />
+
+            <div className="gift-card-preview">
+              <div className="gift-card-mark">
+                H
+              </div>
+            </div>
+
+            <div className="gift-envelope">
+              <div className="gift-envelope-back" />
+
+              <div className="gift-envelope-paper">
+                <span>H</span>
+              </div>
+
+              <div className="gift-envelope-left" />
+              <div className="gift-envelope-right" />
+              <div className="gift-envelope-front" />
+
+              <div className="gift-envelope-flap">
+                <span>✦</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isOpen && (
+          <div className="hadiyad-result">
+            <div className="hadiyad-result-heading">
+              <p className="hadiyad-eyebrow">
+                {text.revealed}
+              </p>
+
+              <h1 className="hadiyad-card-title">
+                {cardTitle}
+              </h1>
+            </div>
+
             <div
-              className={`w-full max-w-xl text-center transition-all duration-700 ${
-                isOpening
-                  ? 'scale-95 opacity-0'
-                  : 'scale-100 opacity-100'
+              className={`hadiyad-card-frame ${
+                orientation ===
+                'portrait'
+                  ? 'is-portrait'
+                  : 'is-landscape'
               }`}
             >
               <div
                 aria-hidden="true"
-                className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[#d7c39b] bg-[#fffaf0] text-2xl text-[#a47334] shadow-[0_15px_40px_rgba(73,55,31,0.12)]"
-              >
-                ✦
-              </div>
+                className="hadiyad-card-glow"
+              />
 
-              <p className="mt-8 text-xs font-black uppercase tracking-[0.25em] text-[#9a7441]">
-                {text.eyebrow}
-              </p>
-
-              <h1 className="mx-auto mt-4 max-w-lg font-serif text-4xl leading-tight text-[#243d34] sm:text-5xl">
-                {isOpening
-                  ? text.opening
-                  : text.closedTitle}
-              </h1>
-
-              <p className="mx-auto mt-5 max-w-md text-base leading-7 text-[#66736d]">
-                {text.closedMessage}
-              </p>
-
-              <button
-                type="button"
-                onClick={() =>
-                  void handleOpen()
-                }
-                disabled={isOpening}
-                className="mt-9 inline-flex min-h-14 min-w-56 items-center justify-center gap-3 rounded-2xl bg-[#285347] px-7 text-sm font-black uppercase tracking-[0.12em] text-white shadow-[0_18px_40px_rgba(40,83,71,0.24)] transition hover:-translate-y-0.5 hover:bg-[#1f4339] disabled:cursor-wait disabled:opacity-70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#285347]"
-              >
-                {isOpening
-                  ? text.opening
-                  : text.openButton}
-
-                {!isOpening && (
-                  <span
-                    aria-hidden="true"
-                    className="text-lg"
-                  >
-                    ✦
-                  </span>
-                )}
-              </button>
-
-              {openingError && (
-                <p
-                  role="alert"
-                  className="mt-5 text-sm font-semibold text-rose-700"
-                >
-                  {text.unavailable}
-                </p>
-              )}
+              <img
+                src={cardUrl}
+                alt={cardTitle}
+                className="hadiyad-card-image"
+              />
             </div>
-          ) : (
-            <div className="w-full animate-[fade-in_700ms_ease-out]">
-              <div className="text-center">
-                <p className="text-xs font-black uppercase tracking-[0.25em] text-[#9a7441]">
-                  {text.revealed}
-                </p>
 
-                <h1 className="mt-3 font-serif text-3xl text-[#243d34] sm:text-4xl">
-                  {cardTitle}
-                </h1>
-              </div>
+            <div className="hadiyad-actions">
+              <p className="hadiyad-moment">
+                {text.moment}
+              </p>
 
-              <div
-                className={`mx-auto mt-7 overflow-hidden rounded-[2rem] border border-white/70 bg-white/50 p-2 shadow-[0_30px_90px_rgba(38,62,54,0.2)] backdrop-blur transition-all duration-700 ${
-                  orientation ===
-                  'portrait'
-                    ? 'max-w-md'
-                    : 'max-w-3xl'
-                }`}
+              <a
+                href={downloadUrl}
+                className="hadiyad-save-button"
               >
-                <img
-                  src={cardUrl}
-                  alt={cardTitle}
-                  className="block h-auto w-full rounded-[1.6rem]"
-                />
-              </div>
-
-              <div className="mx-auto mt-8 max-w-md text-center">
-                <a
-                  href={downloadUrl}
-                  className="inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-2xl bg-[#285347] px-6 text-sm font-bold text-white shadow-lg shadow-[#285347]/15 transition hover:-translate-y-0.5 hover:bg-[#1f4339] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#285347]"
-                >
+                <span>
                   {text.save}
+                </span>
 
-                  <span
-                    aria-hidden="true"
-                    className="text-lg"
-                  >
-                    ↓
-                  </span>
-                </a>
+                <span aria-hidden="true">
+                  ↓
+                </span>
+              </a>
 
-                <p className="mt-3 text-sm leading-6 text-[#77817c]">
-                  {text.saveHint}
-                </p>
-              </div>
+              <p className="hadiyad-save-hint">
+                {text.saveHint}
+              </p>
             </div>
-          )}
-        </section>
+          </div>
+        )}
+      </section>
 
-        <footer className="text-center text-xs font-semibold tracking-wide text-[#928a7e]">
-          {text.footer}
-        </footer>
-      </div>
+      <footer className="hadiyad-footer">
+        {text.footer}
+      </footer>
+
+      <style jsx global>{`
+        .hadiyad-stage {
+          position: relative;
+          min-height: 100svh;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          background:
+            radial-gradient(
+              circle at 50% 28%,
+              rgba(255, 250, 239, 0.98),
+              rgba(244, 237, 223, 0.96) 42%,
+              rgba(226, 215, 194, 0.98) 100%
+            );
+          color: #263e36;
+          isolation: isolate;
+        }
+
+        .hadiyad-stage::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background:
+            linear-gradient(
+              180deg,
+              rgba(255, 255, 255, 0.22),
+              transparent 28%,
+              rgba(40, 83, 71, 0.08)
+            );
+          z-index: -1;
+        }
+
+        .hadiyad-ambient {
+          position: absolute;
+          width: 28rem;
+          height: 28rem;
+          border-radius: 999px;
+          filter: blur(75px);
+          opacity: 0.62;
+          transition:
+            transform 1800ms ease,
+            opacity 1800ms ease;
+          z-index: -2;
+        }
+
+        .hadiyad-ambient-left {
+          left: -12rem;
+          top: -10rem;
+          background: #bfd6ca;
+        }
+
+        .hadiyad-ambient-right {
+          right: -13rem;
+          bottom: -12rem;
+          background: #e4c798;
+        }
+
+        .is-opening .hadiyad-ambient-left {
+          transform: translate3d(
+            4rem,
+            2rem,
+            0
+          ) scale(1.25);
+        }
+
+        .is-opening .hadiyad-ambient-right {
+          transform: translate3d(
+            -4rem,
+            -2rem,
+            0
+          ) scale(1.25);
+        }
+
+        .hadiyad-pattern {
+          position: absolute;
+          inset: 0;
+          opacity: 0.16;
+          pointer-events: none;
+          background-image:
+            linear-gradient(
+              30deg,
+              transparent 48%,
+              rgba(164, 115, 52, 0.18) 49%,
+              rgba(164, 115, 52, 0.18) 51%,
+              transparent 52%
+            ),
+            linear-gradient(
+              -30deg,
+              transparent 48%,
+              rgba(40, 83, 71, 0.1) 49%,
+              rgba(40, 83, 71, 0.1) 51%,
+              transparent 52%
+            );
+          background-size:
+            72px 124px;
+          mask-image:
+            radial-gradient(
+              circle at center,
+              black,
+              transparent 72%
+            );
+          z-index: -1;
+        }
+
+        .hadiyad-stars span {
+          position: absolute;
+          display: block;
+          width: 7px;
+          height: 7px;
+          border-radius: 999px;
+          background: #b4823d;
+          box-shadow:
+            0 0 18px rgba(180, 130, 61, 0.7);
+          animation:
+            hadiyad-float 4s ease-in-out infinite;
+        }
+
+        .hadiyad-stars span:nth-child(1) {
+          left: 12%;
+          top: 19%;
+        }
+
+        .hadiyad-stars span:nth-child(2) {
+          right: 14%;
+          top: 24%;
+          animation-delay: 0.5s;
+        }
+
+        .hadiyad-stars span:nth-child(3) {
+          left: 20%;
+          bottom: 18%;
+          animation-delay: 1.1s;
+        }
+
+        .hadiyad-stars span:nth-child(4) {
+          right: 21%;
+          bottom: 23%;
+          animation-delay: 1.6s;
+        }
+
+        .hadiyad-stars span:nth-child(5) {
+          left: 8%;
+          top: 58%;
+          width: 4px;
+          height: 4px;
+          animation-delay: 2s;
+        }
+
+        .hadiyad-stars span:nth-child(6) {
+          right: 10%;
+          top: 56%;
+          width: 4px;
+          height: 4px;
+          animation-delay: 2.4s;
+        }
+
+        .is-opening .hadiyad-stars span {
+          animation:
+            hadiyad-burst 1250ms ease forwards;
+        }
+
+        .hadiyad-brand {
+          position: relative;
+          z-index: 20;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.75rem;
+          padding: 1.4rem 1rem 0;
+          transition:
+            opacity 500ms ease,
+            transform 500ms ease;
+        }
+
+        .is-opening .hadiyad-brand {
+          opacity: 0.35;
+          transform: translateY(-8px);
+        }
+
+        .hadiyad-monogram {
+          display: flex;
+          width: 2.7rem;
+          height: 2.7rem;
+          align-items: center;
+          justify-content: center;
+          border-radius: 1rem;
+          border: 1px solid rgba(184, 145, 81, 0.38);
+          background:
+            rgba(255, 253, 248, 0.78);
+          box-shadow:
+            0 10px 30px rgba(53, 73, 63, 0.12);
+          backdrop-filter: blur(14px);
+          font-family: Georgia, serif;
+          font-size: 1.1rem;
+          font-weight: 700;
+          color: #285347;
+        }
+
+        .hadiyad-brand-name {
+          font-family: Georgia, serif;
+          font-size: 1.1rem;
+          line-height: 1;
+        }
+
+        .hadiyad-brand-label {
+          margin-top: 0.3rem;
+          font-size: 0.58rem;
+          font-weight: 800;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          color: #897b6c;
+        }
+
+        .hadiyad-content {
+          position: relative;
+          display: flex;
+          flex: 1;
+          width: 100%;
+          max-width: 72rem;
+          margin: 0 auto;
+          align-items: center;
+          justify-content: center;
+          padding: 2.5rem 1.25rem;
+        }
+
+        .hadiyad-intro {
+          position: relative;
+          z-index: 12;
+          width: 100%;
+          max-width: 34rem;
+          text-align: center;
+          transition:
+            opacity 650ms ease,
+            transform 650ms ease,
+            filter 650ms ease;
+        }
+
+        .is-opening .hadiyad-intro {
+          opacity: 0;
+          transform:
+            translateY(-18px)
+            scale(0.96);
+          filter: blur(6px);
+          pointer-events: none;
+        }
+
+        .hadiyad-eyebrow {
+          font-size: 0.7rem;
+          font-weight: 900;
+          letter-spacing: 0.25em;
+          text-transform: uppercase;
+          color: #9a7441;
+        }
+
+        .hadiyad-title {
+          max-width: 32rem;
+          margin: 1rem auto 0;
+          font-family: Georgia, serif;
+          font-size: clamp(
+            2.4rem,
+            8vw,
+            4.5rem
+          );
+          font-weight: 400;
+          line-height: 1.06;
+          letter-spacing: -0.035em;
+          color: #243d34;
+          text-wrap: balance;
+        }
+
+        .hadiyad-message {
+          max-width: 29rem;
+          margin: 1.25rem auto 0;
+          font-size: 1rem;
+          line-height: 1.75;
+          color: #65726c;
+          text-wrap: balance;
+        }
+
+        .hadiyad-open-button {
+          display: inline-flex;
+          min-width: min(
+            100%,
+            17rem
+          );
+          min-height: 3.65rem;
+          margin-top: 2rem;
+          align-items: center;
+          justify-content: center;
+          gap: 0.8rem;
+          border: 0;
+          border-radius: 1.15rem;
+          background:
+            linear-gradient(
+              135deg,
+              #315f51,
+              #1f4439
+            );
+          padding: 0.9rem 1.6rem;
+          box-shadow:
+            0 18px 50px rgba(40, 83, 71, 0.28);
+          color: white;
+          cursor: pointer;
+          font-size: 0.78rem;
+          font-weight: 900;
+          letter-spacing: 0.13em;
+          text-transform: uppercase;
+          transition:
+            transform 180ms ease,
+            box-shadow 180ms ease,
+            opacity 180ms ease;
+        }
+
+        .hadiyad-open-button:hover {
+          transform: translateY(-3px);
+          box-shadow:
+            0 23px 55px rgba(40, 83, 71, 0.32);
+        }
+
+        .hadiyad-open-button:disabled {
+          cursor: wait;
+          opacity: 0.7;
+        }
+
+        .hadiyad-open-button:focus-visible,
+        .hadiyad-save-button:focus-visible {
+          outline: 3px solid #285347;
+          outline-offset: 5px;
+        }
+
+        .hadiyad-button-star {
+          font-size: 1.1rem;
+          animation:
+            hadiyad-star-pulse 1.8s ease-in-out infinite;
+        }
+
+        .gift-scene {
+          position: absolute;
+          z-index: 15;
+          left: 50%;
+          top: 54%;
+          width: min(
+            78vw,
+            21rem
+          );
+          height: 17rem;
+          opacity: 0;
+          pointer-events: none;
+          transform:
+            translate(-50%, -38%)
+            scale(0.72);
+          transition:
+            opacity 350ms ease,
+            transform 350ms ease;
+        }
+
+        .is-opening .gift-scene {
+          opacity: 1;
+          transform:
+            translate(-50%, -50%)
+            scale(1);
+        }
+
+        .gift-glow {
+          position: absolute;
+          left: 50%;
+          top: 47%;
+          width: 16rem;
+          height: 16rem;
+          border-radius: 999px;
+          background:
+            radial-gradient(
+              circle,
+              rgba(255, 236, 177, 0.95),
+              rgba(219, 167, 76, 0.28) 38%,
+              transparent 70%
+            );
+          filter: blur(16px);
+          opacity: 0;
+          transform:
+            translate(-50%, -50%)
+            scale(0.4);
+          animation:
+            gift-glow 1600ms 500ms ease forwards;
+        }
+
+        .gift-envelope {
+          position: absolute;
+          left: 50%;
+          bottom: 0;
+          width: 100%;
+          height: 12.3rem;
+          transform:
+            translateX(-50%);
+          perspective: 900px;
+          filter:
+            drop-shadow(
+              0 28px 28px
+              rgba(49, 58, 49, 0.22)
+            );
+        }
+
+        .gift-envelope-back {
+          position: absolute;
+          inset: 0;
+          border-radius:
+            1.1rem 1.1rem
+            1.35rem 1.35rem;
+          background:
+            linear-gradient(
+              145deg,
+              #e7d2a9,
+              #c59d5c
+            );
+        }
+
+        .gift-envelope-paper {
+          position: absolute;
+          z-index: 2;
+          left: 8%;
+          right: 8%;
+          top: 8%;
+          height: 78%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 0.7rem;
+          background:
+            linear-gradient(
+              160deg,
+              #fffdf7,
+              #f2e8d6
+            );
+          box-shadow:
+            0 10px 24px
+            rgba(77, 57, 31, 0.12);
+          color: #bb9456;
+          font-family: Georgia, serif;
+          font-size: 2rem;
+          font-weight: 700;
+          animation:
+            gift-paper-rise
+            1650ms 650ms
+            cubic-bezier(
+              0.2,
+              0.85,
+              0.25,
+              1
+            )
+            forwards;
+        }
+
+        .gift-envelope-left,
+        .gift-envelope-right,
+        .gift-envelope-front {
+          position: absolute;
+          z-index: 5;
+          inset: 0;
+          border-radius:
+            0 0
+            1.35rem 1.35rem;
+        }
+
+        .gift-envelope-left {
+          clip-path:
+            polygon(
+              0 0,
+              52% 52%,
+              0 100%
+            );
+          background: #d7b77f;
+        }
+
+        .gift-envelope-right {
+          clip-path:
+            polygon(
+              100% 0,
+              48% 52%,
+              100% 100%
+            );
+          background: #cfa86a;
+        }
+
+        .gift-envelope-front {
+          clip-path:
+            polygon(
+              0 100%,
+              50% 46%,
+              100% 100%
+            );
+          background:
+            linear-gradient(
+              160deg,
+              #e2c28e,
+              #bd914f
+            );
+        }
+
+        .gift-envelope-flap {
+          position: absolute;
+          z-index: 6;
+          left: 0;
+          right: 0;
+          top: 0;
+          height: 63%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          clip-path:
+            polygon(
+              0 0,
+              100% 0,
+              50% 100%
+            );
+          border-radius:
+            1.1rem 1.1rem 0 0;
+          background:
+            linear-gradient(
+              160deg,
+              #ead3a7,
+              #c79c5a
+            );
+          color: #72542e;
+          font-size: 1.4rem;
+          transform-origin: top;
+          backface-visibility: hidden;
+          animation:
+            gift-flap-open
+            900ms 280ms
+            cubic-bezier(
+              0.4,
+              0,
+              0.2,
+              1
+            )
+            forwards;
+        }
+
+        .gift-card-preview {
+          position: absolute;
+          z-index: 1;
+          left: 50%;
+          top: 1rem;
+          width: 68%;
+          height: 13rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid
+            rgba(255, 255, 255, 0.8);
+          border-radius: 1.1rem;
+          background:
+            linear-gradient(
+              160deg,
+              #fffdf8,
+              #e8ddc9
+            );
+          box-shadow:
+            0 30px 60px
+            rgba(36, 61, 52, 0.22);
+          opacity: 0;
+          transform:
+            translate(-50%, 8rem)
+            rotate(-3deg)
+            scale(0.76);
+          animation:
+            gift-card-rise
+            1450ms 850ms
+            cubic-bezier(
+              0.16,
+              1,
+              0.3,
+              1
+            )
+            forwards;
+        }
+
+        .gift-card-mark {
+          display: flex;
+          width: 4rem;
+          height: 4rem;
+          align-items: center;
+          justify-content: center;
+          border-radius: 999px;
+          border: 1px solid
+            rgba(184, 145, 81, 0.5);
+          color: #285347;
+          font-family: Georgia, serif;
+          font-size: 1.7rem;
+        }
+
+        .gift-card-shadow {
+          position: absolute;
+          left: 50%;
+          bottom: -1rem;
+          width: 85%;
+          height: 3rem;
+          border-radius: 999px;
+          background:
+            rgba(34, 54, 46, 0.26);
+          filter: blur(20px);
+          transform:
+            translateX(-50%);
+        }
+
+        .hadiyad-result {
+          width: 100%;
+          animation:
+            result-arrive
+            900ms
+            cubic-bezier(
+              0.16,
+              1,
+              0.3,
+              1
+            )
+            both;
+        }
+
+        .hadiyad-result-heading {
+          text-align: center;
+        }
+
+        .hadiyad-card-title {
+          margin-top: 0.65rem;
+          font-family: Georgia, serif;
+          font-size: clamp(
+            2rem,
+            7vw,
+            3.5rem
+          );
+          font-weight: 400;
+          line-height: 1.1;
+          color: #243d34;
+          text-wrap: balance;
+        }
+
+        .hadiyad-card-frame {
+          position: relative;
+          margin:
+            1.75rem auto 0;
+          border-radius: 2rem;
+          padding: 0.5rem;
+          border: 1px solid
+            rgba(255, 255, 255, 0.82);
+          background:
+            rgba(255, 255, 255, 0.5);
+          box-shadow:
+            0 35px 100px
+            rgba(38, 62, 54, 0.25);
+          backdrop-filter:
+            blur(16px);
+          animation:
+            card-settle
+            1100ms 100ms
+            cubic-bezier(
+              0.16,
+              1,
+              0.3,
+              1
+            )
+            both;
+        }
+
+        .hadiyad-card-frame.is-portrait {
+          width: min(
+            100%,
+            29rem
+          );
+        }
+
+        .hadiyad-card-frame.is-landscape {
+          width: min(
+            100%,
+            48rem
+          );
+        }
+
+        .hadiyad-card-glow {
+          position: absolute;
+          inset: 12%;
+          z-index: -1;
+          border-radius: 999px;
+          background:
+            rgba(224, 181, 101, 0.32);
+          filter: blur(45px);
+        }
+
+        .hadiyad-card-image {
+          display: block;
+          width: 100%;
+          height: auto;
+          border-radius: 1.55rem;
+        }
+
+        .hadiyad-actions {
+          width: min(
+            100%,
+            29rem
+          );
+          margin: 2.1rem auto 0;
+          text-align: center;
+          animation:
+            actions-arrive
+            700ms 500ms
+            ease both;
+        }
+
+        .hadiyad-moment {
+          margin-bottom: 1rem;
+          font-family: Georgia, serif;
+          font-size: 1.35rem;
+          color: #364d44;
+        }
+
+        .hadiyad-save-button {
+          display: inline-flex;
+          width: 100%;
+          min-height: 3.6rem;
+          align-items: center;
+          justify-content: center;
+          gap: 0.75rem;
+          border-radius: 1.15rem;
+          background:
+            linear-gradient(
+              135deg,
+              #315f51,
+              #1f4439
+            );
+          padding: 0.9rem 1.4rem;
+          box-shadow:
+            0 16px 40px
+            rgba(40, 83, 71, 0.23);
+          color: white;
+          font-size: 0.88rem;
+          font-weight: 800;
+          text-decoration: none;
+          transition:
+            transform 180ms ease,
+            box-shadow 180ms ease;
+        }
+
+        .hadiyad-save-button:hover {
+          transform: translateY(-2px);
+          box-shadow:
+            0 21px 46px
+            rgba(40, 83, 71, 0.28);
+        }
+
+        .hadiyad-save-hint {
+          margin-top: 0.8rem;
+          font-size: 0.82rem;
+          line-height: 1.6;
+          color: #747f79;
+        }
+
+        .hadiyad-footer {
+          position: relative;
+          z-index: 12;
+          padding:
+            0 1rem 1.4rem;
+          text-align: center;
+          font-size: 0.68rem;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          color: #918778;
+        }
+
+        @keyframes hadiyad-float {
+          0%,
+          100% {
+            transform:
+              translateY(0)
+              scale(1);
+            opacity: 0.4;
+          }
+
+          50% {
+            transform:
+              translateY(-10px)
+              scale(1.35);
+            opacity: 0.9;
+          }
+        }
+
+        @keyframes hadiyad-burst {
+          0% {
+            transform:
+              scale(1);
+            opacity: 0.8;
+          }
+
+          100% {
+            transform:
+              translateY(-45px)
+              scale(2.6);
+            opacity: 0;
+          }
+        }
+
+        @keyframes hadiyad-star-pulse {
+          0%,
+          100% {
+            transform: scale(0.9);
+            opacity: 0.65;
+          }
+
+          50% {
+            transform: scale(1.25);
+            opacity: 1;
+          }
+        }
+
+        @keyframes gift-flap-open {
+          0% {
+            transform:
+              rotateX(0deg);
+          }
+
+          100% {
+            transform:
+              rotateX(178deg);
+          }
+        }
+
+        @keyframes gift-paper-rise {
+          0% {
+            transform:
+              translateY(0);
+          }
+
+          100% {
+            transform:
+              translateY(-7rem);
+          }
+        }
+
+        @keyframes gift-card-rise {
+          0% {
+            opacity: 0;
+            transform:
+              translate(-50%, 8rem)
+              rotate(-3deg)
+              scale(0.76);
+          }
+
+          65% {
+            opacity: 1;
+            transform:
+              translate(-50%, -1.8rem)
+              rotate(1.5deg)
+              scale(1.03);
+          }
+
+          100% {
+            opacity: 1;
+            transform:
+              translate(-50%, -1rem)
+              rotate(0deg)
+              scale(1);
+          }
+        }
+
+        @keyframes gift-glow {
+          0% {
+            opacity: 0;
+            transform:
+              translate(-50%, -50%)
+              scale(0.4);
+          }
+
+          100% {
+            opacity: 1;
+            transform:
+              translate(-50%, -50%)
+              scale(1.35);
+          }
+        }
+
+        @keyframes result-arrive {
+          0% {
+            opacity: 0;
+            transform:
+              translateY(38px);
+          }
+
+          100% {
+            opacity: 1;
+            transform:
+              translateY(0);
+          }
+        }
+
+        @keyframes card-settle {
+          0% {
+            opacity: 0;
+            transform:
+              translateY(50px)
+              scale(0.88)
+              rotate(-2deg);
+          }
+
+          70% {
+            opacity: 1;
+            transform:
+              translateY(-4px)
+              scale(1.012)
+              rotate(0.4deg);
+          }
+
+          100% {
+            opacity: 1;
+            transform:
+              translateY(0)
+              scale(1)
+              rotate(0deg);
+          }
+        }
+
+        @keyframes actions-arrive {
+          from {
+            opacity: 0;
+            transform:
+              translateY(15px);
+          }
+
+          to {
+            opacity: 1;
+            transform:
+              translateY(0);
+          }
+        }
+
+        @media (
+          max-width: 640px
+        ) {
+          .hadiyad-brand {
+            padding-top: 1rem;
+          }
+
+          .hadiyad-content {
+            padding:
+              1.6rem 1rem
+              2rem;
+          }
+
+          .hadiyad-intro {
+            margin-top: -1rem;
+          }
+
+          .hadiyad-message {
+            font-size: 0.94rem;
+          }
+
+          .gift-scene {
+            top: 58%;
+          }
+
+          .hadiyad-result {
+            padding-top: 0.8rem;
+          }
+
+          .hadiyad-card-frame {
+            margin-top: 1.35rem;
+            border-radius: 1.5rem;
+            padding: 0.35rem;
+          }
+
+          .hadiyad-card-image {
+            border-radius: 1.2rem;
+          }
+
+          .hadiyad-actions {
+            margin-top: 1.6rem;
+          }
+        }
+
+        @media (
+          prefers-reduced-motion:
+          reduce
+        ) {
+          .hadiyad-stage *,
+          .hadiyad-stage *::before,
+          .hadiyad-stage *::after {
+            scroll-behavior: auto !important;
+            animation-duration:
+              0.01ms !important;
+            animation-iteration-count:
+              1 !important;
+            transition-duration:
+              0.01ms !important;
+          }
+        }
+      `}</style>
     </main>
   );
 }
