@@ -27,13 +27,16 @@ type CardActionState =
   | 'saving'
   | 'shared'
   | 'saved'
-  | 'fallback'
+  | 'copied'
   | 'error';
 
 interface CardFile {
   blob: Blob;
-  file: File;
   filename: string;
+}
+
+interface ShareResult {
+  shareUrl: string;
 }
 
 function isOrderStatus(
@@ -48,122 +51,186 @@ function isOrderStatus(
   );
 }
 
+function isShareResult(
+  value: unknown,
+): value is ShareResult {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'shareUrl' in value &&
+    typeof value.shareUrl === 'string'
+  );
+}
+
 const copy = {
   so: {
     brandLabel: 'Kaar dijitaal ah',
-    loadingTitle: 'Waxaan hubinaynaa dalabkaaga',
-    loading: 'Xaqiijintu waxay qaadan kartaa dhowr ilbiriqsi.',
-    pendingTitle: 'Waxaan sugaynaa xaqiijinta',
+    loadingTitle:
+      'Waxaan hubinaynaa dalabkaaga',
+    loading:
+      'Xaqiijintu waxay qaadan kartaa dhowr ilbiriqsi.',
+    pendingTitle:
+      'Waxaan sugaynaa xaqiijinta',
     pending:
       'Lacag-bixinta wali waa la xaqiijinayaa. Boggan si toos ah ayuu u cusboonaysiinayaa.',
-    canceledTitle: 'Lacag-bixinta waa la joojiyey',
+    canceledTitle:
+      'Lacag-bixinta waa la joojiyey',
     canceled:
       'Kaarkaagu wali waa kaydsan yahay. Waxaad dib ugu noqon kartaa kaararka.',
-    paidTitle: 'Kaarkaagu waa diyaar',
+    paidTitle:
+      'Kaarkaagu waa diyaar',
     paid:
-      'Lacag-bixinta waa la xaqiijiyey. Kaarkaaga gaarka ah waa diyaar.',
-    failedTitle: 'Lacag-bixintu ma dhammaan',
+      'Lacag-bixinta waa la xaqiijiyey. Kaarkaaga gaarka ah waa diyaar inaad la wadaagto.',
+    failedTitle:
+      'Lacag-bixintu ma dhammaan',
     failed:
       'Dalabka lama dhammaystirin. Waxaad dib ugu noqon kartaa kaararka oo mar kale isku dayi kartaa.',
-    expiredTitle: 'Fadhigu wuu dhammaaday',
+    expiredTitle:
+      'Fadhigu wuu dhammaaday',
     expired:
       'Fadhiga lacag-bixintu wuu dhammaaday. Kaarkaaga mar kale ka fur ururinta.',
-    errorTitle: 'Dalabka lama xaqiijin',
+    errorTitle:
+      'Dalabka lama xaqiijin',
     error:
       'Xaqiijinta wali lama heli karo. Sug dhowr ilbiriqsi ka dibna mar kale isku day.',
-    retry: 'Mar kale hubi',
-    share: 'La wadaag kaarka',
-    save: 'Kaydi kaarka',
-    preparingShare: 'Kaarka ayaa la diyaarinayaa…',
-    preparingSave: 'Kaarka ayaa la kaydinayaa…',
-    shared: 'Kaarka waa la wadaagay.',
-    saved: 'Kaarka waxaa lagu kaydiyey qalabkaaga.',
-    fallback:
-      'Qalabkani ma taageero wadaagista faylka. Kaarka waa la kaydiyey.',
+    retry:
+      'Mar kale hubi',
+    share:
+      'La wadaag kaarka',
+    save:
+      'Kaydi kaarka',
+    preparingShare:
+      'Linkiga gaarka ah ayaa la diyaarinayaa…',
+    preparingSave:
+      'Kaarka ayaa la kaydinayaa…',
+    shared:
+      'Linkiga Hadiyadda waa la wadaagay.',
+    copied:
+      'Linkiga Hadiyadda waa la koobiyey.',
+    saved:
+      'Kaarka waxaa lagu kaydiyey qalabkaaga.',
     actionError:
-      'Kaarka lama diyaarin karin. Mar kale isku day.',
-    shareTitle: 'Kaarka HadiyadPay',
+      'Ficilka lama dhamaystiri karin. Mar kale isku day.',
+    shareTitle:
+      'Hadiyad gaar ah ayaa kuu diyaar ah ✨',
     shareText:
-      'Waxaan kuu soo dirayaa kaar dijitaal ah.',
-    catalog: 'Ku noqo kaararka',
+      'Waxaan kuu soo dirayaa Hadiyad gaar ah. Fur kaarkaaga halkan:',
+    catalog:
+      'Ku noqo kaararka',
   },
 
   en: {
-    brandLabel: 'Digital card',
-    loadingTitle: 'We are checking your order',
-    loading: 'Confirmation can take a few seconds.',
-    pendingTitle: 'Waiting for confirmation',
+    brandLabel:
+      'Digital card',
+    loadingTitle:
+      'We are checking your order',
+    loading:
+      'Confirmation can take a few seconds.',
+    pendingTitle:
+      'Waiting for confirmation',
     pending:
       'Your payment is still being confirmed. This page refreshes automatically.',
-    canceledTitle: 'Payment was cancelled',
+    canceledTitle:
+      'Payment was cancelled',
     canceled:
       'Your card is still saved. You can return to the collection whenever you are ready.',
-    paidTitle: 'Your card is ready',
+    paidTitle:
+      'Your card is ready',
     paid:
-      'Payment is confirmed. Your personal card is ready.',
-    failedTitle: 'Payment was not completed',
+      'Payment is confirmed. Your personal card is ready to share.',
+    failedTitle:
+      'Payment was not completed',
     failed:
       'The order was not completed. Return to the collection and try again when you are ready.',
-    expiredTitle: 'The session has expired',
+    expiredTitle:
+      'The session has expired',
     expired:
       'The payment session expired. Open your card again from the collection.',
-    errorTitle: 'We could not confirm your order',
+    errorTitle:
+      'We could not confirm your order',
     error:
       'Confirmation is not available yet. Wait a few seconds and try again.',
-    retry: 'Check again',
-    share: 'Share card',
-    save: 'Save card',
-    preparingShare: 'Preparing your card…',
-    preparingSave: 'Saving your card…',
-    shared: 'Your card was shared.',
-    saved: 'Your card was saved to your device.',
-    fallback:
-      'File sharing is not supported on this device. Your card was saved instead.',
+    retry:
+      'Check again',
+    share:
+      'Share card',
+    save:
+      'Save card',
+    preparingShare:
+      'Preparing your private Hadiyad link…',
+    preparingSave:
+      'Saving your card…',
+    shared:
+      'Your Hadiyad link was shared.',
+    copied:
+      'Your Hadiyad link was copied.',
+    saved:
+      'Your card was saved to your device.',
     actionError:
-      'Your card could not be prepared. Please try again.',
-    shareTitle: 'HadiyadPay card',
+      'The action could not be completed. Please try again.',
+    shareTitle:
+      'A special Hadiyad is waiting for you ✨',
     shareText:
-      'I am sharing a personal digital card with you.',
-    catalog: 'Back to the cards',
+      'I sent you a personal Hadiyad. Open your card here:',
+    catalog:
+      'Back to the cards',
   },
 
   nl: {
-    brandLabel: 'Digitale kaart',
-    loadingTitle: 'We controleren je bestelling',
-    loading: 'De bevestiging kan enkele seconden duren.',
-    pendingTitle: 'We wachten op bevestiging',
+    brandLabel:
+      'Digitale kaart',
+    loadingTitle:
+      'We controleren je bestelling',
+    loading:
+      'De bevestiging kan enkele seconden duren.',
+    pendingTitle:
+      'We wachten op bevestiging',
     pending:
       'Je betaling wordt nog bevestigd. Deze pagina wordt automatisch bijgewerkt.',
-    canceledTitle: 'De betaling is geannuleerd',
+    canceledTitle:
+      'De betaling is geannuleerd',
     canceled:
       'Je kaart is nog bewaard. Je kunt teruggaan naar de collectie wanneer je er klaar voor bent.',
-    paidTitle: 'Je kaart is klaar',
+    paidTitle:
+      'Je kaart is klaar',
     paid:
-      'De betaling is bevestigd. Je persoonlijke kaart staat klaar.',
-    failedTitle: 'De betaling is niet voltooid',
+      'De betaling is bevestigd. Je persoonlijke kaart staat klaar om te delen.',
+    failedTitle:
+      'De betaling is niet voltooid',
     failed:
       'De bestelling is niet afgerond. Ga terug naar de collectie en probeer het opnieuw wanneer je er klaar voor bent.',
-    expiredTitle: 'De sessie is verlopen',
+    expiredTitle:
+      'De sessie is verlopen',
     expired:
       'De betaalsessie is verlopen. Open je kaart opnieuw vanuit de collectie.',
-    errorTitle: 'We konden je bestelling niet bevestigen',
+    errorTitle:
+      'We konden je bestelling niet bevestigen',
     error:
       'De bevestiging is nog niet beschikbaar. Wacht enkele seconden en probeer het opnieuw.',
-    retry: 'Opnieuw controleren',
-    share: 'Kaart delen',
-    save: 'Kaart bewaren',
-    preparingShare: 'Je kaart wordt voorbereid…',
-    preparingSave: 'Je kaart wordt bewaard…',
-    shared: 'Je kaart is gedeeld.',
-    saved: 'Je kaart is op je apparaat bewaard.',
-    fallback:
-      'Bestanden delen wordt niet ondersteund op dit apparaat. Je kaart is daarom bewaard.',
+    retry:
+      'Opnieuw controleren',
+    share:
+      'Kaart delen',
+    save:
+      'Kaart bewaren',
+    preparingShare:
+      'Je persoonlijke Hadiyad-link wordt klaargemaakt…',
+    preparingSave:
+      'Je kaart wordt bewaard…',
+    shared:
+      'Je Hadiyad-link is gedeeld.',
+    copied:
+      'Je Hadiyad-link is gekopieerd.',
+    saved:
+      'Je kaart is op je apparaat bewaard.',
     actionError:
-      'Je kaart kon niet worden voorbereid. Probeer het opnieuw.',
-    shareTitle: 'HadiyadPay-kaart',
+      'De actie kon niet worden voltooid. Probeer het opnieuw.',
+    shareTitle:
+      'Er staat een bijzondere Hadiyad voor je klaar ✨',
     shareText:
-      'Ik deel een persoonlijke digitale kaart met je.',
-    catalog: 'Terug naar de kaarten',
+      'Ik heb een persoonlijke Hadiyad voor je. Open je kaart hier:',
+    catalog:
+      'Terug naar de kaarten',
   },
 } satisfies Record<
   CardLanguage,
@@ -187,20 +254,69 @@ async function loadCardFile(
     );
   }
 
-  const blob = await response.blob();
-  const filename = 'hadiyadpay-kaart.svg';
+  const blob =
+    await response.blob();
 
   return {
     blob,
-    filename,
-    file: new File(
-      [blob],
-      filename,
-      {
-        type: 'image/svg+xml',
-      },
-    ),
+    filename:
+      'hadiyadpay-kaart.svg',
   };
+}
+
+async function createShareLink(
+  orderId: string,
+): Promise<string> {
+  const response = await fetch(
+    `/api/orders/${orderId}/share`,
+    {
+      method: 'POST',
+      credentials: 'same-origin',
+      cache: 'no-store',
+    },
+  );
+
+  const result: unknown =
+    await response
+      .json()
+      .catch(() => null);
+
+  if (
+    !response.ok ||
+    !isShareResult(result)
+  ) {
+    throw new Error(
+      'Share link could not be created',
+    );
+  }
+
+  const shareUrl =
+    new URL(result.shareUrl);
+
+  const isSecureUrl =
+    shareUrl.protocol === 'https:';
+
+  const isLocalDevelopmentUrl =
+    shareUrl.protocol === 'http:' &&
+    (
+      shareUrl.hostname === 'localhost' ||
+      shareUrl.hostname === '127.0.0.1'
+    );
+
+  if (
+    shareUrl.origin !==
+      window.location.origin ||
+    (
+      !isSecureUrl &&
+      !isLocalDevelopmentUrl
+    )
+  ) {
+    throw new Error(
+      'Share link was not valid',
+    );
+  }
+
+  return shareUrl.toString();
 }
 
 function saveBlob(
@@ -221,7 +337,9 @@ function saveBlob(
   anchor.remove();
 
   window.setTimeout(() => {
-    URL.revokeObjectURL(objectUrl);
+    URL.revokeObjectURL(
+      objectUrl,
+    );
   }, 1500);
 }
 
@@ -234,26 +352,36 @@ export default function OrderStatus({
   language: CardLanguage;
   wasCancelled: boolean;
 }) {
-  const [status, setStatus] =
-    useState<StatusResult | null>(null);
+  const [
+    status,
+    setStatus,
+  ] = useState<
+    StatusResult | null
+  >(null);
 
   const [
     actionState,
     setActionState,
-  ] = useState<CardActionState>('idle');
+  ] = useState<CardActionState>(
+    'idle',
+  );
 
-  const text = copy[language];
+  const text =
+    copy[language];
 
   const refreshStatus =
     useCallback(async () => {
       try {
-        const response = await fetch(
-          `/api/orders/${orderId}/status`,
-          {
-            credentials: 'same-origin',
-            cache: 'no-store',
-          },
-        );
+        const response =
+          await fetch(
+            `/api/orders/${orderId}/status`,
+            {
+              credentials:
+                'same-origin',
+              cache:
+                'no-store',
+            },
+          );
 
         if (!response.ok) {
           throw new Error(
@@ -266,16 +394,21 @@ export default function OrderStatus({
 
         if (
           !result ||
-          typeof result !== 'object' ||
+          typeof result !==
+            'object' ||
           !('status' in result) ||
-          !isOrderStatus(result.status)
+          !isOrderStatus(
+            result.status,
+          )
         ) {
           throw new Error(
             'Order status response was invalid',
           );
         }
 
-        setStatus(result.status);
+        setStatus(
+          result.status,
+        );
       } catch {
         setStatus('error');
       }
@@ -300,87 +433,142 @@ export default function OrderStatus({
     };
   }, [refreshStatus, status]);
 
-  const handleSave = async () => {
-    if (
-      actionState === 'saving' ||
-      actionState === 'sharing'
-    ) {
-      return;
-    }
+  const handleSave =
+    async () => {
+      if (
+        actionState ===
+          'saving' ||
+        actionState ===
+          'sharing'
+      ) {
+        return;
+      }
 
-    setActionState('saving');
-
-    try {
-      const cardFile =
-        await loadCardFile(orderId);
-
-      saveBlob(
-        cardFile.blob,
-        cardFile.filename,
+      setActionState(
+        'saving',
       );
 
-      setActionState('saved');
-    } catch {
-      setActionState('error');
-    }
-  };
+      try {
+        const cardFile =
+          await loadCardFile(
+            orderId,
+          );
 
-  const handleShare = async () => {
-    if (
-      actionState === 'sharing' ||
-      actionState === 'saving'
-    ) {
-      return;
-    }
-
-    setActionState('sharing');
-
-    try {
-      const cardFile =
-        await loadCardFile(orderId);
-
-      const shareData = {
-        title: text.shareTitle,
-        text: text.shareText,
-        files: [cardFile.file],
-      };
-
-      const canShareFile =
-        typeof navigator.share ===
-          'function' &&
-        typeof navigator.canShare ===
-          'function' &&
-        navigator.canShare(shareData);
-
-      if (canShareFile) {
-        await navigator.share(
-          shareData,
+        saveBlob(
+          cardFile.blob,
+          cardFile.filename,
         );
 
-        setActionState('shared');
+        setActionState(
+          'saved',
+        );
+      } catch {
+        setActionState(
+          'error',
+        );
+      }
+    };
+
+  const handleShare =
+    async () => {
+      if (
+        actionState ===
+          'sharing' ||
+        actionState ===
+          'saving'
+      ) {
         return;
       }
 
-      saveBlob(
-        cardFile.blob,
-        cardFile.filename,
+      setActionState(
+        'sharing',
       );
 
-      setActionState('fallback');
-    } catch (error) {
-      if (
-        error instanceof DOMException &&
-        error.name === 'AbortError'
-      ) {
-        setActionState('idle');
-        return;
+      try {
+        const shareUrl =
+          await createShareLink(
+            orderId,
+          );
+
+        const shareData = {
+          title:
+            text.shareTitle,
+
+          text:
+            text.shareText,
+
+          url:
+            shareUrl,
+        };
+
+        if (
+          typeof navigator.share ===
+          'function'
+        ) {
+          try {
+            await navigator.share(
+              shareData,
+            );
+
+            setActionState(
+              'shared',
+            );
+
+            return;
+          } catch (error) {
+            if (
+              error instanceof
+                DOMException &&
+              error.name ===
+                'AbortError'
+            ) {
+              setActionState(
+                'idle',
+              );
+
+              return;
+            }
+
+            /*
+             * Some browsers expose navigator.share but reject
+             * particular share-data combinations. In that case,
+             * continue to the clipboard fallback below.
+             */
+          }
+        }
+
+        if (
+          navigator.clipboard &&
+          typeof navigator
+            .clipboard
+            .writeText ===
+            'function'
+        ) {
+          await navigator
+            .clipboard
+            .writeText(
+              `${text.shareText}\n${shareUrl}`,
+            );
+
+          setActionState(
+            'copied',
+          );
+
+          return;
+        }
+
+        throw new Error(
+          'Sharing is not supported',
+        );
+      } catch {
+        setActionState(
+          'error',
+        );
       }
+    };
 
-      setActionState('error');
-    }
-  };
-
-  const paid = status === 'paid';
+  const paid =
+    status === 'paid';
 
   const heading =
     status === null
@@ -425,10 +613,10 @@ export default function OrderStatus({
         ? text.preparingSave
         : actionState === 'shared'
           ? text.shared
-          : actionState === 'saved'
-            ? text.saved
-            : actionState === 'fallback'
-              ? text.fallback
+          : actionState === 'copied'
+            ? text.copied
+            : actionState === 'saved'
+              ? text.saved
               : actionState === 'error'
                 ? text.actionError
                 : null;
@@ -521,7 +709,7 @@ export default function OrderStatus({
                   actionState ===
                     'saving'
                 }
-                className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#285347] px-5 text-sm font-bold text-white shadow-lg shadow-[#285347]/15 transition hover:-translate-y-0.5 hover:bg-[#1e4338] disabled:cursor-wait disabled:opacity-60"
+                className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#285347] px-5 text-sm font-bold text-white shadow-lg shadow-[#285347]/15 transition hover:-translate-y-0.5 hover:bg-[#1e4338] disabled:cursor-wait disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#285347]"
               >
                 {actionState ===
                 'sharing'
@@ -544,7 +732,7 @@ export default function OrderStatus({
                   actionState ===
                     'saving'
                 }
-                className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl border border-[#b9c7c0] bg-white px-5 text-sm font-bold text-[#285347] transition hover:border-[#285347] hover:bg-[#f3f7f4] disabled:cursor-wait disabled:opacity-60"
+                className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl border border-[#b9c7c0] bg-white px-5 text-sm font-bold text-[#285347] transition hover:border-[#285347] hover:bg-[#f3f7f4] disabled:cursor-wait disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#285347]"
               >
                 {actionState ===
                 'saving'
@@ -561,7 +749,8 @@ export default function OrderStatus({
                   role="status"
                   aria-live="polite"
                   className={`rounded-xl px-4 py-3 text-sm leading-6 ${
-                    actionState === 'error'
+                    actionState ===
+                    'error'
                       ? 'bg-rose-50 text-rose-800'
                       : 'bg-[#f1f4f1] text-[#52615b]'
                   }`}
@@ -578,14 +767,14 @@ export default function OrderStatus({
                   setStatus(null);
                   void refreshStatus();
                 }}
-                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#285347] px-5 text-sm font-bold text-white"
+                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#285347] px-5 text-sm font-bold text-white transition hover:bg-[#1e4338] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#285347]"
               >
                 {text.retry}
               </button>
 
               <Link
                 href={`/kaarten?lang=${language}`}
-                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-[#b9c7c0] bg-white px-5 text-center text-sm font-bold text-[#285347]"
+                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-[#b9c7c0] bg-white px-5 text-center text-sm font-bold text-[#285347] transition hover:border-[#285347] hover:bg-[#f3f7f4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#285347]"
               >
                 {text.catalog}
               </Link>
@@ -597,7 +786,7 @@ export default function OrderStatus({
             <div className="mt-8 border-t border-[#e4e5df] pt-6">
               <Link
                 href={`/kaarten?lang=${language}`}
-                className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-[#285347]"
+                className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-[#285347] transition hover:text-[#1e4338] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#285347]"
               >
                 <span aria-hidden="true">
                   ←
