@@ -104,8 +104,13 @@ export async function generateMetadata({
   const shareUrl =
     `${productionOrigin}/h/${encodeURIComponent(token)}`;
 
+  /*
+   * The version parameter gives WhatsApp a fresh image URL
+   * after metadata changes instead of relying on an older
+   * cached version of the existing HadiyadPay logo.
+   */
   const logoUrl =
-    `${productionOrigin}/images/logo.jpg`;
+    `${productionOrigin}/images/logo.jpg?v=3`;
 
   return {
     metadataBase:
@@ -118,6 +123,9 @@ export async function generateMetadata({
 
     description:
       content.description,
+
+    applicationName:
+      'HadiyadPay',
 
     robots: {
       index: false,
@@ -151,6 +159,15 @@ export async function generateMetadata({
           url:
             logoUrl,
 
+          width:
+            512,
+
+          height:
+            512,
+
+          type:
+            'image/jpeg',
+
           alt:
             'HadiyadPay',
         },
@@ -181,6 +198,20 @@ export async function generateMetadata({
 
       apple:
         '/images/logo.jpg',
+    },
+
+    other: {
+      'og:image:secure_url':
+        logoUrl,
+
+      'og:image:type':
+        'image/jpeg',
+
+      'og:image:width':
+        '512',
+
+      'og:image:height':
+        '512',
     },
   };
 }
