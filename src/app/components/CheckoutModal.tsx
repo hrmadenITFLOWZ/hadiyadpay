@@ -1,7 +1,5 @@
 'use client';
 
-import { useState } from 'react';
-
 import type { CardOption } from '../data/cardOptions';
 import useDialogAccessibility from '../hooks/useDialogAccessibility';
 import type { CardLanguage } from '../../lib/card-types';
@@ -34,18 +32,18 @@ export default function CheckoutModal({
   error,
   onPay,
 }: CheckoutModalProps) {
-  const [previewSide, setPreviewSide] = useState<'front' | 'inside'>('front');
-
-  const dialogRef = useDialogAccessibility<HTMLElement>(
-    isOpen,
-    onClose,
-  );
+  const dialogRef =
+    useDialogAccessibility<HTMLElement>(
+      isOpen,
+      onClose,
+    );
 
   if (!isOpen) {
     return null;
   }
 
   const lang = initialLanguage;
+  const preview = draft.front;
 
   const content = {
     so: {
@@ -53,8 +51,6 @@ export default function CheckoutModal({
       description:
         'Eeg kaarkaaga gaarka ah ka hor intaadan u gudbin lacag-bixinta.',
       preview: 'Tusaalaha kaarka',
-      front: 'Hordhaca',
-      inside: 'Gudaha',
       card: 'Kaarka',
       recipient: 'Qaataha',
       sender: 'Diraha',
@@ -72,8 +68,6 @@ export default function CheckoutModal({
       description:
         'Preview your personalized card before continuing to payment.',
       preview: 'Card preview',
-      front: 'Front',
-      inside: 'Inside',
       card: 'Card',
       recipient: 'Recipient',
       sender: 'Sender',
@@ -91,8 +85,6 @@ export default function CheckoutModal({
       description:
         'Bekijk je persoonlijke kaart voordat je verdergaat naar de betaling.',
       preview: 'Kaartvoorbeeld',
-      front: 'Voorkant',
-      inside: 'Binnenkant',
       card: 'Kaart',
       recipient: 'Ontvanger',
       sender: 'Verzender',
@@ -106,22 +98,18 @@ export default function CheckoutModal({
     },
   }[lang];
 
-  const preview =
-    previewSide === 'front'
-      ? draft.front
-      : draft.inside;
-
-  const formattedPrice = new Intl.NumberFormat(
-    lang === 'nl'
-      ? 'nl-NL'
-      : lang === 'so'
-        ? 'so-SO'
-        : 'en-IE',
-    {
-      style: 'currency',
-      currency: 'EUR',
-    },
-  ).format(cardPrice);
+  const formattedPrice =
+    new Intl.NumberFormat(
+      lang === 'nl'
+        ? 'nl-NL'
+        : lang === 'so'
+          ? 'so-SO'
+          : 'en-IE',
+      {
+        style: 'currency',
+        currency: 'EUR',
+      },
+    ).format(cardPrice);
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-3 backdrop-blur-sm sm:p-5">
@@ -174,27 +162,9 @@ export default function CheckoutModal({
             <CardComposition
               card={selectedOccasion}
               language={lang}
-              cardSide={previewSide}
+              cardSide="front"
               side={preview}
             />
-
-            <div className="mt-3 grid grid-cols-2 gap-1 rounded-xl bg-stone-100 p-1">
-              {(['front', 'inside'] as const).map((side) => (
-                <button
-                  key={side}
-                  type="button"
-                  aria-pressed={previewSide === side}
-                  onClick={() => setPreviewSide(side)}
-                  className={`min-h-10 rounded-lg px-2 text-xs font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#285347] ${
-                    previewSide === side
-                      ? 'bg-white text-[#285347] shadow-sm'
-                      : 'text-stone-600'
-                  }`}
-                >
-                  {content[side]}
-                </button>
-              ))}
-            </div>
           </section>
 
           <div className="flex min-w-0 flex-col gap-4 text-sm text-gray-700">

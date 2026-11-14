@@ -68,24 +68,35 @@ export async function GET(
     );
   }
 
-  const sideName =
+  /*
+   * HadiyadPay cards are delivered as one complete
+   * single-sided digital card.
+   *
+   * Existing ?side=front links remain compatible.
+   * The inside side is no longer available through
+   * the customer delivery flow.
+   */
+  const requestedSide =
     request.nextUrl.searchParams.get(
       'side',
     );
 
   if (
-    sideName !== 'front' &&
-    sideName !== 'inside'
+    requestedSide !== null &&
+    requestedSide !== 'front'
   ) {
     return NextResponse.json(
       {
-        error: 'Choose a card side',
+        error:
+          'This card is available as one complete digital card',
       },
       {
         status: 400,
       },
     );
   }
+
+  const sideName = 'front' as const;
 
   let paymentVerified = false;
   let paidOrder = order;
@@ -204,17 +215,13 @@ export async function GET(
     );
 
     const selectedSide =
-      draft[sideName];
+      draft.front;
 
     const photo =
-      sideName === 'front'
-        ? paidOrder.photo_front
-        : paidOrder.photo_inside;
+      paidOrder.photo_front;
 
     const photoMime =
-      sideName === 'front'
-        ? paidOrder.photo_front_mime
-        : paidOrder.photo_inside_mime;
+      paidOrder.photo_front_mime;
 
     const photoDataUrl =
       photo && photoMime
@@ -231,9 +238,7 @@ export async function GET(
     );
 
     const filename =
-      sideName === 'front'
-        ? `${card.slug}-kaart-1.svg`
-        : `${card.slug}-kaart-2.svg`;
+      `${card.slug}-hadiyadpay-kaart.svg`;
 
     return new Response(
       svg,

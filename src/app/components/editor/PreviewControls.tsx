@@ -12,19 +12,32 @@ interface PreviewControlsProps {
   };
 }
 
-export default function PreviewControls({ activeMode, onSelect, labels }: PreviewControlsProps) {
-  const modes: EditorPreviewMode[] = ['edit', 'clean', 'full'];
+export default function PreviewControls({
+  activeMode,
+  onSelect,
+  labels,
+}: PreviewControlsProps) {
+  const modes = [
+    'edit',
+    'clean',
+  ] as const;
 
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-2 gap-2">
       {modes.map((mode) => (
         <button
           key={mode}
           type="button"
           onClick={() => onSelect(mode)}
-          className={`min-h-11 min-w-0 rounded-lg border px-1 text-[9px] font-black uppercase tracking-normal transition sm:px-2 sm:text-[10px] sm:tracking-[0.12em] ${activeMode === mode ? 'border-[#285347] bg-[#285347]/5 text-[#285347]' : 'border-stone-200 bg-white text-stone-700'}`}
+          className={`min-h-11 min-w-0 rounded-lg border px-2 text-[10px] font-black uppercase tracking-[0.12em] transition ${
+            activeMode === mode
+              ? 'border-[#285347] bg-[#285347]/5 text-[#285347]'
+              : 'border-stone-200 bg-white text-stone-700'
+          }`}
         >
-          {mode === 'edit' ? labels.edit : mode === 'clean' ? labels.clean : labels.full}
+          {mode === 'edit'
+            ? labels.edit
+            : labels.clean}
         </button>
       ))}
     </div>
