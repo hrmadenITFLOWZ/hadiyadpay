@@ -1,3 +1,7 @@
+import {
+  cache,
+} from 'react';
+
 import type {
   Metadata,
 } from 'next';
@@ -32,6 +36,7 @@ const metadataCopy = {
   so: {
     title:
       'Hadiyad gaar ah ayaa kuu diyaar ah ✨',
+
     description:
       'Qof ayaa wax gaar ah kuu sameeyey. Fur Hadiyaddaada.',
   },
@@ -39,6 +44,7 @@ const metadataCopy = {
   en: {
     title:
       'A special Hadiyad is waiting for you ✨',
+
     description:
       'Someone created something special for you. Open your Hadiyad.',
   },
@@ -46,6 +52,7 @@ const metadataCopy = {
   nl: {
     title:
       'Er staat een Hadiyad voor je klaar ✨',
+
     description:
       'Iemand heeft iets bijzonders voor je gemaakt. Open je Hadiyad.',
   },
@@ -57,27 +64,37 @@ const metadataCopy = {
   }
 >;
 
-async function loadSharedCard(
-  token: string,
-) {
-  try {
-    return await getOrderForShareToken(
-      token,
-    );
-  } catch (error) {
-    console.error(
-      'Unable to load shared Hadiyad',
-      {
-        errorType:
-          error instanceof Error
-            ? error.name
-            : 'unknown',
-      },
-    );
+/*
+ * generateMetadata() and SharedCardPage() both need
+ * the same share lookup.
+ *
+ * React cache ensures that the same token uses the
+ * same lookup result during one server render.
+ */
+const loadSharedCard =
+  cache(
+    async (
+      token: string,
+    ) => {
+      try {
+        return await getOrderForShareToken(
+          token,
+        );
+      } catch (error) {
+        console.error(
+          'Unable to load shared Hadiyad',
+          {
+            errorType:
+              error instanceof Error
+                ? error.name
+                : 'unknown',
+          },
+        );
 
-    return null;
-  }
-}
+        return null;
+      }
+    },
+  );
 
 export async function generateMetadata({
   params,
@@ -94,7 +111,8 @@ export async function generateMetadata({
       token,
     );
 
-  const language =
+  const language:
+    CardLanguage =
     sharedOrder?.language ??
     'nl';
 
@@ -104,13 +122,6 @@ export async function generateMetadata({
   const shareUrl =
     `${productionOrigin}/h/${encodeURIComponent(token)}`;
 
-  /*
-   * Keep using the existing HadiyadPay logo.
-   *
-   * The version parameter gives social crawlers a
-   * fresh image URL after metadata changes without
-   * requiring a new image asset.
-   */
   const logoUrl =
     `${productionOrigin}/images/logo.jpg?v=4`;
 
@@ -193,13 +204,13 @@ export async function generateMetadata({
 
     icons: {
       icon:
-        '/images/logo.jpg',
+        '/images/logo.jpg?v=4',
 
       shortcut:
-        '/images/logo.jpg',
+        '/images/logo.jpg?v=4',
 
       apple:
-        '/images/logo.jpg',
+        '/images/logo.jpg?v=4',
     },
 
     other: {
