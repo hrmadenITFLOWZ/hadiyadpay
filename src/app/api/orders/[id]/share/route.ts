@@ -5,6 +5,10 @@ import {
   type NextRequest,
 } from 'next/server';
 
+import type {
+  PoolClient,
+} from 'pg';
+
 import { getDatabasePool } from '../../../../../lib/server/database';
 import { getOrderForGuest } from '../../../../../lib/server/order-access';
 import { verifyAndRecordPaidOrder } from '../../../../../lib/server/payment-confirmation';
@@ -28,7 +32,9 @@ function getRequestOrigin(
 
   try {
     const browserOrigin =
-      new URL(originHeader).origin;
+      new URL(
+        originHeader,
+      ).origin;
 
     if (
       browserOrigin !==
@@ -55,7 +61,9 @@ export async function POST(
     await context.params;
 
   const requestOrigin =
-    getRequestOrigin(request);
+    getRequestOrigin(
+      request,
+    );
 
   if (!requestOrigin) {
     return NextResponse.json(
@@ -90,6 +98,7 @@ export async function POST(
       'Unable to load share order',
       {
         orderId: id,
+
         errorType:
           error instanceof Error
             ? error.name
@@ -115,7 +124,8 @@ export async function POST(
   if (!order) {
     return NextResponse.json(
       {
-        error: 'Order not found',
+        error:
+          'Order not found',
       },
       {
         status: 404,
@@ -141,6 +151,7 @@ export async function POST(
         'Unable to verify share entitlement',
         {
           orderId: id,
+
           errorType:
             error instanceof Error
               ? error.name
@@ -194,19 +205,23 @@ export async function POST(
   const pool =
     getDatabasePool();
 
-  const client =
-    await pool.connect();
+  let client:
+    | PoolClient
+    | undefined;
 
   try {
+    client =
+      await pool.connect();
+
     await client.query(
       'BEGIN',
     );
 
     /*
-     * One active recipient link per order.
+     * One active Hadiyad Reveal link per order.
      *
-     * Creating a new link securely revokes the old one,
-     * because only token hashes are stored in the database.
+     * Creating a new link revokes the previous active
+     * link before the new token hash is stored.
      */
     await client.query(
       `UPDATE card_order_shares
@@ -244,21 +259,74 @@ export async function POST(
       'COMMIT',
     );
   } catch (error) {
-    try {
-      await client.query(
-        'ROLLBACK',
-      );
-    } catch {
-      // The original database error is logged below.
+    if (client) {
+      try {
+        await client.query(
+          'ROLLBACK',
+        );
+      } catch (
+        rollbackError
+      ) {
+        console.error(
+          'Unable to rollback recipient share transaction',
+          {
+            orderId: id,
+
+            errorType:
+              rollbackError instanceof Error
+                ? rollbackError.name
+                : 'unknown',
+          },
+        );
+      }
     }
 
     console.error(
       'Unable to create recipient share',
       {
         orderId: id,
+
         errorType:
           error instanceof Error
             ? error.name
+            : 'unknown',
+
+        errorCode:
+          error &&
+          typeof error ===
+            'object' &&
+          'code' in error
+            ? String(
+                error.code,
+              )
+            : 'unknown',
+
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : 'unknown',
+
+        constraint:
+          error &&
+          typeof error ===
+            'object' &&
+          'constraint' in
+            error &&
+          error.constraint
+            ? String(
+                error.constraint,
+              )
+            : 'unknown',
+
+        detail:
+          error &&
+          typeof error ===
+            'object' &&
+          'detail' in error &&
+          error.detail
+            ? String(
+                error.detail,
+              )
             : 'unknown',
       },
     );
@@ -277,7 +345,9 @@ export async function POST(
       },
     );
   } finally {
-    client.release();
+    if (client) {
+      client.release();
+    }
   }
 
   const shareUrl =
