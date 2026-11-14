@@ -1,7 +1,3 @@
-import {
-  cache,
-} from 'react';
-
 import type {
   Metadata,
 } from 'next';
@@ -18,10 +14,6 @@ import {
   getOrderForShareToken,
 } from '../../../lib/server/share-access';
 
-import type {
-  CardLanguage,
-} from '../../../lib/card-types';
-
 import HadiyadReveal from './HadiyadReveal';
 
 export const dynamic =
@@ -32,202 +24,100 @@ export const revalidate = 0;
 const productionOrigin =
   'https://www.hadiyadpay.com';
 
-const metadataCopy = {
-  so: {
-    title:
-      'Hadiyad gaar ah ayaa kuu diyaar ah ✨',
+export const metadata: Metadata = {
+  metadataBase:
+    new URL(
+      productionOrigin,
+    ),
 
-    description:
-      'Qof ayaa wax gaar ah kuu sameeyey. Fur Hadiyaddaada.',
+  title:
+    'Er staat een Hadiyad voor je klaar ✨',
+
+  description:
+    'Iemand heeft iets bijzonders voor je gemaakt. Open je Hadiyad.',
+
+  applicationName:
+    'HadiyadPay',
+
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
   },
 
-  en: {
-    title:
-      'A special Hadiyad is waiting for you ✨',
+  openGraph: {
+    type:
+      'website',
 
-    description:
-      'Someone created something special for you. Open your Hadiyad.',
-  },
+    siteName:
+      'HadiyadPay',
 
-  nl: {
     title:
       'Er staat een Hadiyad voor je klaar ✨',
 
     description:
       'Iemand heeft iets bijzonders voor je gemaakt. Open je Hadiyad.',
+
+    images: [
+      {
+        url:
+          '/images/logo.jpg?v=5',
+
+        width:
+          455,
+
+        height:
+          452,
+
+        type:
+          'image/jpeg',
+
+        alt:
+          'HadiyadPay',
+      },
+    ],
   },
-} satisfies Record<
-  CardLanguage,
-  {
-    title: string;
-    description: string;
-  }
->;
 
-/*
- * generateMetadata() and SharedCardPage() both need
- * the same share lookup.
- *
- * React cache ensures that the same token uses the
- * same lookup result during one server render.
- */
-const loadSharedCard =
-  cache(
-    async (
-      token: string,
-    ) => {
-      try {
-        return await getOrderForShareToken(
-          token,
-        );
-      } catch (error) {
-        console.error(
-          'Unable to load shared Hadiyad',
-          {
-            errorType:
-              error instanceof Error
-                ? error.name
-                : 'unknown',
-          },
-        );
-
-        return null;
-      }
-    },
-  );
-
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{
-    token: string;
-  }>;
-}): Promise<Metadata> {
-  const { token } =
-    await params;
-
-  const sharedOrder =
-    await loadSharedCard(
-      token,
-    );
-
-  const language:
-    CardLanguage =
-    sharedOrder?.language ??
-    'nl';
-
-  const content =
-    metadataCopy[language];
-
-  const shareUrl =
-    `${productionOrigin}/h/${encodeURIComponent(token)}`;
-
-  const logoUrl =
-    `${productionOrigin}/images/logo.jpg?v=4`;
-
-  return {
-    metadataBase:
-      new URL(
-        productionOrigin,
-      ),
+  twitter: {
+    card:
+      'summary',
 
     title:
-      content.title,
+      'Er staat een Hadiyad voor je klaar ✨',
 
     description:
-      content.description,
+      'Iemand heeft iets bijzonders voor je gemaakt. Open je Hadiyad.',
 
-    applicationName:
-      'HadiyadPay',
+    images: [
+      '/images/logo.jpg?v=5',
+    ],
+  },
 
-    robots: {
-      index: false,
-      follow: false,
-      nocache: true,
-    },
+  icons: {
+    icon:
+      '/images/logo.jpg?v=5',
 
-    alternates: {
-      canonical:
-        shareUrl,
-    },
+    shortcut:
+      '/images/logo.jpg?v=5',
 
-    openGraph: {
-      type:
-        'website',
+    apple:
+      '/images/logo.jpg?v=5',
+  },
 
-      url:
-        shareUrl,
+  other: {
+    'og:image:secure_url':
+      `${productionOrigin}/images/logo.jpg?v=5`,
 
-      siteName:
-        'HadiyadPay',
+    'og:image:type':
+      'image/jpeg',
 
-      title:
-        content.title,
+    'og:image:width':
+      '455',
 
-      description:
-        content.description,
-
-      images: [
-        {
-          url:
-            logoUrl,
-
-          width:
-            455,
-
-          height:
-            452,
-
-          type:
-            'image/jpeg',
-
-          alt:
-            'HadiyadPay',
-        },
-      ],
-    },
-
-    twitter: {
-      card:
-        'summary',
-
-      title:
-        content.title,
-
-      description:
-        content.description,
-
-      images: [
-        logoUrl,
-      ],
-    },
-
-    icons: {
-      icon:
-        '/images/logo.jpg?v=4',
-
-      shortcut:
-        '/images/logo.jpg?v=4',
-
-      apple:
-        '/images/logo.jpg?v=4',
-    },
-
-    other: {
-      'og:image:secure_url':
-        logoUrl,
-
-      'og:image:type':
-        'image/jpeg',
-
-      'og:image:width':
-        '455',
-
-      'og:image:height':
-        '452',
-    },
-  };
-}
+    'og:image:height':
+      '452',
+  },
+};
 
 export default async function SharedCardPage({
   params,
@@ -239,10 +129,30 @@ export default async function SharedCardPage({
   const { token } =
     await params;
 
-  const sharedOrder =
-    await loadSharedCard(
-      token,
+  let sharedOrder: Awaited<
+    ReturnType<
+      typeof getOrderForShareToken
+    >
+  >;
+
+  try {
+    sharedOrder =
+      await getOrderForShareToken(
+        token,
+      );
+  } catch (error) {
+    console.error(
+      'Unable to load Hadiyad Reveal page',
+      {
+        errorType:
+          error instanceof Error
+            ? error.name
+            : 'unknown',
+      },
     );
+
+    notFound();
+  }
 
   if (!sharedOrder) {
     notFound();
