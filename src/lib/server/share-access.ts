@@ -10,6 +10,7 @@ import {
 
 import {
   hashShareToken,
+  isValidShareTokenFormat,
 } from './share-token';
 
 export interface SharedCardOrder
@@ -34,16 +35,25 @@ export interface SharedCardOrder
 export async function getOrderForShareToken(
   token: string,
 ): Promise<SharedCardOrder | null> {
+  /*
+   * Token validation is centralized in share-token.ts.
+   *
+   * This supports the current compact Hadiyad links
+   * while preserving compatibility with older,
+   * longer share tokens.
+   */
   if (
-    typeof token !== 'string' ||
-    token.length < 32 ||
-    token.length > 256
+    !isValidShareTokenFormat(
+      token,
+    )
   ) {
     return null;
   }
 
   const tokenHash =
-    hashShareToken(token);
+    hashShareToken(
+      token,
+    );
 
   const result =
     await getDatabasePool()
@@ -92,7 +102,9 @@ export async function recordShareOpen(
        open_count =
          open_count + 1,
        updated_at = NOW()
-     WHERE id = $1`,
+     WHERE
+       id = $1
+       AND revoked_at IS NULL`,
     [
       shareId,
     ],
