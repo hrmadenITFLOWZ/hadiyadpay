@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  useCallback,
   useEffect,
   useReducer,
   useRef,
@@ -17,6 +18,10 @@ import type {
 import {
   getCardComposition,
 } from '../../lib/card-composition';
+
+import {
+  getCardProductionProfile,
+} from '../../lib/card-production';
 
 import {
   createEditorRuntimeState,
@@ -80,7 +85,9 @@ async function compressPhotoForOrder(
   file: File,
 ): Promise<File> {
   const image =
-    await createImageBitmap(file);
+    await createImageBitmap(
+      file,
+    );
 
   const longestSide =
     Math.max(
@@ -94,7 +101,8 @@ async function compressPhotoForOrder(
       1800 / longestSide,
     );
 
-  let blob: Blob | null = null;
+  let blob: Blob | null =
+    null;
 
   for (
     let attempt = 0;
@@ -106,22 +114,28 @@ async function compressPhotoForOrder(
         'canvas',
       );
 
-    canvas.width = Math.max(
-      1,
-      Math.round(
-        image.width * scale,
-      ),
-    );
+    canvas.width =
+      Math.max(
+        1,
+        Math.round(
+          image.width *
+            scale,
+        ),
+      );
 
-    canvas.height = Math.max(
-      1,
-      Math.round(
-        image.height * scale,
-      ),
-    );
+    canvas.height =
+      Math.max(
+        1,
+        Math.round(
+          image.height *
+            scale,
+        ),
+      );
 
     const context =
-      canvas.getContext('2d');
+      canvas.getContext(
+        '2d',
+      );
 
     if (!context) {
       image.close();
@@ -131,7 +145,8 @@ async function compressPhotoForOrder(
       );
     }
 
-    context.fillStyle = '#ffffff';
+    context.fillStyle =
+      '#ffffff';
 
     context.fillRect(
       0,
@@ -149,12 +164,16 @@ async function compressPhotoForOrder(
     );
 
     blob =
-      await new Promise<Blob | null>(
+      await new Promise<
+        Blob | null
+      >(
         (resolve) => {
           canvas.toBlob(
             resolve,
             'image/jpeg',
-            0.86 - attempt * 0.08,
+            0.86 -
+              attempt *
+                0.08,
           );
         },
       );
@@ -183,10 +202,13 @@ async function compressPhotoForOrder(
   }
 
   return new File(
-    [blob],
+    [
+      blob,
+    ],
     'card-photo.jpg',
     {
-      type: 'image/jpeg',
+      type:
+        'image/jpeg',
     },
   );
 }
@@ -206,20 +228,29 @@ export default function CardBuilder({
     if (savedDraft) {
       const normalizedDraft = {
         ...savedDraft,
-        side: 'front' as const,
+
+        side:
+          'front' as const,
+
         previewMode:
-          savedDraft.previewMode ===
+          savedDraft
+            .previewMode ===
           'full'
             ? 'clean' as const
-            : savedDraft.previewMode,
+            : savedDraft
+                .previewMode,
       };
 
       return {
-        draft: normalizedDraft,
+        draft:
+          normalizedDraft,
+
         history: [
           normalizedDraft,
         ],
-        historyIndex: 0,
+
+        historyIndex:
+          0,
       };
     }
 
@@ -231,21 +262,31 @@ export default function CardBuilder({
 
     const normalizedDraft = {
       ...runtime.draft,
-      side: 'front' as const,
+
+      side:
+        'front' as const,
+
       previewMode:
-        runtime.draft.previewMode ===
+        runtime.draft
+          .previewMode ===
         'full'
           ? 'clean' as const
-          : runtime.draft.previewMode,
+          : runtime.draft
+              .previewMode,
     };
 
     return {
       ...runtime,
-      draft: normalizedDraft,
+
+      draft:
+        normalizedDraft,
+
       history: [
         normalizedDraft,
       ],
-      historyIndex: 0,
+
+      historyIndex:
+        0,
     };
   };
 
@@ -270,48 +311,62 @@ export default function CardBuilder({
     startY: number;
     originX: number;
     originY: number;
-    layer: 'photo' | 'text';
-    textLayer?: EditorTextLayer;
-  } | null>(null);
+    layer:
+      | 'photo'
+      | 'text';
+    textLayer?:
+      EditorTextLayer;
+  } | null>(
+    null,
+  );
 
   const [
     activeTextLayer,
     setActiveTextLayer,
-  ] =
-    useState<EditorTextLayer>(
-      'message',
-    );
+  ] = useState<
+    EditorTextLayer
+  >(
+    'message',
+  );
 
   const [
     selectedLayer,
     setSelectedLayer,
-  ] =
-    useState<'photo' | 'text'>(
-      'text',
-    );
+  ] = useState<
+    'photo' | 'text'
+  >(
+    'text',
+  );
 
   const [
     isCheckoutOpen,
     setIsCheckoutOpen,
-  ] = useState(false);
+  ] = useState(
+    false,
+  );
 
   const [
     isCheckoutSubmitting,
     setIsCheckoutSubmitting,
-  ] = useState(false);
+  ] = useState(
+    false,
+  );
 
   const [
     checkoutError,
     setCheckoutError,
-  ] =
-    useState<string | null>(
-      null,
-    );
+  ] = useState<
+    string | null
+  >(
+    null,
+  );
 
   const [
     hasUnsavedChanges,
     setHasUnsavedChanges,
-  ] = useState(false);
+  ] = useState(
+    false,
+  );
 
   const ownedPhotoUrlsRef =
     useRef(
@@ -320,17 +375,26 @@ export default function CardBuilder({
 
   const photoFilesRef =
     useRef(
-      new Map<string, File>(),
+      new Map<
+        string,
+        File
+      >(),
     );
 
   const dragMovedRef =
-    useRef(false);
+    useRef(
+      false,
+    );
 
   const checkoutSubmittingRef =
-    useRef(false);
+    useRef(
+      false,
+    );
 
   const isMountedRef =
-    useRef(false);
+    useRef(
+      false,
+    );
 
   const previewRef =
     useRef<HTMLDivElement>(
@@ -338,7 +402,9 @@ export default function CardBuilder({
     );
 
   const dialogRef =
-    useDialogAccessibility<HTMLDivElement>(
+    useDialogAccessibility<
+      HTMLDivElement
+    >(
       !isCheckoutOpen,
       onClose,
     );
@@ -347,34 +413,97 @@ export default function CardBuilder({
     editorState.draft;
 
   /*
-   * HadiyadPay is now presented as one
-   * complete single-sided digital card.
+   * HadiyadPay is presented as one
+   * complete single-sided card.
    */
   const activeSideData =
     draft.front;
 
   const currentTextStyle =
-    activeSideData.textStyles[
-      activeTextLayer
-    ];
+    activeSideData
+      .textStyles[
+        activeTextLayer
+      ];
+
+  const productionProfile =
+    getCardProductionProfile(
+      card.id,
+    );
+
+  const safeZone =
+    productionProfile
+      ?.safeZone;
+
+  /*
+   * Physical-production templates keep personal
+   * content within the safe area.
+   *
+   * Cards without a production profile keep the
+   * existing unrestricted editor behaviour.
+   */
+  const clampToSafeZone =
+    useCallback(
+      (
+        x: number,
+        y: number,
+      ) => {
+        if (!safeZone) {
+          return {
+            x,
+            y,
+          };
+        }
+
+        return {
+          x:
+            Math.min(
+              100 -
+                safeZone.right,
+              Math.max(
+                safeZone.left,
+                x,
+              ),
+            ),
+
+          y:
+            Math.min(
+              100 -
+                safeZone.bottom,
+              Math.max(
+                safeZone.top,
+                y,
+              ),
+            ),
+        };
+      },
+      [
+        safeZone,
+      ],
+    );
 
   const commitAction = (
     action: EditorAction,
   ) => {
-    dispatch(action);
-    setHasUnsavedChanges(true);
+    dispatch(
+      action,
+    );
+
+    setHasUnsavedChanges(
+      true,
+    );
   };
 
   useEffect(() => {
-    /*
-     * Normalize drafts that were previously
-     * saved while viewing the inside or full
-     * two-sided preview.
-     */
-    if (draft.side !== 'front') {
+    if (
+      draft.side !==
+      'front'
+    ) {
       dispatch({
-        type: 'SET_SIDE',
-        side: 'front',
+        type:
+          'SET_SIDE',
+
+        side:
+          'front',
       });
 
       return;
@@ -387,7 +516,9 @@ export default function CardBuilder({
       dispatch({
         type:
           'SET_PREVIEW_MODE',
-        mode: 'clean',
+
+        mode:
+          'clean',
       });
     }
   }, [
@@ -397,16 +528,19 @@ export default function CardBuilder({
 
   useEffect(() => {
     const timer =
-      window.setTimeout(() => {
-        saveDraftToStorage(
-          card,
-          draft,
-        );
+      window.setTimeout(
+        () => {
+          saveDraftToStorage(
+            card,
+            draft,
+          );
 
-        setHasUnsavedChanges(
-          false,
-        );
-      }, 250);
+          setHasUnsavedChanges(
+            false,
+          );
+        },
+        250,
+      );
 
     return () =>
       window.clearTimeout(
@@ -428,8 +562,8 @@ export default function CardBuilder({
       ]
     ) {
       const source =
-        snapshot.front.photo
-          ?.src;
+        snapshot.front
+          .photo?.src;
 
       if (
         source?.startsWith(
@@ -444,7 +578,8 @@ export default function CardBuilder({
 
     for (
       const url of
-      ownedPhotoUrlsRef.current
+      ownedPhotoUrlsRef
+        .current
     ) {
       if (
         !referencedUrls.has(
@@ -453,8 +588,10 @@ export default function CardBuilder({
       ) {
         revokeOwnedPhotoUrl(
           url,
-          ownedPhotoUrlsRef.current,
-          photoFilesRef.current,
+          ownedPhotoUrlsRef
+            .current,
+          photoFilesRef
+            .current,
         );
       }
     }
@@ -467,10 +604,12 @@ export default function CardBuilder({
       true;
 
     const ownedPhotoUrls =
-      ownedPhotoUrlsRef.current;
+      ownedPhotoUrlsRef
+        .current;
 
     const photoFiles =
-      photoFilesRef.current;
+      photoFilesRef
+        .current;
 
     return () => {
       isMountedRef.current =
@@ -502,6 +641,7 @@ export default function CardBuilder({
           BeforeUnloadEvent,
       ) => {
         event.preventDefault();
+
         event.returnValue =
           '';
       };
@@ -524,7 +664,9 @@ export default function CardBuilder({
     const handleKeyDown = (
       event: KeyboardEvent,
     ) => {
-      if (isCheckoutOpen) {
+      if (
+        isCheckoutOpen
+      ) {
         return;
       }
 
@@ -546,7 +688,9 @@ export default function CardBuilder({
             ),
         );
 
-      if (isTypingTarget) {
+      if (
+        isTypingTarget
+      ) {
         return;
       }
 
@@ -555,7 +699,8 @@ export default function CardBuilder({
         event.metaKey;
 
       const key =
-        event.key.toLowerCase();
+        event.key
+          .toLowerCase();
 
       if (
         modifier &&
@@ -571,17 +716,20 @@ export default function CardBuilder({
           key === 'z'
         ) {
           dispatch({
-            type: 'REDO',
+            type:
+              'REDO',
           });
         } else if (
           key === 'y'
         ) {
           dispatch({
-            type: 'REDO',
+            type:
+              'REDO',
           });
         } else {
           dispatch({
-            type: 'UNDO',
+            type:
+              'UNDO',
           });
         }
 
@@ -593,13 +741,32 @@ export default function CardBuilder({
       }
 
       const direction = {
-        ArrowLeft: [-1, 0],
-        ArrowRight: [1, 0],
-        ArrowUp: [0, -1],
-        ArrowDown: [0, 1],
-      }[event.key];
+        ArrowLeft: [
+          -1,
+          0,
+        ],
 
-      if (!direction) {
+        ArrowRight: [
+          1,
+          0,
+        ],
+
+        ArrowUp: [
+          0,
+          -1,
+        ],
+
+        ArrowDown: [
+          0,
+          1,
+        ],
+      }[
+        event.key
+      ];
+
+      if (
+        !direction
+      ) {
         return;
       }
 
@@ -614,26 +781,29 @@ export default function CardBuilder({
         selectedLayer ===
           'photo' &&
         activeSideData.photo &&
-        !activeSideData.photo
+        !activeSideData
+          .photo
           .requiresReselection
       ) {
+        const nextPosition =
+          clampToSafeZone(
+            activeSideData
+              .photo.x +
+              direction[0] *
+                step,
+
+            activeSideData
+              .photo.y +
+              direction[1] *
+                step,
+          );
+
         commitAction({
           type:
             'ADJUST_PHOTO',
 
-          changes: {
-            x:
-              activeSideData
-                .photo.x +
-              direction[0] *
-                step,
-
-            y:
-              activeSideData
-                .photo.y +
-              direction[1] *
-                step,
-          },
+          changes:
+            nextPosition,
         });
 
         return;
@@ -645,6 +815,17 @@ export default function CardBuilder({
             activeTextLayer
           ];
 
+      const nextPosition =
+        clampToSafeZone(
+          position.x +
+            direction[0] *
+              step,
+
+          position.y +
+            direction[1] *
+              step,
+        );
+
       commitAction({
         type:
           'SET_TEXT_POSITION',
@@ -652,17 +833,8 @@ export default function CardBuilder({
         layer:
           activeTextLayer,
 
-        position: {
-          x:
-            position.x +
-            direction[0] *
-              step,
-
-          y:
-            position.y +
-            direction[1] *
-              step,
-        },
+        position:
+          nextPosition,
       });
     };
 
@@ -679,6 +851,7 @@ export default function CardBuilder({
   }, [
     activeSideData,
     activeTextLayer,
+    clampToSafeZone,
     isCheckoutOpen,
     selectedLayer,
   ]);
@@ -687,36 +860,58 @@ export default function CardBuilder({
     so: {
       title:
         'Shakhsiyeey Kaarkaaga',
+
       photo:
         'Sawir ikhtiyaari ah',
-      remove: 'Ka saar',
+
+      remove:
+        'Ka saar',
+
       close:
         'Xir tifaftiraha',
+
       personalize:
         'Bixi · €2.00',
+
       invalidImage:
         'Dooro sawir JPEG, PNG ama WebP oo aan ka weynayn 8 MB.',
+
       imageError:
         'Sawirka lama akhrin karin.',
-      undo: 'Dib u celin',
-      redo: 'Mara u samee',
+
+      undo:
+        'Dib u celin',
+
+      redo:
+        'Mara u samee',
+
       resetCard:
         'Dib u celi kaar dhan',
+
       resetSide:
         'Dib u celi kaarka',
+
       resetConfirm:
         'Ma hubtaa inaad dib u habeyneysid kaarka oo dhan?',
-      edit: 'Tifaftire',
+
+      edit:
+        'Tifaftire',
+
       clean:
         'Eegis nadiif',
+
       full:
         'Eegis buuxa',
+
       privacy:
         'Xogta shakhsi ahaaneed ma la abuuri doono link cusub.',
+
       zoom:
         'Cabbirka sawirka',
+
       resetTransform:
         'Dib u celi qaabeynta',
+
       reselectPhoto:
         'Sawirka hore waa in dib loo doorataa.',
     },
@@ -724,34 +919,58 @@ export default function CardBuilder({
     en: {
       title:
         'Personalize your card',
+
       photo:
         'Optional photo',
-      remove: 'Remove',
+
+      remove:
+        'Remove',
+
       close:
         'Close card editor',
+
       personalize:
         'Pay · €2.00',
+
       invalidImage:
         'Choose a JPEG, PNG, or WebP image no larger than 8 MB.',
+
       imageError:
         'The image could not be read.',
-      undo: 'Undo',
-      redo: 'Redo',
+
+      undo:
+        'Undo',
+
+      redo:
+        'Redo',
+
       resetCard:
         'Reset full card',
+
       resetSide:
         'Reset card',
+
       resetConfirm:
         'Are you sure you want to reset the full card?',
-      edit: 'Edit',
-      clean: 'Preview',
-      full: 'Full',
+
+      edit:
+        'Edit',
+
+      clean:
+        'Preview',
+
+      full:
+        'Full',
+
       privacy:
         'New personal-data share links are not generated.',
+
       zoom:
         'Photo zoom',
+
       resetTransform:
         'Reset transform',
+
       reselectPhoto:
         'The previous photo needs to be selected again.',
     },
@@ -759,48 +978,74 @@ export default function CardBuilder({
     nl: {
       title:
         'Personaliseer je kaart',
+
       photo:
         'Optionele foto',
+
       remove:
         'Verwijderen',
+
       close:
         'Kaarteditor sluiten',
+
       personalize:
         'Betalen · €2,00',
+
       invalidImage:
         'Kies een JPEG-, PNG- of WebP-afbeelding van maximaal 8 MB.',
+
       imageError:
         'De afbeelding kon niet worden gelezen.',
+
       undo:
         'Ongedaan maken',
-      redo: 'Opnieuw',
+
+      redo:
+        'Opnieuw',
+
       resetCard:
         'Kaart volledig resetten',
+
       resetSide:
         'Kaart resetten',
+
       resetConfirm:
         'Weet je zeker dat je de hele kaart wilt resetten?',
-      edit: 'Bewerken',
+
+      edit:
+        'Bewerken',
+
       clean:
         'Voorbeeld',
-      full: 'Volledig',
+
+      full:
+        'Volledig',
+
       privacy:
         'Nieuwe links met persoonlijke gegevens worden niet gemaakt.',
+
       zoom:
         'Fotozoom',
+
       resetTransform:
         'Foto resetten',
+
       reselectPhoto:
         'De vorige foto moet opnieuw worden geselecteerd.',
     },
-  }[currentLanguage];
+  }[
+    currentLanguage
+  ];
 
   const handleImageUpload = (
     event:
-      ChangeEvent<HTMLInputElement>,
+      ChangeEvent<
+        HTMLInputElement
+      >,
   ) => {
     const file =
-      event.target.files?.[0];
+      event.target
+        .files?.[0];
 
     if (!file) {
       return;
@@ -824,16 +1069,22 @@ export default function CardBuilder({
     }
 
     const nextUrl =
-      URL.createObjectURL(file);
+      URL.createObjectURL(
+        file,
+      );
 
-    ownedPhotoUrlsRef.current.add(
-      nextUrl,
-    );
+    ownedPhotoUrlsRef
+      .current
+      .add(
+        nextUrl,
+      );
 
-    photoFilesRef.current.set(
-      nextUrl,
-      file,
-    );
+    photoFilesRef
+      .current
+      .set(
+        nextUrl,
+        file,
+      );
 
     const savedTransform =
       activeSideData.photo ??
@@ -843,7 +1094,8 @@ export default function CardBuilder({
       getCardComposition(
         card,
         'front',
-      ).defaultPhotoPosition;
+      )
+        .defaultPhotoPosition;
 
     const previewImage =
       new window.Image();
@@ -852,8 +1104,10 @@ export default function CardBuilder({
       () => {
         revokeOwnedPhotoUrl(
           nextUrl,
-          ownedPhotoUrlsRef.current,
-          photoFilesRef.current,
+          ownedPhotoUrlsRef
+            .current,
+          photoFilesRef
+            .current,
         );
 
         window.alert(
@@ -868,16 +1122,28 @@ export default function CardBuilder({
         ) {
           revokeOwnedPhotoUrl(
             nextUrl,
-            ownedPhotoUrlsRef.current,
-            photoFilesRef.current,
+            ownedPhotoUrlsRef
+              .current,
+            photoFilesRef
+              .current,
           );
 
           return;
         }
 
+        const initialPosition =
+          clampToSafeZone(
+            savedTransform?.x ??
+              defaultPhotoPosition.x,
+
+            savedTransform?.y ??
+              defaultPhotoPosition.y,
+          );
+
         const photo:
           EditorPhotoLayer = {
-            src: nextUrl,
+            src:
+              nextUrl,
 
             width:
               previewImage
@@ -889,19 +1155,19 @@ export default function CardBuilder({
 
             scale:
               savedTransform
-                ?.scale ?? 1,
+                ?.scale ??
+              1,
 
             x:
-              savedTransform?.x ??
-              defaultPhotoPosition.x,
+              initialPosition.x,
 
             y:
-              savedTransform?.y ??
-              defaultPhotoPosition.y,
+              initialPosition.y,
 
             rotation:
               savedTransform
-                ?.rotation ?? 0,
+                ?.rotation ??
+              0,
 
             requiresReselection:
               false,
@@ -910,6 +1176,7 @@ export default function CardBuilder({
         commitAction({
           type:
             'UPLOAD_PHOTO',
+
           photo,
         });
       };
@@ -938,7 +1205,9 @@ export default function CardBuilder({
             scale,
           ),
           PHOTO_SCALE_MAX,
-        ).toFixed(2),
+        ).toFixed(
+          2,
+        ),
       );
 
     commitAction({
@@ -946,14 +1215,17 @@ export default function CardBuilder({
         'ADJUST_PHOTO',
 
       changes: {
-        scale: nextScale,
+        scale:
+          nextScale,
       },
     });
   };
 
   const handlePointerDown = (
     event:
-      PointerEvent<HTMLDivElement>,
+      PointerEvent<
+        HTMLDivElement
+      >,
   ) => {
     if (
       draft.previewMode !==
@@ -967,11 +1239,15 @@ export default function CardBuilder({
         HTMLElement;
 
     const layerElement =
-      target.closest<HTMLElement>(
+      target.closest<
+        HTMLElement
+      >(
         '[data-editor-layer]',
       );
 
-    if (!layerElement) {
+    if (
+      !layerElement
+    ) {
       return;
     }
 
@@ -979,7 +1255,10 @@ export default function CardBuilder({
       layerElement.dataset
         .editorLayer;
 
-    if (layer === 'photo') {
+    if (
+      layer ===
+      'photo'
+    ) {
       if (
         !activeSideData.photo ||
         activeSideData.photo
@@ -1018,20 +1297,26 @@ export default function CardBuilder({
           activeSideData
             .photo.y,
 
-        layer: 'photo',
+        layer:
+          'photo',
       });
 
       return;
     }
 
-    if (layer === 'text') {
+    if (
+      layer ===
+      'text'
+    ) {
       const textLayer =
         layerElement.dataset
           .textLayer as
           | EditorTextLayer
           | undefined;
 
-      if (!textLayer) {
+      if (
+        !textLayer
+      ) {
         return;
       }
 
@@ -1067,9 +1352,15 @@ export default function CardBuilder({
         startY:
           event.clientY,
 
-        originX: position.x,
-        originY: position.y,
-        layer: 'text',
+        originX:
+          position.x,
+
+        originY:
+          position.y,
+
+        layer:
+          'text',
+
         textLayer,
       });
     }
@@ -1077,7 +1368,9 @@ export default function CardBuilder({
 
   const handlePointerMove = (
     event:
-      PointerEvent<HTMLDivElement>,
+      PointerEvent<
+        HTMLDivElement
+      >,
   ) => {
     if (
       !dragStart ||
@@ -1092,8 +1385,10 @@ export default function CardBuilder({
         .getBoundingClientRect();
 
     if (
-      bounds.width === 0 ||
-      bounds.height === 0
+      bounds.width ===
+        0 ||
+      bounds.height ===
+        0
     ) {
       return;
     }
@@ -1120,6 +1415,12 @@ export default function CardBuilder({
       ) *
         100;
 
+    const safePosition =
+      clampToSafeZone(
+        x,
+        y,
+      );
+
     if (
       dragStart.layer ===
       'photo'
@@ -1131,10 +1432,8 @@ export default function CardBuilder({
         type:
           'ADJUST_PHOTO',
 
-        changes: {
-          x,
-          y,
-        },
+        changes:
+          safePosition,
 
         recordHistory:
           false,
@@ -1154,12 +1453,11 @@ export default function CardBuilder({
           'SET_TEXT_POSITION',
 
         layer:
-          dragStart.textLayer,
+          dragStart
+            .textLayer,
 
-        position: {
-          x,
-          y,
-        },
+        position:
+          safePosition,
 
         recordHistory:
           false,
@@ -1169,7 +1467,9 @@ export default function CardBuilder({
 
   const handlePointerUp = (
     event:
-      PointerEvent<HTMLDivElement>,
+      PointerEvent<
+        HTMLDivElement
+      >,
   ) => {
     if (
       dragStart?.pointerId !==
@@ -1190,7 +1490,9 @@ export default function CardBuilder({
     dragMovedRef.current =
       false;
 
-    setDragStart(null);
+    setDragStart(
+      null,
+    );
   };
 
   const handleRotate = (
@@ -1209,7 +1511,8 @@ export default function CardBuilder({
             activeSideData
               .photo.rotation ??
             0
-          ) + amount,
+          ) +
+            amount,
           -180,
         ),
         180,
@@ -1235,10 +1538,13 @@ export default function CardBuilder({
         return;
       }
 
-      checkoutSubmittingRef.current =
+      checkoutSubmittingRef
+        .current =
         true;
 
-      setCheckoutError(null);
+      setCheckoutError(
+        null,
+      );
 
       setIsCheckoutSubmitting(
         true,
@@ -1264,12 +1570,17 @@ export default function CardBuilder({
             serializeEditorDraft(
               {
                 ...draft,
-                side: 'front',
+
+                side:
+                  'front',
+
                 previewMode:
-                  draft.previewMode ===
+                  draft
+                    .previewMode ===
                   'full'
                     ? 'clean'
-                    : draft.previewMode,
+                    : draft
+                        .previewMode,
               },
             ),
           ),
@@ -1280,7 +1591,8 @@ export default function CardBuilder({
 
         if (photo) {
           if (
-            photo.requiresReselection ||
+            photo
+              .requiresReselection ||
             !photo.src
           ) {
             throw new Error(
@@ -1289,11 +1601,15 @@ export default function CardBuilder({
           }
 
           const sourceFile =
-            photoFilesRef.current.get(
-              photo.src,
-            );
+            photoFilesRef
+              .current
+              .get(
+                photo.src,
+              );
 
-          if (!sourceFile) {
+          if (
+            !sourceFile
+          ) {
             throw new Error(
               text.reselectPhoto,
             );
@@ -1311,8 +1627,11 @@ export default function CardBuilder({
           await fetch(
             '/api/orders',
             {
-              method: 'POST',
-              body: formData,
+              method:
+                'POST',
+
+              body:
+                formData,
             },
           );
 
@@ -1341,7 +1660,8 @@ export default function CardBuilder({
             result &&
             typeof result ===
               'object' &&
-            'error' in result &&
+            'error' in
+              result &&
             typeof result.error ===
               'string'
               ? result.error
@@ -1374,11 +1694,13 @@ export default function CardBuilder({
           checkoutUrl.toString(),
         );
       } catch (error) {
-        checkoutSubmittingRef.current =
+        checkoutSubmittingRef
+          .current =
           false;
 
         setCheckoutError(
-          error instanceof Error
+          error instanceof
+            Error
             ? error.message
             : 'Checkout could not be started. Please try again later.',
         );
@@ -1402,7 +1724,9 @@ export default function CardBuilder({
       commitAction({
         type:
           'RESET_CARD',
+
         card,
+
         currentLanguage,
       });
     };
@@ -1414,12 +1738,16 @@ export default function CardBuilder({
         'edit',
     ) => (
       <CardComposition
-        card={card}
+        card={
+          card
+        }
         language={
           currentLanguage
         }
         cardSide="front"
-        side={draft.front}
+        side={
+          draft.front
+        }
         interactive={
           showEditGuides &&
           draft.previewMode ===
@@ -1457,8 +1785,12 @@ export default function CardBuilder({
     <>
       <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm sm:items-center">
         <div
-          ref={dialogRef}
-          tabIndex={-1}
+          ref={
+            dialogRef
+          }
+          tabIndex={
+            -1
+          }
           role="dialog"
           aria-modal={
             !isCheckoutOpen
@@ -1471,7 +1803,9 @@ export default function CardBuilder({
         >
           <button
             type="button"
-            onClick={onClose}
+            onClick={
+              onClose
+            }
             disabled={
               isCheckoutSubmitting
             }
@@ -1484,7 +1818,9 @@ export default function CardBuilder({
           </button>
 
           <section
-            ref={previewRef}
+            ref={
+              previewRef
+            }
             aria-label={
               currentLanguage ===
               'nl'
@@ -1578,14 +1914,17 @@ export default function CardBuilder({
                   commitAction({
                     type:
                       'SET_PREVIEW_MODE',
+
                     mode,
                   })
                 }
                 labels={{
                   edit:
                     text.edit,
+
                   clean:
                     text.clean,
+
                   full:
                     text.full,
                 }}
@@ -1623,8 +1962,10 @@ export default function CardBuilder({
                   commitAction({
                     type:
                       'SET_FIELD',
+
                     field:
                       activeTextLayer,
+
                     value,
                   })
                 }
@@ -1634,8 +1975,10 @@ export default function CardBuilder({
                   commitAction({
                     type:
                       'SET_TEXT_STYLE',
+
                     layer:
                       activeTextLayer,
+
                     style: {
                       color,
                     },
@@ -1647,8 +1990,10 @@ export default function CardBuilder({
                   commitAction({
                     type:
                       'SET_TEXT_STYLE',
+
                     layer:
                       activeTextLayer,
+
                     style: {
                       align,
                     },
@@ -1660,8 +2005,10 @@ export default function CardBuilder({
                   commitAction({
                     type:
                       'SET_TEXT_STYLE',
+
                     layer:
                       activeTextLayer,
+
                     style: {
                       size,
                     },
@@ -1673,10 +2020,13 @@ export default function CardBuilder({
                   commitAction({
                     type:
                       'SET_TEXT_FORMAT',
+
                     layer:
                       activeTextLayer,
+
                     field:
                       'family',
+
                     value:
                       family,
                   })
@@ -1687,9 +2037,12 @@ export default function CardBuilder({
                   commitAction({
                     type:
                       'SET_TEXT_FORMAT',
+
                     layer:
                       activeTextLayer,
+
                     field,
+
                     value:
                       !currentTextStyle[
                         field
@@ -1700,6 +2053,7 @@ export default function CardBuilder({
                   commitAction({
                     type:
                       'RESET_TEXT_STYLE',
+
                     layer:
                       activeTextLayer,
                   })
@@ -1734,7 +2088,8 @@ export default function CardBuilder({
                 }
                 scale={
                   activeSideData
-                    .photo?.scale ??
+                    .photo
+                    ?.scale ??
                   1
                 }
                 rotation={
@@ -1749,11 +2104,21 @@ export default function CardBuilder({
                       'RESET_PHOTO_TRANSFORM',
 
                     position:
-                      getCardComposition(
-                        card,
-                        'front',
-                      )
-                        .defaultPhotoPosition,
+                      clampToSafeZone(
+                        getCardComposition(
+                          card,
+                          'front',
+                        )
+                          .defaultPhotoPosition
+                          .x,
+
+                        getCardComposition(
+                          card,
+                          'front',
+                        )
+                          .defaultPhotoPosition
+                          .y,
+                      ),
                   })
                 }
                 labels={{
@@ -1800,22 +2165,28 @@ export default function CardBuilder({
                 editorState
                   .historyIndex <
                 editorState
-                  .history.length -
+                  .history
+                  .length -
                   1
               }
               onUndo={() =>
                 dispatch({
-                  type: 'UNDO',
+                  type:
+                    'UNDO',
                 })
               }
               onRedo={() =>
                 dispatch({
-                  type: 'REDO',
+                  type:
+                    'REDO',
                 })
               }
               labels={{
-                undo: text.undo,
-                redo: text.redo,
+                undo:
+                  text.undo,
+
+                redo:
+                  text.redo,
               }}
             />
 
@@ -1824,7 +2195,9 @@ export default function CardBuilder({
                 commitAction({
                   type:
                     'RESET_ACTIVE_SIDE',
+
                   card,
+
                   currentLanguage,
                 })
               }
@@ -1834,6 +2207,7 @@ export default function CardBuilder({
               labels={{
                 activeSide:
                   text.resetSide,
+
                 card:
                   text.resetCard,
               }}
@@ -1888,14 +2262,20 @@ export default function CardBuilder({
         }
         draft={{
           ...draft,
-          side: 'front',
+
+          side:
+            'front',
+
           previewMode:
             draft.previewMode ===
             'full'
               ? 'clean'
-              : draft.previewMode,
+              : draft
+                  .previewMode,
         }}
-        cardPrice={2}
+        cardPrice={
+          2
+        }
         initialLanguage={
           currentLanguage
         }

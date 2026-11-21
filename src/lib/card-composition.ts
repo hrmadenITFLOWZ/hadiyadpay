@@ -9,6 +9,10 @@ import type {
   EditorTextLayer,
 } from './card-editor';
 
+import {
+  getCardProductionProfile,
+} from './card-production';
+
 export type CardSide =
   | 'front'
   | 'inside';
@@ -18,22 +22,33 @@ export interface CardCompositionLayout {
   showBrand: boolean;
   protectsBirthdayArtwork: boolean;
   defaultTextColor: string;
+
   textHeights: Record<
     EditorTextLayer,
     number
   >;
+
   defaultTextPositions: Record<
     EditorTextLayer,
     EditorPosition
   >;
-  defaultPhotoPosition: EditorPosition;
+
+  defaultPhotoPosition:
+    EditorPosition;
 }
 
 export const cardInsideColors = {
-  background: '#fffaf0',
-  border: '#d8bd8d',
-  ornament: '#b47855',
-  text: '#31483e',
+  background:
+    '#fffaf0',
+
+  border:
+    '#d8bd8d',
+
+  ornament:
+    '#b47855',
+
+  text:
+    '#31483e',
 } as const;
 
 const standardTextHeights: Record<
@@ -71,10 +86,12 @@ const standardFrontPositions: Record<
     x: 50,
     y: 14,
   },
+
   message: {
     x: 50,
     y: 70,
   },
+
   sender: {
     x: 50,
     y: 92,
@@ -89,10 +106,12 @@ const birthdayFrontPositions: Record<
     x: 50,
     y: 65,
   },
+
   message: {
     x: 50,
     y: 80,
   },
+
   sender: {
     x: 50,
     y: 96,
@@ -107,10 +126,12 @@ const insidePositions: Record<
     x: 50,
     y: 20,
   },
+
   message: {
     x: 50,
     y: 53,
   },
+
   sender: {
     x: 50,
     y: 84,
@@ -125,11 +146,17 @@ export function getCardComposition(
     card.id === 'dhalasho' &&
     side === 'front';
 
+  const productionProfile =
+    getCardProductionProfile(
+      card.id,
+    );
+
   return {
     showArtwork:
       side === 'front',
 
-    showBrand: false,
+    showBrand:
+      false,
 
     protectsBirthdayArtwork:
       isBirthdayFront,
@@ -156,15 +183,20 @@ export function getCardComposition(
           : standardFrontPositions,
 
     defaultPhotoPosition:
-      isBirthdayFront
-        ? {
-            x: 89,
-            y: 31,
-          }
-        : {
-            x: 84,
-            y: 80,
-          },
+      side === 'front' &&
+      productionProfile
+        ? productionProfile
+            .photo
+            .defaultPosition
+        : isBirthdayFront
+          ? {
+              x: 89,
+              y: 31,
+            }
+          : {
+              x: 84,
+              y: 80,
+            },
   };
 }
 
@@ -195,11 +227,26 @@ function escapeXml(
   value: string,
 ): string {
   return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
+    .replace(
+      /&/g,
+      '&amp;',
+    )
+    .replace(
+      /</g,
+      '&lt;',
+    )
+    .replace(
+      />/g,
+      '&gt;',
+    )
+    .replace(
+      /"/g,
+      '&quot;',
+    )
+    .replace(
+      /'/g,
+      '&apos;',
+    );
 }
 
 function getSvgFontFamily(
@@ -209,7 +256,8 @@ function getSvgFontFamily(
     family in fontFamilies
   ) {
     return fontFamilies[
-      family as keyof typeof fontFamilies
+      family as keyof
+        typeof fontFamilies
     ];
   }
 
@@ -220,6 +268,7 @@ function renderTextLayer(
   side: EditorSideState,
   layer: EditorTextLayer,
   layout: CardCompositionLayout,
+  canvasWidth: number,
 ): string {
   const value =
     side[layer].trim();
@@ -250,15 +299,29 @@ function renderTextLayer(
         ? Math.max(
             8,
             Math.min(
-              (style.size * 12) / 5.5,
-              1200 * 0.052,
+              (
+                style.size *
+                canvasWidth
+              ) /
+                550,
+              canvasWidth *
+                0.052,
             ),
           )
         : Math.min(
-            (style.size * 12) / 5,
-            1200 * 0.065,
+            (
+              style.size *
+              canvasWidth
+            ) /
+              500,
+            canvasWidth *
+              0.065,
           )
-      : style.size * 3;
+      : (
+          style.size *
+          canvasWidth
+        ) /
+        400;
 
   const lineHeight =
     layout.protectsBirthdayArtwork
@@ -268,13 +331,15 @@ function renderTextLayer(
   const justifyContent =
     style.align === 'left'
       ? 'flex-start'
-      : style.align === 'right'
+      : style.align ===
+          'right'
         ? 'flex-end'
         : 'center';
 
   const textShadow =
     layout.showArtwork &&
-    !layout.protectsBirthdayArtwork
+    !layout
+      .protectsBirthdayArtwork
       ? '0 2px 8px #000, 0 1px 2px #000'
       : 'none';
 
@@ -284,57 +349,99 @@ function renderTextLayer(
     );
 
   const safeFontFamily =
-    escapeXml(fontFamily);
+    escapeXml(
+      fontFamily,
+    );
 
   const safeColor =
-    escapeXml(style.color);
+    escapeXml(
+      style.color,
+    );
 
   const safeAlignment =
-    style.align === 'center' ||
-    style.align === 'right'
+    style.align ===
+      'center' ||
+    style.align ===
+      'right'
       ? style.align
       : 'left';
 
   return [
     '<foreignObject',
+
     ` x="${x}%"`,
     ` y="${y}%"`,
+
     ' width="86%"',
+
     ` height="${height}%"`,
+
     '>',
 
     '<div',
+
     ' xmlns="http://www.w3.org/1999/xhtml"',
+
     ' style="',
+
     'box-sizing:border-box;',
     'width:100%;',
     'height:100%;',
     'display:flex;',
     'align-items:center;',
+
     `justify-content:${justifyContent};`,
+
     'overflow:hidden;',
     'padding:0 2%;',
     'border:none;',
     'outline:none;',
     'background:transparent;',
     'box-shadow:none;',
+
     `color:${safeColor};`,
+
     `font-family:${safeFontFamily};`,
+
     `font-size:${fontSize}px;`,
-    `font-weight:${style.bold ? 700 : 400};`,
-    `font-style:${style.italic ? 'italic' : 'normal'};`,
-    `text-decoration:${style.underline ? 'underline' : 'none'};`,
+
+    `font-weight:${
+      style.bold
+        ? 700
+        : 400
+    };`,
+
+    `font-style:${
+      style.italic
+        ? 'italic'
+        : 'normal'
+    };`,
+
+    `text-decoration:${
+      style.underline
+        ? 'underline'
+        : 'none'
+    };`,
+
     `text-align:${safeAlignment};`,
+
     `line-height:${lineHeight};`,
+
     'white-space:pre-wrap;',
     'overflow-wrap:anywhere;',
+
     `text-shadow:${textShadow};`,
+
     '"',
+
     '>',
 
-    escapeXml(value),
+    escapeXml(
+      value,
+    ),
 
     '</div>',
+
     '</foreignObject>',
   ].join('');
 }
@@ -347,12 +454,32 @@ export function renderCardSvg(
   artworkDataUrl: string,
   photoDataUrl?: string,
 ): string {
-  const width = 1200;
+  const productionProfile =
+    getCardProductionProfile(
+      card.id,
+    );
+
+  /*
+   * Cards with a production profile use their
+   * supplier-independent digital canvas.
+   *
+   * Existing cards without a production profile
+   * keep their historical dimensions unchanged.
+   */
+  const width =
+    productionProfile
+      ?.digital.width ??
+    1200;
 
   const height =
-    card.orientation === 'portrait'
-      ? 1464
-      : 968;
+    productionProfile
+      ?.digital.height ??
+    (
+      card.orientation ===
+      'portrait'
+        ? 1464
+        : 968
+    );
 
   const layout =
     getCardComposition(
@@ -363,39 +490,71 @@ export function renderCardSvg(
   const photo =
     side.photo;
 
+  /*
+   * Keep the current 22% photo sizing for now so
+   * existing editor behaviour remains unchanged.
+   *
+   * Production-profile photo sizing will be wired
+   * in only after the digital preview and SVG export
+   * have been verified to match.
+   */
+  const photoWidthPercent =
+    22;
+
   const photoSize =
     width *
-    0.22 *
-    (photo?.scale ?? 1);
+    (
+      photoWidthPercent /
+      100
+    ) *
+    (
+      photo?.scale ??
+      1
+    );
 
   const photoCenterX =
     (
-      (photo?.x ?? 50) /
+      (
+        photo?.x ??
+        50
+      ) /
       100
     ) *
     width;
 
   const photoCenterY =
     (
-      (photo?.y ?? 50) /
+      (
+        photo?.y ??
+        50
+      ) /
       100
     ) *
     height;
 
   const photoRadius =
-    width * 0.11;
+    width *
+    (
+      photoWidthPercent /
+      200
+    );
 
   const photoMarkup =
-    photo && photoDataUrl
+    photo &&
+    photoDataUrl
       ? [
           '<defs>',
 
           '<clipPath id="photo-clip">',
 
           '<circle',
+
           ` cx="${photoCenterX}"`,
+
           ` cy="${photoCenterY}"`,
+
           ` r="${photoRadius}"`,
+
           '/>',
 
           '</clipPath>',
@@ -403,22 +562,48 @@ export function renderCardSvg(
           '</defs>',
 
           '<circle',
+
           ` cx="${photoCenterX}"`,
+
           ` cy="${photoCenterY}"`,
+
           ` r="${photoRadius}"`,
+
           ' fill="#fffefa"',
+
           ' opacity=".96"',
+
           '/>',
 
           '<image',
-          ` href="${escapeXml(photoDataUrl)}"`,
-          ` x="${photoCenterX - photoSize / 2}"`,
-          ` y="${photoCenterY - photoSize / 2}"`,
+
+          ` href="${escapeXml(
+            photoDataUrl,
+          )}"`,
+
+          ` x="${
+            photoCenterX -
+            photoSize / 2
+          }"`,
+
+          ` y="${
+            photoCenterY -
+            photoSize / 2
+          }"`,
+
           ` width="${photoSize}"`,
+
           ` height="${photoSize}"`,
+
           ' preserveAspectRatio="xMidYMid slice"',
-          ` transform="rotate(${photo.rotation ?? 0} ${photoCenterX} ${photoCenterY})"`,
+
+          ` transform="rotate(${
+            photo.rotation ??
+            0
+          } ${photoCenterX} ${photoCenterY})"`,
+
           ' clip-path="url(#photo-clip)"',
+
           '/>',
         ].join('')
       : '';
@@ -429,63 +614,117 @@ export function renderCardSvg(
         'local-image'
         ? [
             '<image',
-            ` href="${escapeXml(artworkDataUrl)}"`,
+
+            ` href="${escapeXml(
+              artworkDataUrl,
+            )}"`,
+
             ' x="0"',
             ' y="0"',
+
             ` width="${width}"`,
+
             ` height="${height}"`,
+
             ' preserveAspectRatio="xMidYMid slice"',
+
             '/>',
           ].join('')
         : [
             '<rect',
+
             ` width="${width}"`,
+
             ` height="${height}"`,
-            ` fill="${escapeXml(card.artwork.background)}"`,
+
+            ` fill="${escapeXml(
+              card.artwork
+                .background,
+            )}"`,
+
             '/>',
           ].join('')
       : [
           '<rect',
+
           ` width="${width}"`,
+
           ` height="${height}"`,
+
           ` fill="${cardInsideColors.background}"`,
+
           '/>',
 
           '<rect',
+
           ' x="28"',
           ' y="28"',
-          ` width="${width - 56}"`,
-          ` height="${height - 56}"`,
+
+          ` width="${
+            width - 56
+          }"`,
+
+          ` height="${
+            height - 56
+          }"`,
+
           ' rx="28"',
           ' fill="none"',
+
           ` stroke="${cardInsideColors.border}"`,
+
           ' stroke-width="4"',
+
           '/>',
 
           '<path',
-          ` d="M92 150h270m476 0h270M92 ${height - 150}h270m476 0h270"`,
+
+          ` d="M92 150h270m476 0h270M92 ${
+            height - 150
+          }h270m476 0h270"`,
+
           ` stroke="${cardInsideColors.border}"`,
+
           ' stroke-width="3"',
+
           '/>',
 
           '<circle',
-          ' cx="600"',
+
+          ` cx="${
+            width / 2
+          }"`,
+
           ' cy="150"',
+
           ' r="13"',
+
           ` fill="${cardInsideColors.ornament}"`,
+
           '/>',
 
           '<circle',
-          ' cx="600"',
-          ` cy="${height - 150}"`,
+
+          ` cx="${
+            width / 2
+          }"`,
+
+          ` cy="${
+            height - 150
+          }"`,
+
           ' r="13"',
+
           ` fill="${cardInsideColors.ornament}"`,
+
           '/>',
         ].join('');
 
   const title =
     escapeXml(
-      card.title[language],
+      card.title[
+        language
+      ],
     );
 
   const recipient =
@@ -493,6 +732,7 @@ export function renderCardSvg(
       side,
       'recipient',
       layout,
+      width,
     );
 
   const message =
@@ -500,6 +740,7 @@ export function renderCardSvg(
       side,
       'message',
       layout,
+      width,
     );
 
   const sender =
@@ -507,29 +748,44 @@ export function renderCardSvg(
       side,
       'sender',
       layout,
+      width,
     );
 
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
 
     '<svg',
+
     ' xmlns="http://www.w3.org/2000/svg"',
+
     ' xmlns:xhtml="http://www.w3.org/1999/xhtml"',
+
     ` width="${width}"`,
+
     ` height="${height}"`,
+
     ` viewBox="0 0 ${width} ${height}"`,
+
     ' role="img"',
+
     ' aria-labelledby="card-title"',
+
     '>',
 
     '<title id="card-title">',
+
     title,
+
     '</title>',
 
     artwork,
+
     photoMarkup,
+
     recipient,
+
     message,
+
     sender,
 
     '</svg>',
