@@ -85,13 +85,13 @@ const insideTextHeights: Record<
   number
 > = {
   recipient:
-    10,
+    13,
 
   message:
-    30,
+    42,
 
   sender:
-    9,
+    13,
 };
 
 const standardFrontPositions: Record<
@@ -161,7 +161,7 @@ const insidePositions: Record<
       50,
 
     y:
-      20,
+      19,
   },
 
   message: {
@@ -169,7 +169,7 @@ const insidePositions: Record<
       50,
 
     y:
-      53,
+      51,
   },
 
   sender: {
@@ -177,7 +177,7 @@ const insidePositions: Record<
       50,
 
     y:
-      84,
+      83,
   },
 };
 
@@ -313,6 +313,20 @@ function escapeXml(
     );
 }
 
+function clamp(
+  value: number,
+  minimum: number,
+  maximum: number,
+): number {
+  return Math.min(
+    maximum,
+    Math.max(
+      minimum,
+      value,
+    ),
+  );
+}
+
 function getSvgFontFamily(
   family: string,
 ): string {
@@ -329,11 +343,192 @@ function getSvgFontFamily(
   return fontFamilies.nunito;
 }
 
+function getTextLengthScale(
+  value: string,
+  layer: EditorTextLayer,
+): number {
+  const normalizedLength =
+    value
+      .replace(
+        /\s+/g,
+        ' ',
+      )
+      .trim()
+      .length;
+
+  if (
+    layer ===
+      'message'
+  ) {
+    if (
+      normalizedLength >
+      220
+    ) {
+      return 0.58;
+    }
+
+    if (
+      normalizedLength >
+      160
+    ) {
+      return 0.66;
+    }
+
+    if (
+      normalizedLength >
+      110
+    ) {
+      return 0.74;
+    }
+
+    if (
+      normalizedLength >
+      70
+    ) {
+      return 0.84;
+    }
+
+    return 1;
+  }
+
+  if (
+    normalizedLength >
+    38
+  ) {
+    return 0.58;
+  }
+
+  if (
+    normalizedLength >
+    30
+  ) {
+    return 0.68;
+  }
+
+  if (
+    normalizedLength >
+    22
+  ) {
+    return 0.78;
+  }
+
+  if (
+    normalizedLength >
+    16
+  ) {
+    return 0.88;
+  }
+
+  return 1;
+}
+
+function getSafeTextPosition(
+  position: EditorPosition,
+  layer: EditorTextLayer,
+  cardSide: CardSide,
+): EditorPosition {
+  if (
+    cardSide !==
+    'inside'
+  ) {
+    return position;
+  }
+
+  const safeYRange: Record<
+    EditorTextLayer,
+    {
+      minimum: number;
+      maximum: number;
+    }
+  > = {
+    recipient: {
+      minimum:
+        12,
+
+      maximum:
+        27,
+    },
+
+    message: {
+      minimum:
+        35,
+
+      maximum:
+        65,
+    },
+
+    sender: {
+      minimum:
+        75,
+
+      maximum:
+        88,
+    },
+  };
+
+  return {
+    x:
+      clamp(
+        position.x,
+        46,
+        54,
+      ),
+
+    y:
+      clamp(
+        position.y,
+        safeYRange[
+          layer
+        ].minimum,
+        safeYRange[
+          layer
+        ].maximum,
+      ),
+  };
+}
+
+function getSafeInsideFontSize(
+  value: string,
+  layer: EditorTextLayer,
+  requestedFontSize: number,
+  canvasWidth: number,
+): number {
+  const lengthScale =
+    getTextLengthScale(
+      value,
+      layer,
+    );
+
+  const maximumFontSize =
+    layer ===
+      'message'
+      ? canvasWidth *
+        0.056
+      : canvasWidth *
+        0.052;
+
+  const minimumFontSize =
+    layer ===
+      'message'
+      ? canvasWidth *
+        0.024
+      : canvasWidth *
+        0.026;
+
+  return clamp(
+    requestedFontSize *
+      lengthScale,
+    minimumFontSize,
+    maximumFontSize,
+  );
+}
+
 function renderTextLayer(
   side: EditorSideState,
   layer: EditorTextLayer,
   layout: CardCompositionLayout,
   canvasWidth: number,
+  cardSide: CardSide,
 ): string {
   const value =
     side[layer].trim();
@@ -342,10 +537,20 @@ function renderTextLayer(
     return '';
   }
 
-  const position =
+  const storedPosition =
     side.textPositions[
       layer
+    ] ??
+    layout.defaultTextPositions[
+      layer
     ];
+
+  const position =
+    getSafeTextPosition(
+      storedPosition,
+      layer,
+      cardSide,
+    );
 
   const style =
     side.textStyles[
@@ -358,14 +563,22 @@ function renderTextLayer(
     ];
 
   const x =
-    position.x -
-    43;
+    cardSide ===
+      'inside'
+      ? 8
+      : position.x -
+        43;
 
   const y =
-    position.y -
-    height / 2;
+    clamp(
+      position.y -
+        height / 2,
+      4,
+      96 -
+        height,
+    );
 
-  const fontSize =
+  const requestedFontSize =
     layout.protectsBirthdayArtwork
       ? layer ===
           'message'
@@ -398,10 +611,27 @@ function renderTextLayer(
         ) /
         400;
 
+  const fontSize =
+    cardSide ===
+      'inside'
+      ? getSafeInsideFontSize(
+          value,
+          layer,
+          requestedFontSize,
+          canvasWidth,
+        )
+      : requestedFontSize;
+
   const lineHeight =
-    layout.protectsBirthdayArtwork
-      ? 1.08
-      : 1.18;
+    cardSide ===
+      'inside'
+      ? layer ===
+          'message'
+        ? 1.22
+        : 1.12
+      : layout.protectsBirthdayArtwork
+        ? 1.08
+        : 1.18;
 
   const justifyContent =
     style.align ===
@@ -441,6 +671,21 @@ function renderTextLayer(
       ? style.align
       : 'left';
 
+  const width =
+    cardSide ===
+      'inside'
+      ? 84
+      : 86;
+
+  const horizontalPadding =
+    cardSide ===
+      'inside'
+      ? layer ===
+          'message'
+        ? 4
+        : 3
+      : 2;
+
   return [
     '<foreignObject',
 
@@ -448,7 +693,7 @@ function renderTextLayer(
 
     ` y="${y}%"`,
 
-    ' width="86%"',
+    ` width="${width}%"`,
 
     ` height="${height}%"`,
 
@@ -469,7 +714,9 @@ function renderTextLayer(
     `justify-content:${justifyContent};`,
 
     'overflow:hidden;',
-    'padding:0 2%;',
+
+    `padding:0 ${horizontalPadding}%;`,
+
     'border:none;',
     'outline:none;',
     'background:transparent;',
@@ -505,6 +752,7 @@ function renderTextLayer(
 
     'white-space:pre-wrap;',
     'overflow-wrap:anywhere;',
+    'word-break:break-word;',
 
     `text-shadow:${textShadow};`,
 
@@ -522,20 +770,22 @@ function renderTextLayer(
   ].join('');
 }
 
-function renderPhotoLayer(
+function getPhotoFrameDimensions(
   side: EditorSideState,
   canvasWidth: number,
   canvasHeight: number,
-  photoDataUrl?: string,
-): string {
+): {
+  frameX: number;
+  frameY: number;
+  frameWidth: number;
+  frameHeight: number;
+  clipRadius: number;
+} | null {
   const photo =
     side.photo;
 
-  if (
-    !photo ||
-    !photoDataUrl
-  ) {
-    return '';
+  if (!photo) {
+    return null;
   }
 
   const framePercent =
@@ -544,18 +794,38 @@ function renderPhotoLayer(
     ] ??
     PHOTO_FRAME_SIZES.large;
 
-  const frameWidth =
+  const availableWidth =
+    canvasWidth *
+    0.88;
+
+  const availableHeight =
+    canvasHeight *
+    0.88;
+
+  const requestedWidth =
     canvasWidth *
     (
       framePercent /
       100
     );
 
-  const frameHeight =
+  const requestedHeight =
     canvasHeight *
     (
       framePercent /
       100
+    );
+
+  const frameWidth =
+    Math.min(
+      requestedWidth,
+      availableWidth,
+    );
+
+  const frameHeight =
+    Math.min(
+      requestedHeight,
+      availableHeight,
     );
 
   const frameX =
@@ -572,6 +842,63 @@ function renderPhotoLayer(
     ) /
     2;
 
+  const clipRadius =
+    Math.max(
+      18,
+      Math.min(
+        frameWidth,
+        frameHeight,
+      ) *
+        0.035,
+    );
+
+  return {
+    frameX,
+    frameY,
+    frameWidth,
+    frameHeight,
+    clipRadius,
+  };
+}
+
+function renderPhotoLayer(
+  side: EditorSideState,
+  canvasWidth: number,
+  canvasHeight: number,
+  photoDataUrl?: string,
+  clipPathId =
+    'photo-frame-clip',
+): string {
+  const photo =
+    side.photo;
+
+  if (
+    !photo ||
+    !photoDataUrl
+  ) {
+    return '';
+  }
+
+  const dimensions =
+    getPhotoFrameDimensions(
+      side,
+      canvasWidth,
+      canvasHeight,
+    );
+
+  if (!dimensions) {
+    return '';
+  }
+
+  const {
+    frameX,
+    frameY,
+    frameWidth,
+    frameHeight,
+    clipRadius,
+  } =
+    dimensions;
+
   const zoom =
     Math.max(
       1,
@@ -587,22 +914,18 @@ function renderPhotoLayer(
     zoom;
 
   const focusX =
-    Math.min(
+    clamp(
+      photo.x,
+      0,
       100,
-      Math.max(
-        0,
-        photo.x,
-      ),
     ) /
     100;
 
   const focusY =
-    Math.min(
+    clamp(
+      photo.y,
+      0,
       100,
-      Math.max(
-        0,
-        photo.y,
-      ),
     ) /
     100;
 
@@ -610,14 +933,14 @@ function renderPhotoLayer(
     Math.max(
       0,
       scaledWidth -
-      frameWidth,
+        frameWidth,
     );
 
   const overflowY =
     Math.max(
       0,
       scaledHeight -
-      frameHeight,
+        frameHeight,
     );
 
   const imageX =
@@ -638,20 +961,10 @@ function renderPhotoLayer(
     frameY +
     frameHeight / 2;
 
-  const clipRadius =
-    Math.max(
-      18,
-      Math.min(
-        frameWidth,
-        frameHeight,
-      ) *
-        0.035,
-    );
-
   return [
     '<defs>',
 
-    '<clipPath id="photo-frame-clip">',
+    `<clipPath id="${clipPathId}">`,
 
     '<rect',
 
@@ -716,7 +1029,7 @@ function renderPhotoLayer(
       0
     } ${centerX} ${centerY})"`,
 
-    ' clip-path="url(#photo-frame-clip)"',
+    ` clip-path="url(#${clipPathId})"`,
 
     '/>',
 
@@ -738,7 +1051,7 @@ function renderPhotoLayer(
 
     ' stroke="#ffffff"',
 
-    ' stroke-opacity=".7"',
+    ' stroke-opacity=".78"',
 
     ' stroke-width="5"',
 
@@ -746,14 +1059,248 @@ function renderPhotoLayer(
   ].join('');
 }
 
-export function renderCardSvg(
-  card: CardOption,
-  language: CardLanguage,
-  cardSide: CardSide,
-  side: EditorSideState,
-  artworkDataUrl: string,
-  photoDataUrl?: string,
+function renderInsideBackground(
+  width: number,
+  height: number,
 ): string {
+  return [
+    '<rect',
+
+    ` width="${width}"`,
+
+    ` height="${height}"`,
+
+    ` fill="${cardInsideColors.background}"`,
+
+    '/>',
+
+    '<rect',
+
+    ' x="28"',
+
+    ' y="28"',
+
+    ` width="${
+      width -
+      56
+    }"`,
+
+    ` height="${
+      height -
+      56
+    }"`,
+
+    ' rx="28"',
+
+    ' fill="none"',
+
+    ` stroke="${cardInsideColors.border}"`,
+
+    ' stroke-width="4"',
+
+    '/>',
+
+    '<path',
+
+    ` d="M92 150h270m476 0h270M92 ${
+      height -
+      150
+    }h270m476 0h270"`,
+
+    ` stroke="${cardInsideColors.border}"`,
+
+    ' stroke-width="3"',
+
+    '/>',
+
+    '<circle',
+
+    ` cx="${
+      width /
+      2
+    }"`,
+
+    ' cy="150"',
+
+    ' r="13"',
+
+    ` fill="${cardInsideColors.ornament}"`,
+
+    '/>',
+
+    '<circle',
+
+    ` cx="${
+      width /
+      2
+    }"`,
+
+    ` cy="${
+      height -
+      150
+    }"`,
+
+    ' r="13"',
+
+    ` fill="${cardInsideColors.ornament}"`,
+
+    '/>',
+  ].join('');
+}
+
+function renderInsidePhotoFallback(
+  width: number,
+  height: number,
+): string {
+  const centerX =
+    width /
+    2;
+
+  const centerY =
+    height /
+    2;
+
+  const markRadius =
+    Math.min(
+      width,
+      height,
+    ) *
+    0.09;
+
+  return [
+    '<defs>',
+
+    '<pattern',
+
+    ' id="inside-photo-pattern"',
+
+    ' width="96"',
+
+    ' height="96"',
+
+    ' patternUnits="userSpaceOnUse"',
+
+    ' patternTransform="rotate(30)"',
+
+    '>',
+
+    '<path',
+
+    ' d="M0 48h96M48 0v96"',
+
+    ` stroke="${cardInsideColors.border}"`,
+
+    ' stroke-opacity=".16"',
+
+    ' stroke-width="3"',
+
+    '/>',
+
+    '</pattern>',
+
+    '</defs>',
+
+    '<rect',
+
+    ` width="${width}"`,
+
+    ` height="${height}"`,
+
+    ` fill="${cardInsideColors.background}"`,
+
+    '/>',
+
+    '<rect',
+
+    ` width="${width}"`,
+
+    ` height="${height}"`,
+
+    ' fill="url(#inside-photo-pattern)"',
+
+    '/>',
+
+    '<rect',
+
+    ' x="28"',
+
+    ' y="28"',
+
+    ` width="${
+      width -
+      56
+    }"`,
+
+    ` height="${
+      height -
+      56
+    }"`,
+
+    ' rx="28"',
+
+    ' fill="none"',
+
+    ` stroke="${cardInsideColors.border}"`,
+
+    ' stroke-width="4"',
+
+    '/>',
+
+    '<circle',
+
+    ` cx="${centerX}"`,
+
+    ` cy="${centerY}"`,
+
+    ` r="${markRadius}"`,
+
+    ' fill="#fffdf7"',
+
+    ' fill-opacity=".86"',
+
+    ` stroke="${cardInsideColors.border}"`,
+
+    ' stroke-width="3"',
+
+    '/>',
+
+    '<text',
+
+    ` x="${centerX}"`,
+
+    ` y="${
+      centerY +
+      markRadius *
+        0.3
+    }"`,
+
+    ' text-anchor="middle"',
+
+    ` fill="${cardInsideColors.text}"`,
+
+    ' font-family="Georgia, Times New Roman, serif"',
+
+    ` font-size="${
+      markRadius *
+      0.9
+    }"`,
+
+    ' font-weight="700"',
+
+    '>',
+
+    'H',
+
+    '</text>',
+  ].join('');
+}
+
+function getCanvasDimensions(
+  card: CardOption,
+): {
+  width: number;
+  height: number;
+} {
   const productionProfile =
     getCardProductionProfile(
       card.id,
@@ -774,18 +1321,113 @@ export function renderCardSvg(
         : 968
     );
 
+  return {
+    width,
+    height,
+  };
+}
+
+export function renderInsidePhotoSvg(
+  card: CardOption,
+  language: CardLanguage,
+  side: EditorSideState,
+  photoDataUrl?: string,
+): string {
+  const {
+    width,
+    height,
+  } =
+    getCanvasDimensions(
+      card,
+    );
+
+  const title =
+    escapeXml(
+      card.title[
+        language
+      ],
+    );
+
+  const content =
+    photoDataUrl &&
+    side.photo
+      ? [
+          '<rect',
+
+          ` width="${width}"`,
+
+          ` height="${height}"`,
+
+          ` fill="${cardInsideColors.background}"`,
+
+          '/>',
+
+          renderPhotoLayer(
+            side,
+            width,
+            height,
+            photoDataUrl,
+            'inside-left-photo-clip',
+          ),
+        ].join('')
+      : renderInsidePhotoFallback(
+          width,
+          height,
+        );
+
+  return [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+
+    '<svg',
+
+    ' xmlns="http://www.w3.org/2000/svg"',
+
+    ' xmlns:xhtml="http://www.w3.org/1999/xhtml"',
+
+    ` width="${width}"`,
+
+    ` height="${height}"`,
+
+    ` viewBox="0 0 ${width} ${height}"`,
+
+    ' role="img"',
+
+    ' aria-labelledby="inside-photo-title"',
+
+    '>',
+
+    '<title id="inside-photo-title">',
+
+    title,
+
+    '</title>',
+
+    content,
+
+    '</svg>',
+  ].join('');
+}
+
+export function renderCardSvg(
+  card: CardOption,
+  language: CardLanguage,
+  cardSide: CardSide,
+  side: EditorSideState,
+  artworkDataUrl: string,
+  photoDataUrl?: string,
+): string {
+  const {
+    width,
+    height,
+  } =
+    getCanvasDimensions(
+      card,
+    );
+
   const layout =
     getCardComposition(
       card,
       cardSide,
-    );
-
-  const photoMarkup =
-    renderPhotoLayer(
-      side,
-      width,
-      height,
-      photoDataUrl,
     );
 
   const artwork =
@@ -824,83 +1466,22 @@ export function renderCardSvg(
 
             '/>',
           ].join('')
-      : [
-          '<rect',
+      : renderInsideBackground(
+          width,
+          height,
+        );
 
-          ` width="${width}"`,
-
-          ` height="${height}"`,
-
-          ` fill="${cardInsideColors.background}"`,
-
-          '/>',
-
-          '<rect',
-
-          ' x="28"',
-
-          ' y="28"',
-
-          ` width="${
-            width - 56
-          }"`,
-
-          ` height="${
-            height - 56
-          }"`,
-
-          ' rx="28"',
-
-          ' fill="none"',
-
-          ` stroke="${cardInsideColors.border}"`,
-
-          ' stroke-width="4"',
-
-          '/>',
-
-          '<path',
-
-          ` d="M92 150h270m476 0h270M92 ${
-            height - 150
-          }h270m476 0h270"`,
-
-          ` stroke="${cardInsideColors.border}"`,
-
-          ' stroke-width="3"',
-
-          '/>',
-
-          '<circle',
-
-          ` cx="${
-            width / 2
-          }"`,
-
-          ' cy="150"',
-
-          ' r="13"',
-
-          ` fill="${cardInsideColors.ornament}"`,
-
-          '/>',
-
-          '<circle',
-
-          ` cx="${
-            width / 2
-          }"`,
-
-          ` cy="${
-            height - 150
-          }"`,
-
-          ' r="13"',
-
-          ` fill="${cardInsideColors.ornament}"`,
-
-          '/>',
-        ].join('');
+  const photoMarkup =
+    cardSide ===
+      'front'
+      ? renderPhotoLayer(
+          side,
+          width,
+          height,
+          photoDataUrl,
+          'front-photo-clip',
+        )
+      : '';
 
   const title =
     escapeXml(
@@ -915,6 +1496,7 @@ export function renderCardSvg(
       'recipient',
       layout,
       width,
+      cardSide,
     );
 
   const message =
@@ -923,6 +1505,7 @@ export function renderCardSvg(
       'message',
       layout,
       width,
+      cardSide,
     );
 
   const sender =
@@ -931,6 +1514,7 @@ export function renderCardSvg(
       'sender',
       layout,
       width,
+      cardSide,
     );
 
   return [

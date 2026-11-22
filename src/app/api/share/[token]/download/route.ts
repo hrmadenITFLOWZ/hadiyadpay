@@ -26,6 +26,7 @@ import {
 
 import {
   renderCardSvg,
+  renderInsidePhotoSvg,
 } from '../../../../../lib/card-composition';
 
 import {
@@ -37,7 +38,8 @@ export const runtime =
 
 type CardSide =
   | 'cover'
-  | 'inside';
+  | 'inside'
+  | 'inside-photo';
 
 function getArtworkMimeType(
   source:
@@ -81,34 +83,6 @@ function getArtworkMimeType(
   return 'application/octet-stream';
 }
 
-function createDataUrl(
-  mimeType: string,
-  content: Buffer,
-): string {
-  return `data:${mimeType};base64,${content.toString(
-    'base64',
-  )}`;
-}
-
-function getRequestedSide(
-  request:
-    NextRequest,
-): CardSide {
-  const requestedSide =
-    request.nextUrl.searchParams.get(
-      'side',
-    );
-
-  if (
-    requestedSide ===
-    'cover'
-  ) {
-    return 'cover';
-  }
-
-  return 'inside';
-}
-
 function getArtworkExtension(
   source:
     CardArtworkSource,
@@ -149,6 +123,77 @@ function getArtworkExtension(
   }
 
   return 'bin';
+}
+
+function createDataUrl(
+  mimeType: string,
+  content: Buffer,
+): string {
+  return `data:${mimeType};base64,${content.toString(
+    'base64',
+  )}`;
+}
+
+function getRequestedSide(
+  request:
+    NextRequest,
+): CardSide {
+  const requestedSide =
+    request.nextUrl.searchParams.get(
+      'side',
+    );
+
+  if (
+    requestedSide ===
+    'cover'
+  ) {
+    return 'cover';
+  }
+
+  if (
+    requestedSide ===
+    'inside-photo'
+  ) {
+    return 'inside-photo';
+  }
+
+  return 'inside';
+}
+
+function createSvgResponse(
+  svg: string,
+  filename: string,
+  shouldDownload: boolean,
+): Response {
+  return new Response(
+    svg,
+    {
+      status:
+        200,
+
+      headers: {
+        'Content-Type':
+          'image/svg+xml; charset=utf-8',
+
+        'Content-Disposition':
+          shouldDownload
+            ? `attachment; filename="${filename}"`
+            : `inline; filename="${filename}"`,
+
+        'Cache-Control':
+          'private, no-store, max-age=0',
+
+        'X-Content-Type-Options':
+          'nosniff',
+
+        'Content-Security-Policy':
+          "default-src 'none'; img-src data:; style-src 'unsafe-inline'",
+
+        'Referrer-Policy':
+          'no-referrer',
+      },
+    },
+  );
 }
 
 export async function GET(
@@ -345,15 +390,8 @@ export async function GET(
     /*
      * COVER
      *
-     * The selected artwork is already the actual
-     * front/cover design of the card.
-     *
-     * Do not send the cover through renderCardSvg(),
-     * because that composition function applies the
-     * personalization layout.
-     *
-     * Instead, return the original localized artwork
-     * directly.
+     * Return the actual selected/localized
+     * artwork directly.
      */
     if (
       requestedSide ===
@@ -395,19 +433,6 @@ export async function GET(
       );
     }
 
-    /*
-     * INSIDE
-     *
-     * Only the inside needs the personalized
-     * composition containing the recipient name,
-     * message, sender and optional inside photo.
-     */
-    const artworkDataUrl =
-      createDataUrl(
-        artworkMimeType,
-        artworkBuffer,
-      );
-
     const hasInsidePhoto =
       sharedOrder.photo_inside !==
       null;
@@ -431,6 +456,58 @@ export async function GET(
           )
         : undefined;
 
+    /*
+     * LEFT INSIDE PAGE
+     *
+     * This creates the separate left-hand
+     * inside page.
+     *
+     * If an inside photo exists, the
+     * renderInsidePhotoSvg function renders
+     * the saved photo using the saved editor
+     * state.
+     *
+     * If there is no photo, that function
+     * produces the HadiyadPay fallback.
+     */
+    if (
+      requestedSide ===
+      'inside-photo'
+    ) {
+      const svg =
+        renderInsidePhotoSvg(
+          card,
+          sharedOrder.language,
+          draft.inside,
+          insidePhotoDataUrl,
+        );
+
+      const filename =
+        `${card.slug}-hadiyadpay-inside-photo.svg`;
+
+      return createSvgResponse(
+        svg,
+        filename,
+        shouldDownload,
+      );
+    }
+
+    /*
+     * RIGHT INSIDE PAGE
+     *
+     * Recipient + message + sender only.
+     *
+     * The photo is deliberately NOT passed
+     * to renderCardSvg here anymore because
+     * the photo belongs to the separate
+     * left-hand inside page.
+     */
+    const artworkDataUrl =
+      createDataUrl(
+        artworkMimeType,
+        artworkBuffer,
+      );
+
     const svg =
       renderCardSvg(
         card,
@@ -438,40 +515,16 @@ export async function GET(
         'inside',
         draft.inside,
         artworkDataUrl,
-        insidePhotoDataUrl,
+        undefined,
       );
 
     const filename =
       `${card.slug}-hadiyadpay-kaart.svg`;
 
-    return new Response(
+    return createSvgResponse(
       svg,
-      {
-        status:
-          200,
-
-        headers: {
-          'Content-Type':
-            'image/svg+xml; charset=utf-8',
-
-          'Content-Disposition':
-            shouldDownload
-              ? `attachment; filename="${filename}"`
-              : `inline; filename="${filename}"`,
-
-          'Cache-Control':
-            'private, no-store, max-age=0',
-
-          'X-Content-Type-Options':
-            'nosniff',
-
-          'Content-Security-Policy':
-            "default-src 'none'; img-src data:; style-src 'unsafe-inline'",
-
-          'Referrer-Policy':
-            'no-referrer',
-        },
-      },
+      filename,
+      shouldDownload,
     );
   } catch (error) {
     console.error(
