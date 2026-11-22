@@ -19,7 +19,8 @@ import HadiyadReveal from './HadiyadReveal';
 export const dynamic =
   'force-dynamic';
 
-export const revalidate = 0;
+export const revalidate =
+  0;
 
 const productionOrigin =
   'https://www.hadiyadpay.com';
@@ -40,9 +41,14 @@ export const metadata: Metadata = {
     'HadiyadPay',
 
   robots: {
-    index: false,
-    follow: false,
-    nocache: true,
+    index:
+      false,
+
+    follow:
+      false,
+
+    nocache:
+      true,
   },
 
   openGraph: {
@@ -126,7 +132,9 @@ export default async function SharedCardPage({
     token: string;
   }>;
 }) {
-  const { token } =
+  const {
+    token,
+  } =
     await params;
 
   let sharedOrder: Awaited<
@@ -171,7 +179,9 @@ export default async function SharedCardPage({
 
   return (
     <HadiyadReveal
-      token={token}
+      token={
+        token
+      }
       language={
         sharedOrder.language
       }
@@ -182,6 +192,9 @@ export default async function SharedCardPage({
       }
       orientation={
         card.orientation
+      }
+      occasion={
+        card.occasion
       }
     />
   );

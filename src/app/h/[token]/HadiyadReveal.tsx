@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  useEffect,
   useRef,
   useState,
   type CSSProperties,
@@ -10,6 +11,7 @@ import {
 
 import type {
   CardLanguage,
+  CardOccasion,
 } from '../../../lib/card-types';
 
 type RevealState =
@@ -25,34 +27,65 @@ interface HadiyadRevealProps {
   orientation:
     | 'portrait'
     | 'landscape';
+  occasion: CardOccasion;
 }
+
+const WEDDING_HENNA_AUDIO =
+  '/audio/wedding-henna-reveal.m4a';
+
+const AUDIO_START_VOLUME =
+  0.35;
+
+const AUDIO_FADE_START_MS =
+  6300;
+
+const AUDIO_STOP_MS =
+  7000;
+
+const AUDIO_FADE_STEP_MS =
+  50;
+
+const EFFECT_END_MS =
+  3400;
 
 const copy = {
   so: {
     brandLabel:
       'Kaar dijitaal ah',
+
     eyebrow:
       'Gaar ahaan adiga',
+
     closedTitle:
       'Wax gaar ah ayaa kuu yimid',
+
     closedMessage:
       'Qof ayaa si gaar ah kuugu sameeyey Hadiyad.',
+
     openButton:
       'Fur Hadiyaddayda',
+
     opening:
       'Hadiyaddaada ayaa furmaysa…',
+
     tapToOpen:
       'Taabo Hadiyaddaada si aad u furto',
+
     tapHint:
       'Fur oo arag fariinta laguu reebay',
+
     revealed:
       'Hadiyaddaada',
+
     moment:
       'Xusuustan hayso',
+
     save:
       'Kaydi kaarka',
+
     saveHint:
       'Ku kaydi qalabkaaga si aad mar walba dib ugu daawato.',
+
     footer:
       'Waxaa lagu sameeyey HadiyadPay',
   },
@@ -60,28 +93,40 @@ const copy = {
   en: {
     brandLabel:
       'Digital card',
+
     eyebrow:
       'Especially for you',
+
     closedTitle:
       'Something special has arrived',
+
     closedMessage:
       'Someone created a personal Hadiyad especially for you.',
+
     openButton:
       'Open my Hadiyad',
+
     opening:
       'Opening your Hadiyad…',
+
     tapToOpen:
       'Tap your Hadiyad to open',
+
     tapHint:
       'Open the card to reveal your personal message',
+
     revealed:
       'Your Hadiyad',
+
     moment:
       'Keep this moment',
+
     save:
       'Save card',
+
     saveHint:
       'Save the card to your device so you can revisit this moment anytime.',
+
     footer:
       'Created with HadiyadPay',
   },
@@ -89,28 +134,40 @@ const copy = {
   nl: {
     brandLabel:
       'Digitale kaart',
+
     eyebrow:
       'Speciaal voor jou',
+
     closedTitle:
       'Er is iets bijzonders voor je gekomen',
+
     closedMessage:
       'Iemand heeft speciaal voor jou een persoonlijke Hadiyad gemaakt.',
+
     openButton:
       'Open mijn Hadiyad',
+
     opening:
       'Je Hadiyad wordt geopend…',
+
     tapToOpen:
       'Tik op je Hadiyad om te openen',
+
     tapHint:
       'Open de kaart en bekijk je persoonlijke boodschap',
+
     revealed:
       'Jouw Hadiyad',
+
     moment:
       'Bewaar dit moment',
+
     save:
       'Kaart bewaren',
+
     saveHint:
       'Bewaar de kaart op je apparaat, zodat je dit moment altijd terug kunt kijken.',
+
     footer:
       'Gemaakt met HadiyadPay',
   },
@@ -118,6 +175,79 @@ const copy = {
   CardLanguage,
   Record<string, string>
 >;
+
+const revealOrnaments = [
+  {
+    left: '4%',
+    top: '76%',
+    size: 12,
+    delay: 0,
+    color: '#a66f54',
+  },
+  {
+    left: '9%',
+    top: '62%',
+    size: 8,
+    delay: 100,
+    color: '#7f4d59',
+  },
+  {
+    left: '15%',
+    top: '86%',
+    size: 10,
+    delay: 180,
+    color: '#c09a5f',
+  },
+  {
+    left: '22%',
+    top: '72%',
+    size: 7,
+    delay: 260,
+    color: '#687461',
+  },
+  {
+    left: '29%',
+    top: '91%',
+    size: 9,
+    delay: 340,
+    color: '#9a634e',
+  },
+  {
+    left: '71%',
+    top: '91%',
+    size: 9,
+    delay: 320,
+    color: '#9a634e',
+  },
+  {
+    left: '78%',
+    top: '72%',
+    size: 7,
+    delay: 240,
+    color: '#687461',
+  },
+  {
+    left: '85%',
+    top: '86%',
+    size: 10,
+    delay: 160,
+    color: '#c09a5f',
+  },
+  {
+    left: '91%',
+    top: '62%',
+    size: 8,
+    delay: 80,
+    color: '#7f4d59',
+  },
+  {
+    left: '96%',
+    top: '76%',
+    size: 12,
+    delay: 20,
+    color: '#a66f54',
+  },
+] as const;
 
 function sleep(
   milliseconds: number,
@@ -137,6 +267,7 @@ export default function HadiyadReveal({
   language,
   cardTitle,
   orientation,
+  occasion,
 }: HadiyadRevealProps) {
   const [
     revealState,
@@ -154,6 +285,18 @@ export default function HadiyadReveal({
       null,
     );
 
+  const [
+    specialEffectVisible,
+    setSpecialEffectVisible,
+  ] =
+    useState(false);
+
+  const [
+    specialEffectActive,
+    setSpecialEffectActive,
+  ] =
+    useState(false);
+
   const hasStartedRef =
     useRef(false);
 
@@ -163,8 +306,44 @@ export default function HadiyadReveal({
   const coverInteractiveAtRef =
     useRef(0);
 
+  const audioRef =
+    useRef<HTMLAudioElement | null>(
+      null,
+    );
+
+  const fadeStartTimerRef =
+    useRef<number | null>(
+      null,
+    );
+
+  const stopTimerRef =
+    useRef<number | null>(
+      null,
+    );
+
+  const fadeIntervalRef =
+    useRef<number | null>(
+      null,
+    );
+
+  const effectTimerRef =
+    useRef<number | null>(
+      null,
+    );
+
+  const effectRemoveTimerRef =
+    useRef<number | null>(
+      null,
+    );
+
   const text =
     copy[language];
+
+  const hasWeddingHennaReveal =
+    occasion ===
+      'wedding' ||
+    occasion ===
+      'henna';
 
   const encodedToken =
     encodeURIComponent(
@@ -213,6 +392,346 @@ export default function HadiyadReveal({
         } as CSSProperties)
       : undefined;
 
+  const clearAudioTimers =
+    () => {
+      if (
+        fadeStartTimerRef.current !==
+        null
+      ) {
+        window.clearTimeout(
+          fadeStartTimerRef.current,
+        );
+
+        fadeStartTimerRef.current =
+          null;
+      }
+
+      if (
+        stopTimerRef.current !==
+        null
+      ) {
+        window.clearTimeout(
+          stopTimerRef.current,
+        );
+
+        stopTimerRef.current =
+          null;
+      }
+
+      if (
+        fadeIntervalRef.current !==
+        null
+      ) {
+        window.clearInterval(
+          fadeIntervalRef.current,
+        );
+
+        fadeIntervalRef.current =
+          null;
+      }
+    };
+
+  const clearEffectTimers =
+    () => {
+      if (
+        effectTimerRef.current !==
+        null
+      ) {
+        window.clearTimeout(
+          effectTimerRef.current,
+        );
+
+        effectTimerRef.current =
+          null;
+      }
+
+      if (
+        effectRemoveTimerRef.current !==
+        null
+      ) {
+        window.clearTimeout(
+          effectRemoveTimerRef.current,
+        );
+
+        effectRemoveTimerRef.current =
+          null;
+      }
+    };
+
+  const stopRevealAudio =
+    () => {
+      clearAudioTimers();
+
+      const audio =
+        audioRef.current;
+
+      if (!audio) {
+        return;
+      }
+
+      audio.pause();
+      audio.currentTime =
+        0;
+      audio.volume =
+        AUDIO_START_VOLUME;
+    };
+
+  const removeRevealEffect =
+    () => {
+      clearEffectTimers();
+
+      setSpecialEffectActive(
+        false,
+      );
+
+      setSpecialEffectVisible(
+        false,
+      );
+    };
+
+  const startRevealEffect =
+    () => {
+      if (
+        !hasWeddingHennaReveal
+      ) {
+        return;
+      }
+
+      clearEffectTimers();
+
+      setSpecialEffectVisible(
+        true,
+      );
+
+      setSpecialEffectActive(
+        false,
+      );
+
+      window.requestAnimationFrame(
+        () => {
+          window.requestAnimationFrame(
+            () => {
+              setSpecialEffectActive(
+                true,
+              );
+            },
+          );
+        },
+      );
+
+      effectTimerRef.current =
+        window.setTimeout(
+          () => {
+            setSpecialEffectActive(
+              false,
+            );
+
+            effectRemoveTimerRef.current =
+              window.setTimeout(
+                () => {
+                  setSpecialEffectVisible(
+                    false,
+                  );
+                },
+                900,
+              );
+          },
+          EFFECT_END_MS,
+        );
+    };
+
+  const startRevealAudio =
+    async () => {
+      if (
+        !hasWeddingHennaReveal
+      ) {
+        return;
+      }
+
+      clearAudioTimers();
+
+      let audio =
+        audioRef.current;
+
+      if (!audio) {
+        audio =
+          new Audio(
+            WEDDING_HENNA_AUDIO,
+          );
+
+        audio.preload =
+          'auto';
+
+        audioRef.current =
+          audio;
+      }
+
+      audio.pause();
+      audio.currentTime =
+        0;
+      audio.volume =
+        AUDIO_START_VOLUME;
+
+      try {
+        await audio.play();
+      } catch (error) {
+        console.warn(
+          'Wedding and Henna reveal audio could not start',
+          {
+            errorType:
+              error instanceof Error
+                ? error.name
+                : 'unknown',
+          },
+        );
+
+        return;
+      }
+
+      fadeStartTimerRef.current =
+        window.setTimeout(
+          () => {
+            const fadeDuration =
+              AUDIO_STOP_MS -
+              AUDIO_FADE_START_MS;
+
+            const totalSteps =
+              Math.max(
+                1,
+                Math.ceil(
+                  fadeDuration /
+                    AUDIO_FADE_STEP_MS,
+                ),
+              );
+
+            let currentStep =
+              0;
+
+            fadeIntervalRef.current =
+              window.setInterval(
+                () => {
+                  const currentAudio =
+                    audioRef.current;
+
+                  if (
+                    !currentAudio
+                  ) {
+                    return;
+                  }
+
+                  currentStep +=
+                    1;
+
+                  const progress =
+                    Math.min(
+                      1,
+                      currentStep /
+                        totalSteps,
+                    );
+
+                  currentAudio.volume =
+                    Math.max(
+                      0,
+                      AUDIO_START_VOLUME *
+                        (
+                          1 -
+                          progress
+                        ),
+                    );
+
+                  if (
+                    progress >=
+                    1 &&
+                    fadeIntervalRef.current !==
+                      null
+                  ) {
+                    window.clearInterval(
+                      fadeIntervalRef.current,
+                    );
+
+                    fadeIntervalRef.current =
+                      null;
+                  }
+                },
+                AUDIO_FADE_STEP_MS,
+              );
+          },
+          AUDIO_FADE_START_MS,
+        );
+
+      stopTimerRef.current =
+        window.setTimeout(
+          () => {
+            const currentAudio =
+              audioRef.current;
+
+            if (
+              currentAudio
+            ) {
+              currentAudio.pause();
+              currentAudio.currentTime =
+                0;
+              currentAudio.volume =
+                AUDIO_START_VOLUME;
+            }
+
+            if (
+              fadeIntervalRef.current !==
+              null
+            ) {
+              window.clearInterval(
+                fadeIntervalRef.current,
+              );
+
+              fadeIntervalRef.current =
+                null;
+            }
+          },
+          AUDIO_STOP_MS,
+        );
+    };
+
+  useEffect(
+    () => {
+      if (
+        !hasWeddingHennaReveal ||
+        typeof Audio ===
+          'undefined'
+      ) {
+        return;
+      }
+
+      const audio =
+        new Audio(
+          WEDDING_HENNA_AUDIO,
+        );
+
+      audio.preload =
+        'auto';
+
+      audio.volume =
+        AUDIO_START_VOLUME;
+
+      audioRef.current =
+        audio;
+
+      return () => {
+        clearAudioTimers();
+        clearEffectTimers();
+
+        audio.pause();
+        audio.currentTime =
+          0;
+
+        audioRef.current =
+          null;
+      };
+    },
+    [
+      hasWeddingHennaReveal,
+    ],
+  );
+
   const handleCoverLoad = (
     event:
       SyntheticEvent<HTMLImageElement>,
@@ -221,8 +740,10 @@ export default function HadiyadReveal({
       event.currentTarget;
 
     if (
-      image.naturalWidth <= 0 ||
-      image.naturalHeight <= 0
+      image.naturalWidth <=
+        0 ||
+      image.naturalHeight <=
+        0
     ) {
       return;
     }
@@ -245,7 +766,8 @@ export default function HadiyadReveal({
         true;
 
       coverInteractiveAtRef.current =
-        Date.now() + 900;
+        Date.now() +
+        900;
 
       setRevealState(
         'showing-cover',
@@ -261,7 +783,8 @@ export default function HadiyadReveal({
             'no-store',
         },
       ).catch(
-        () => null,
+        () =>
+          null,
       );
     };
 
@@ -279,6 +802,10 @@ export default function HadiyadReveal({
 
       isOpeningRef.current =
         true;
+
+      startRevealEffect();
+
+      void startRevealAudio();
 
       setRevealState(
         'opening',
@@ -337,8 +864,70 @@ export default function HadiyadReveal({
         isOpen
           ? 'is-open'
           : ''
+      } ${
+        hasWeddingHennaReveal
+          ? 'has-wedding-henna-reveal'
+          : ''
       }`}
     >
+      {specialEffectVisible &&
+        hasWeddingHennaReveal && (
+          <div
+            aria-hidden="true"
+            className={`hadiyad-special-reveal ${
+              specialEffectActive
+                ? 'is-active'
+                : ''
+            }`}
+          >
+            <div className="hadiyad-special-wash" />
+
+            <div className="hadiyad-special-ring hadiyad-special-ring-one" />
+
+            <div className="hadiyad-special-ring hadiyad-special-ring-two" />
+
+            <div className="hadiyad-special-bloom hadiyad-special-bloom-left" />
+
+            <div className="hadiyad-special-bloom hadiyad-special-bloom-right" />
+
+            <div className="hadiyad-special-ornament hadiyad-special-ornament-left" />
+
+            <div className="hadiyad-special-ornament hadiyad-special-ornament-right" />
+
+            {revealOrnaments.map(
+              (
+                ornament,
+                index,
+              ) => (
+                <span
+                  key={
+                    `${ornament.left}-${ornament.top}-${index}`
+                  }
+                  className="hadiyad-special-particle"
+                  style={
+                    {
+                      '--particle-left':
+                        ornament.left,
+
+                      '--particle-top':
+                        ornament.top,
+
+                      '--particle-size':
+                        `${ornament.size}px`,
+
+                      '--particle-delay':
+                        `${ornament.delay}ms`,
+
+                      '--particle-color':
+                        ornament.color,
+                    } as CSSProperties
+                  }
+                />
+              ),
+            )}
+          </div>
+        )}
+
       <div
         aria-hidden="true"
         className="hadiyad-ambient hadiyad-ambient-left"
@@ -432,7 +1021,9 @@ export default function HadiyadReveal({
                     ? 'is-interactive'
                     : ''
                 }`}
-                style={cardBookStyle}
+                style={
+                  cardBookStyle
+                }
                 role={
                   isShowingCover
                     ? 'button'
@@ -461,8 +1052,12 @@ export default function HadiyadReveal({
               >
                 <div className="hadiyad-inside-right">
                   <img
-                    src={insideUrl}
-                    alt={cardTitle}
+                    src={
+                      insideUrl
+                    }
+                    alt={
+                      cardTitle
+                    }
                     className="hadiyad-inside-image"
                   />
                 </div>
@@ -470,7 +1065,9 @@ export default function HadiyadReveal({
                 <div className="hadiyad-cover-panel">
                   <div className="hadiyad-cover-front">
                     <img
-                      src={coverUrl}
+                      src={
+                        coverUrl
+                      }
                       alt=""
                       aria-hidden="true"
                       className="hadiyad-cover-image"
@@ -487,7 +1084,9 @@ export default function HadiyadReveal({
 
                   <div className="hadiyad-cover-back">
                     <img
-                      src={insidePhotoUrl}
+                      src={
+                        insidePhotoUrl
+                      }
                       alt=""
                       aria-hidden="true"
                       className="hadiyad-inside-photo-image"
@@ -547,7 +1146,9 @@ export default function HadiyadReveal({
                 </p>
 
                 <a
-                  href={downloadUrl}
+                  href={
+                    downloadUrl
+                  }
                   className="hadiyad-save-button"
                 >
                   {text.save}
@@ -597,6 +1198,250 @@ export default function HadiyadReveal({
               transparent 28%,
               rgba(40, 83, 71, 0.08)
             );
+        }
+
+        .hadiyad-special-reveal {
+          position: fixed;
+          inset: 0;
+          z-index: 100;
+          overflow: hidden;
+          pointer-events: none;
+          opacity: 1;
+        }
+
+        .hadiyad-special-wash {
+          position: absolute;
+          inset: 0;
+          opacity: 0;
+          background:
+            radial-gradient(
+              circle at 50% 48%,
+              rgba(207, 172, 107, 0.32),
+              rgba(121, 66, 73, 0.14) 34%,
+              transparent 70%
+            );
+          transition:
+            opacity 850ms ease;
+        }
+
+        .hadiyad-special-reveal.is-active
+          .hadiyad-special-wash {
+          opacity: 1;
+        }
+
+        .hadiyad-special-ring {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          border-radius: 999px;
+          opacity: 0.72;
+          transform:
+            translate(-50%, -50%)
+            scale(0.35);
+          transition:
+            transform 2100ms
+              cubic-bezier(
+                0.16,
+                1,
+                0.3,
+                1
+              ),
+            opacity 2100ms ease;
+        }
+
+        .hadiyad-special-ring-one {
+          width: 22rem;
+          height: 22rem;
+          border:
+            1px solid
+            rgba(194, 154, 88, 0.46);
+        }
+
+        .hadiyad-special-ring-two {
+          width: 15rem;
+          height: 15rem;
+          border:
+            1px solid
+            rgba(127, 75, 85, 0.38);
+          transition-delay: 130ms;
+        }
+
+        .hadiyad-special-reveal.is-active
+          .hadiyad-special-ring-one {
+          opacity: 0;
+          transform:
+            translate(-50%, -50%)
+            scale(2.2);
+        }
+
+        .hadiyad-special-reveal.is-active
+          .hadiyad-special-ring-two {
+          opacity: 0;
+          transform:
+            translate(-50%, -50%)
+            scale(2.7);
+        }
+
+        .hadiyad-special-bloom {
+          position: absolute;
+          bottom: -10rem;
+          width: 25rem;
+          height: 25rem;
+          border-radius: 999px;
+          opacity: 0;
+          filter: blur(55px);
+          transition:
+            opacity 1700ms ease,
+            transform 2200ms
+              cubic-bezier(
+                0.16,
+                1,
+                0.3,
+                1
+              );
+        }
+
+        .hadiyad-special-bloom-left {
+          left: -11rem;
+          background:
+            radial-gradient(
+              circle,
+              rgba(128, 72, 79, 0.74),
+              transparent 68%
+            );
+          transform:
+            translate(-2rem, 5rem)
+            scale(0.7);
+        }
+
+        .hadiyad-special-bloom-right {
+          right: -11rem;
+          background:
+            radial-gradient(
+              circle,
+              rgba(194, 150, 83, 0.72),
+              transparent 68%
+            );
+          transform:
+            translate(2rem, 5rem)
+            scale(0.7);
+        }
+
+        .hadiyad-special-reveal.is-active
+          .hadiyad-special-bloom-left {
+          opacity: 0.34;
+          transform:
+            translate(7rem, -8rem)
+            scale(1.25);
+        }
+
+        .hadiyad-special-reveal.is-active
+          .hadiyad-special-bloom-right {
+          opacity: 0.34;
+          transform:
+            translate(-7rem, -8rem)
+            scale(1.25);
+        }
+
+        .hadiyad-special-ornament {
+          position: absolute;
+          top: 54%;
+          width: 7.5rem;
+          height: 7.5rem;
+          opacity: 0.55;
+          border-radius:
+            55% 45% 60% 40%;
+          transition:
+            transform 2100ms
+              cubic-bezier(
+                0.16,
+                1,
+                0.3,
+                1
+              ),
+            opacity 2100ms ease;
+        }
+
+        .hadiyad-special-ornament-left {
+          left: 5%;
+          border:
+            1px solid
+            rgba(184, 139, 77, 0.45);
+          transform:
+            rotate(-26deg)
+            scale(0.7);
+        }
+
+        .hadiyad-special-ornament-right {
+          right: 5%;
+          border:
+            1px solid
+            rgba(126, 74, 83, 0.42);
+          transform:
+            rotate(26deg)
+            scale(0.7);
+        }
+
+        .hadiyad-special-reveal.is-active
+          .hadiyad-special-ornament-left {
+          opacity: 0;
+          transform:
+            translate(-5rem, -9rem)
+            rotate(-62deg)
+            scale(1.7);
+        }
+
+        .hadiyad-special-reveal.is-active
+          .hadiyad-special-ornament-right {
+          opacity: 0;
+          transform:
+            translate(5rem, -9rem)
+            rotate(62deg)
+            scale(1.7);
+        }
+
+        .hadiyad-special-particle {
+          position: absolute;
+          left:
+            var(--particle-left);
+          top:
+            var(--particle-top);
+          width:
+            var(--particle-size);
+          height:
+            var(--particle-size);
+          border-radius:
+            999px 999px 999px 0;
+          opacity: 0.74;
+          background:
+            var(--particle-color);
+          box-shadow:
+            0 0 14px
+            rgba(185, 139, 81, 0.32);
+          transform:
+            translateY(0)
+            rotate(45deg)
+            scale(1);
+          transition:
+            transform 1900ms
+              cubic-bezier(
+                0.16,
+                1,
+                0.3,
+                1
+              ),
+            opacity 1900ms ease;
+          transition-delay:
+            var(--particle-delay);
+        }
+
+        .hadiyad-special-reveal.is-active
+          .hadiyad-special-particle {
+          opacity: 0;
+          transform:
+            translateY(-13rem)
+            rotate(165deg)
+            scale(0.15);
         }
 
         .hadiyad-ambient {
@@ -673,6 +1518,17 @@ export default function HadiyadReveal({
             radial-gradient(
               circle at center,
               black,
+              transparent 72%
+            );
+        }
+
+        .has-wedding-henna-reveal.is-opening
+          .hadiyad-card-glow {
+          background:
+            radial-gradient(
+              circle,
+              rgba(205, 164, 93, 0.72),
+              rgba(126, 73, 81, 0.3) 46%,
               transparent 72%
             );
         }
@@ -779,7 +1635,8 @@ export default function HadiyadReveal({
             );
           font-weight: 400;
           line-height: 1.06;
-          letter-spacing: -0.035em;
+          letter-spacing:
+            -0.035em;
           color: #243d34;
           text-wrap: balance;
         }
@@ -839,8 +1696,7 @@ export default function HadiyadReveal({
 
         .hadiyad-open-button:focus-visible,
         .hadiyad-save-button:focus-visible,
-        .hadiyad-card-book.is-interactive:
-          focus-visible {
+        .hadiyad-card-book.is-interactive:focus-visible {
           outline:
             3px solid #285347;
           outline-offset: 5px;
@@ -1598,6 +2454,22 @@ export default function HadiyadReveal({
                 2.5rem
               );
           }
+
+          .hadiyad-special-ring-one {
+            width: 16rem;
+            height: 16rem;
+          }
+
+          .hadiyad-special-ring-two {
+            width: 11rem;
+            height: 11rem;
+          }
+
+          .hadiyad-special-ornament {
+            top: 58%;
+            width: 5rem;
+            height: 5rem;
+          }
         }
 
         @media (
@@ -1646,6 +2518,10 @@ export default function HadiyadReveal({
             .hadiyad-cover-panel {
             transform:
               rotateY(-180deg);
+          }
+
+          .hadiyad-special-reveal {
+            display: none;
           }
         }
       `}</style>
