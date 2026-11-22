@@ -1,11 +1,27 @@
 import Image from 'next/image';
-import type { CardArtwork, CardLanguage } from '../../lib/card-types';
+
+import {
+  getCardArtworkSource,
+  type CardArtwork,
+  type CardLanguage,
+} from '../../lib/card-types';
 
 interface CardArtworkLayerProps {
   artwork: CardArtwork;
   language: CardLanguage;
   decorative?: boolean;
   overlay?: boolean;
+
+  /*
+   * cover:
+   * Fills the complete container and may crop artwork.
+   *
+   * contain:
+   * Shows the complete artwork without cropping.
+   */
+  fit?: 'cover' | 'contain';
+
+  backgroundColor?: string;
 }
 
 export default function CardArtworkLayer({
@@ -13,27 +29,77 @@ export default function CardArtworkLayer({
   language,
   decorative = true,
   overlay = true,
+  fit = 'cover',
+  backgroundColor = '#f7f1e8',
 }: CardArtworkLayerProps) {
-  const alt = decorative ? '' : artwork.alt[language];
+  const alt =
+    decorative
+      ? ''
+      : artwork.alt[
+          language
+        ];
+
+  const artworkSource =
+    getCardArtworkSource(
+      artwork,
+      language,
+    );
 
   return (
     <div
-      aria-hidden={decorative ? true : undefined}
+      aria-hidden={
+        decorative
+          ? true
+          : undefined
+      }
       className="pointer-events-none absolute inset-0 overflow-hidden"
+      style={{
+        backgroundColor:
+          artwork.type ===
+          'local-image'
+            ? backgroundColor
+            : undefined,
+      }}
     >
-      {artwork.type === 'local-image' ? (
+      {artwork.type ===
+        'local-image' &&
+      artworkSource ? (
         <Image
-          src={artwork.src}
-          alt={alt}
+          src={
+            artworkSource
+          }
+          alt={
+            alt
+          }
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className="object-cover"
-          unoptimized={artwork.src.endsWith('.svg')}
-          style={{ objectPosition: artwork.focalPoint ?? 'center' }}
+          className={
+            fit === 'contain'
+              ? 'object-contain'
+              : 'object-cover'
+          }
+          unoptimized={
+            artworkSource.endsWith(
+              '.svg',
+            )
+          }
+          style={{
+            objectPosition:
+              artwork.focalPoint ??
+              'center',
+          }}
         />
-      ) : (
-        <div className="absolute inset-0" style={{ background: artwork.background }} />
-      )}
+      ) : artwork.type ===
+        'gradient' ? (
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              artwork.background,
+          }}
+        />
+      ) : null}
+
       {overlay && (
         <div
           aria-hidden="true"

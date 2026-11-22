@@ -9,175 +9,365 @@ import { useStorefrontLanguage } from './StorefrontShell';
 
 const copy = {
   nl: {
-    occasionEyebrow: 'VIND JOUW MOMENT',
-    occasionTitle: 'Waar wil je een kaart voor sturen?',
+    occasionEyebrow:
+      'VIND JOUW MOMENT',
+
+    occasionTitle:
+      'Waar wil je een kaart voor sturen?',
+
     occasionDescription:
       'Begin bij het moment. Ontdek daarna een kaart die past bij de persoon, stijl en boodschap.',
 
-    wedding: 'Bruiloft',
-    weddingCardDescription: 'Aroos, Nikah en felicitaties',
+    wedding:
+      'Bruiloft',
 
-    birthday: 'Verjaardag',
-    birthdayDescription: 'Een persoonlijke verjaardagsgroet',
+    weddingCardDescription:
+      'Aroos, Nikah en felicitaties',
 
-    henna: 'Henna',
-    hennaDescription: 'Voor een bijzondere henna-avond',
+    birthday:
+      'Verjaardag',
 
-    eid: 'Eid',
-    eidDescription: 'Warme wensen voor Eid',
+    birthdayDescription:
+      'Een persoonlijke verjaardagsgroet',
 
-    graduation: 'Afstuderen',
-    graduationDescription: 'Vier een nieuwe mijlpaal',
+    henna:
+      'Henna',
 
-    blessings: 'Zegeningen',
-    blessingsDescription: 'Een warme wens voor dierbaren',
+    hennaDescription:
+      'Voor een bijzondere henna-avond',
 
-    weddingEyebrow: 'BRUILOFT IN DE SPOTLIGHT',
-    weddingTitle: 'Voor meer dan alleen de trouwdag.',
+    eid:
+      'Eid',
+
+    eidDescription:
+      'Warme wensen voor Eid',
+
+    graduation:
+      'Afstuderen',
+
+    graduationDescription:
+      'Vier een nieuwe mijlpaal',
+
+    justBecause:
+      'Zomaar',
+
+    justBecauseDescription:
+      'Voor momenten die geen speciale reden nodig hebben',
+
+    weddingEyebrow:
+      'BRUILOFT IN DE SPOTLIGHT',
+
+    weddingTitle:
+      'Voor meer dan alleen de trouwdag.',
+
     weddingSpotlightDescription:
       'Een bruiloft bestaat uit meerdere bijzondere momenten. HadiyadPay bouwt daarom een collectie voor de hele reis, van de eerste aankondiging tot een persoonlijke felicitatie.',
 
-    saveTheDate: 'Save the Date',
-    invitations: 'Uitnodigingen',
-    nikah: 'Nikah',
-    hennaWedding: 'Henna',
-    walima: 'Walima',
-    congratulations: 'Felicitatie',
+    saveTheDate:
+      'Save the Date',
 
-    weddingCta: 'Ontdek bruiloftskaarten',
-    allCards: 'Bekijk alle kaarten',
-    explore: 'Ontdek',
+    invitations:
+      'Uitnodigingen',
+
+    nikah:
+      'Nikah',
+
+    hennaWedding:
+      'Henna',
+
+    walima:
+      'Walima',
+
+    congratulations:
+      'Felicitatie',
+
+    weddingCta:
+      'Ontdek bruiloftskaarten',
+
+    allCards:
+      'Bekijk alle kaarten',
+
+    explore:
+      'Ontdek',
   },
 
   en: {
-    occasionEyebrow: 'FIND YOUR MOMENT',
-    occasionTitle: 'What would you like to send a card for?',
+    occasionEyebrow:
+      'FIND YOUR MOMENT',
+
+    occasionTitle:
+      'What would you like to send a card for?',
+
     occasionDescription:
       'Start with the moment. Then discover a card that fits the person, style and message.',
 
-    wedding: 'Wedding',
-    weddingCardDescription: 'Wedding, Nikah and congratulations',
+    wedding:
+      'Wedding',
 
-    birthday: 'Birthday',
-    birthdayDescription: 'A personal birthday greeting',
+    weddingCardDescription:
+      'Wedding, Nikah and congratulations',
 
-    henna: 'Henna',
-    hennaDescription: 'For a special henna night',
+    birthday:
+      'Birthday',
 
-    eid: 'Eid',
-    eidDescription: 'Warm wishes for Eid',
+    birthdayDescription:
+      'A personal birthday greeting',
 
-    graduation: 'Graduation',
-    graduationDescription: 'Celebrate a new milestone',
+    henna:
+      'Henna',
 
-    blessings: 'Blessings',
-    blessingsDescription: 'A warm wish for loved ones',
+    hennaDescription:
+      'For a special henna night',
 
-    weddingEyebrow: 'WEDDING SPOTLIGHT',
-    weddingTitle: 'For more than just the wedding day.',
+    eid:
+      'Eid',
+
+    eidDescription:
+      'Warm wishes for Eid',
+
+    graduation:
+      'Graduation',
+
+    graduationDescription:
+      'Celebrate a new milestone',
+
+    justBecause:
+      'Just Because',
+
+    justBecauseDescription:
+      'For the moments that need no occasion',
+
+    weddingEyebrow:
+      'WEDDING SPOTLIGHT',
+
+    weddingTitle:
+      'For more than just the wedding day.',
+
     weddingSpotlightDescription:
       'A wedding journey contains many meaningful moments. HadiyadPay is building a collection for the whole journey, from the first announcement to a personal congratulation.',
 
-    saveTheDate: 'Save the Date',
-    invitations: 'Invitations',
-    nikah: 'Nikah',
-    hennaWedding: 'Henna',
-    walima: 'Walima',
-    congratulations: 'Congratulations',
+    saveTheDate:
+      'Save the Date',
 
-    weddingCta: 'Explore wedding cards',
-    allCards: 'View all cards',
-    explore: 'Explore',
+    invitations:
+      'Invitations',
+
+    nikah:
+      'Nikah',
+
+    hennaWedding:
+      'Henna',
+
+    walima:
+      'Walima',
+
+    congratulations:
+      'Congratulations',
+
+    weddingCta:
+      'Explore wedding cards',
+
+    allCards:
+      'View all cards',
+
+    explore:
+      'Explore',
   },
 
   so: {
-    occasionEyebrow: 'DOORO MUNAASABADDA',
-    occasionTitle: 'Maxaad kaar u diraysaa?',
+    occasionEyebrow:
+      'DOORO MUNAASABADDA',
+
+    occasionTitle:
+      'Maxaad kaar u diraysaa?',
+
     occasionDescription:
       'Ka bilow munaasabadda, dabadeed dooro kaar ku habboon qofka, qaabka iyo fariinta.',
 
-    wedding: 'Aroos',
-    weddingCardDescription: 'Aroos, Nikah iyo hambalyo',
+    wedding:
+      'Aroos',
 
-    birthday: 'Dhalasho',
-    birthdayDescription: 'Hambalyo dhalasho oo gaar ah',
+    weddingCardDescription:
+      'Aroos, Nikah iyo hambalyo',
 
-    henna: 'Henna',
-    hennaDescription: 'Habeen henna oo gaar ah',
+    birthday:
+      'Dhalasho',
 
-    eid: 'Ciid',
-    eidDescription: 'Hambalyo iyo duco Ciid',
+    birthdayDescription:
+      'Hambalyo dhalasho oo gaar ah',
 
-    graduation: 'Qalinjabin',
-    graduationDescription: 'U dabaaldeg guul cusub',
+    henna:
+      'Henna',
 
-    blessings: 'Barako',
-    blessingsDescription: 'Duco iyo rajo wanaagsan',
+    hennaDescription:
+      'Habeen henna oo gaar ah',
 
-    weddingEyebrow: 'AROOSKA',
-    weddingTitle: 'Wax ka badan maalinta arooska.',
+    eid:
+      'Ciid',
+
+    eidDescription:
+      'Hambalyo iyo duco Ciid',
+
+    graduation:
+      'Qalinjabin',
+
+    graduationDescription:
+      'U dabaaldeg guul cusub',
+
+    justBecause:
+      'Sabab la’aan',
+
+    justBecauseDescription:
+      'Waqtiyada aan munaasabad gaar ah u baahnayn',
+
+    weddingEyebrow:
+      'AROOSKA',
+
+    weddingTitle:
+      'Wax ka badan maalinta arooska.',
+
     weddingSpotlightDescription:
       'Safarka aroosku wuxuu leeyahay waqtiyo badan oo gaar ah. HadiyadPay waxay dhisaysaa ururin kaarar ah oo la socda safarka oo dhan.',
 
-    saveTheDate: 'Save the Date',
-    invitations: 'Casuumad',
-    nikah: 'Nikah',
-    hennaWedding: 'Henna',
-    walima: 'Walima',
-    congratulations: 'Hambalyo',
+    saveTheDate:
+      'Save the Date',
 
-    weddingCta: 'Eeg kaararka arooska',
-    allCards: 'Eeg dhammaan kaararka',
-    explore: 'Eeg',
+    invitations:
+      'Casuumad',
+
+    nikah:
+      'Nikah',
+
+    hennaWedding:
+      'Henna',
+
+    walima:
+      'Walima',
+
+    congratulations:
+      'Hambalyo',
+
+    weddingCta:
+      'Eeg kaararka arooska',
+
+    allCards:
+      'Eeg dhammaan kaararka',
+
+    explore:
+      'Eeg',
   },
 };
 
 export default function HomeStorefront() {
-  const language = useStorefrontLanguage();
-  const text = copy[language];
+  const language =
+    useStorefrontLanguage();
+
+  const text =
+    copy[
+      language
+    ];
 
   const occasions = [
     {
-      label: text.wedding,
-      description: text.weddingCardDescription,
-      href: `/kaarten/huwelijk?lang=${language}`,
-      symbol: '◇',
-      featured: true,
+      label:
+        text.wedding,
+
+      description:
+        text.weddingCardDescription,
+
+      href:
+        `/kaarten/huwelijk?lang=${language}`,
+
+      symbol:
+        '◇',
+
+      featured:
+        true,
     },
+
     {
-      label: text.birthday,
-      description: text.birthdayDescription,
-      href: `/kaarten/verjaardag?lang=${language}`,
-      symbol: '✦',
-      featured: false,
+      label:
+        text.birthday,
+
+      description:
+        text.birthdayDescription,
+
+      href:
+        `/kaarten/verjaardag?lang=${language}`,
+
+      symbol:
+        '✦',
+
+      featured:
+        false,
     },
+
     {
-      label: text.henna,
-      description: text.hennaDescription,
-      href: `/kaarten/hennafeest?lang=${language}`,
-      symbol: '◌',
-      featured: false,
+      label:
+        text.henna,
+
+      description:
+        text.hennaDescription,
+
+      href:
+        `/kaarten/hennafeest?lang=${language}`,
+
+      symbol:
+        '◌',
+
+      featured:
+        false,
     },
+
     {
-      label: text.eid,
-      description: text.eidDescription,
-      href: `/kaarten/eid?lang=${language}`,
-      symbol: '☾',
-      featured: false,
+      label:
+        text.eid,
+
+      description:
+        text.eidDescription,
+
+      href:
+        `/kaarten/eid?lang=${language}`,
+
+      symbol:
+        '☾',
+
+      featured:
+        false,
     },
+
     {
-      label: text.graduation,
-      description: text.graduationDescription,
-      href: `/kaarten/afstuderen?lang=${language}`,
-      symbol: '✧',
-      featured: false,
+      label:
+        text.graduation,
+
+      description:
+        text.graduationDescription,
+
+      href:
+        `/kaarten/afstuderen?lang=${language}`,
+
+      symbol:
+        '✧',
+
+      featured:
+        false,
     },
+
     {
-      label: text.blessings,
-      description: text.blessingsDescription,
-      href: `/kaarten/zegeningen?lang=${language}`,
-      symbol: '○',
-      featured: false,
+      label:
+        text.justBecause,
+
+      description:
+        text.justBecauseDescription,
+
+      href:
+        `/kaarten/zomaar?lang=${language}`,
+
+      symbol:
+        '♡',
+
+      featured:
+        false,
     },
   ];
 
@@ -192,7 +382,11 @@ export default function HomeStorefront() {
 
   return (
     <div className="mx-auto flex w-full max-w-[1500px] flex-col pb-12">
-      <StorefrontHero currentLanguage={language} />
+      <StorefrontHero
+        currentLanguage={
+          language
+        }
+      />
 
       <AnimatedCardShowcase />
 
@@ -200,51 +394,73 @@ export default function HomeStorefront() {
         <div className="mx-auto w-full max-w-7xl">
           <div className="max-w-3xl">
             <p className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-[#7f6b62]">
-              {text.occasionEyebrow}
+              {
+                text.occasionEyebrow
+              }
             </p>
 
             <h2 className="mt-3 font-serif text-4xl leading-tight text-[#263e36] sm:text-5xl">
-              {text.occasionTitle}
+              {
+                text.occasionTitle
+              }
             </h2>
 
             <p className="mt-4 max-w-2xl text-sm leading-7 text-[#6c7771] sm:text-base">
-              {text.occasionDescription}
+              {
+                text.occasionDescription
+              }
             </p>
           </div>
 
           <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {occasions.map((occasion) => (
-              <Link
-                key={occasion.href}
-                href={occasion.href}
-                className={`group flex min-h-[145px] items-start gap-4 rounded-[1.5rem] border p-6 transition duration-300 hover:-translate-y-1 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#285347] ${
-                  occasion.featured
-                    ? 'border-[#285347] bg-[#e6eee9]'
-                    : 'border-[#ddd9cf] bg-[#fffdf9] hover:border-[#aebdb5]'
-                }`}
-              >
-                <span
-                  aria-hidden="true"
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#f1e7d8] text-xl text-[#9a704b]"
+            {occasions.map(
+              (
+                occasion,
+              ) => (
+                <Link
+                  key={
+                    occasion.href
+                  }
+                  href={
+                    occasion.href
+                  }
+                  className={`group flex min-h-[145px] items-start gap-4 rounded-[1.5rem] border p-6 transition duration-300 hover:-translate-y-1 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#285347] ${
+                    occasion.featured
+                      ? 'border-[#285347] bg-[#e6eee9]'
+                      : 'border-[#ddd9cf] bg-[#fffdf9] hover:border-[#aebdb5]'
+                  }`}
                 >
-                  {occasion.symbol}
-                </span>
-
-                <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="font-serif text-xl text-[#29443a]">
-                    {occasion.label}
+                  <span
+                    aria-hidden="true"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#f1e7d8] text-xl text-[#9a704b]"
+                  >
+                    {
+                      occasion.symbol
+                    }
                   </span>
 
-                  <span className="mt-1 text-sm leading-6 text-[#798079]">
-                    {occasion.description}
-                  </span>
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="font-serif text-xl text-[#29443a]">
+                      {
+                        occasion.label
+                      }
+                    </span>
 
-                  <span className="mt-auto pt-4 text-xs font-bold uppercase tracking-[0.14em] text-[#285347]">
-                    {text.explore} →
+                    <span className="mt-1 text-sm leading-6 text-[#798079]">
+                      {
+                        occasion.description
+                      }
+                    </span>
+
+                    <span className="mt-auto pt-4 text-xs font-bold uppercase tracking-[0.14em] text-[#285347]">
+                      {
+                        text.explore
+                      } →
+                    </span>
                   </span>
-                </span>
-              </Link>
-            ))}
+                </Link>
+              ),
+            )}
           </div>
         </div>
       </section>
@@ -253,26 +469,40 @@ export default function HomeStorefront() {
         <div className="mx-auto grid w-full max-w-7xl gap-10 px-6 py-12 sm:px-10 sm:py-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:px-14 lg:py-20">
           <div>
             <p className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-[#e4c99e]">
-              {text.weddingEyebrow}
+              {
+                text.weddingEyebrow
+              }
             </p>
 
             <h2 className="mt-4 max-w-2xl font-serif text-4xl leading-[1.08] text-white sm:text-5xl">
-              {text.weddingTitle}
+              {
+                text.weddingTitle
+              }
             </h2>
 
             <p className="mt-5 max-w-2xl text-sm leading-7 text-white/70 sm:text-base">
-              {text.weddingSpotlightDescription}
+              {
+                text.weddingSpotlightDescription
+              }
             </p>
 
             <div className="mt-7 flex flex-wrap gap-2">
-              {weddingMoments.map((moment) => (
-                <span
-                  key={moment}
-                  className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold text-[#f7efe2]"
-                >
-                  {moment}
-                </span>
-              ))}
+              {weddingMoments.map(
+                (
+                  moment,
+                ) => (
+                  <span
+                    key={
+                      moment
+                    }
+                    className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold text-[#f7efe2]"
+                  >
+                    {
+                      moment
+                    }
+                  </span>
+                ),
+              )}
             </div>
 
             <div className="mt-9 flex flex-wrap gap-3">
@@ -280,15 +510,24 @@ export default function HomeStorefront() {
                 href={`/kaarten/huwelijk?lang=${language}`}
                 className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#f3e4ca] px-5 py-2.5 text-sm font-bold text-[#29443a] transition hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-white"
               >
-                {text.weddingCta}
-                <span aria-hidden="true">→</span>
+                {
+                  text.weddingCta
+                }
+
+                <span
+                  aria-hidden="true"
+                >
+                  →
+                </span>
               </Link>
 
               <Link
                 href={`/kaarten?lang=${language}`}
                 className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/30 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-white"
               >
-                {text.allCards}
+                {
+                  text.allCards
+                }
               </Link>
             </div>
           </div>
@@ -309,11 +548,19 @@ export default function HomeStorefront() {
                   </p>
 
                   <p className="mt-4 font-serif text-2xl leading-tight text-white">
-                    {text.wedding}
+                    {
+                      text.wedding
+                    }
                   </p>
 
                   <p className="mt-3 text-xs leading-5 text-white/70">
-                    {text.nikah} · {text.hennaWedding} · {text.walima}
+                    {
+                      text.nikah
+                    } · {
+                      text.hennaWedding
+                    } · {
+                      text.walima
+                    }
                   </p>
                 </div>
               </div>
@@ -323,7 +570,11 @@ export default function HomeStorefront() {
       </section>
 
       <div className="mt-12 sm:mt-16">
-        <EditorialSections currentLanguage={language} />
+        <EditorialSections
+          currentLanguage={
+            language
+          }
+        />
       </div>
     </div>
   );

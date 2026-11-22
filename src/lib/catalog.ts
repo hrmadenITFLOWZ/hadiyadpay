@@ -1,4 +1,7 @@
-import { cardOptions } from '../app/data/cardOptions';
+import {
+  cardOptions,
+} from '../app/data/cardOptions';
+
 import {
   cardColors,
   cardOccasions,
@@ -16,17 +19,35 @@ import {
   type RecipientType,
 } from './card-types';
 
-export const defaultCatalogFilters: CatalogFilters = {
-  query: '',
-  category: 'all',
-  occasion: 'all',
-  recipient: 'all',
-  style: 'all',
-  color: 'all',
-  language: 'all',
-  orientation: 'all',
-  sort: 'featured',
-};
+export const defaultCatalogFilters:
+  CatalogFilters = {
+    query:
+      '',
+
+    category:
+      'all',
+
+    occasion:
+      'all',
+
+    recipient:
+      'all',
+
+    style:
+      'all',
+
+    color:
+      'all',
+
+    language:
+      'all',
+
+    orientation:
+      'all',
+
+    sort:
+      'featured',
+  };
 
 const catalogParamKeys = [
   'q',
@@ -40,155 +61,674 @@ const catalogParamKeys = [
   'sort',
 ] as const;
 
-function isCategory(value: string | null): value is CardCategory {
-  return value === 'celebrations' || value === 'milestones';
+/*
+ * These specific occasions appear together in the
+ * customer-facing Just Because collection.
+ *
+ * The original occasion stays on each card so that
+ * search, SEO and future detailed filters can still
+ * distinguish Love, Blessings, Encouragement and
+ * Heritage.
+ */
+export const justBecauseOccasions:
+  readonly CardOccasion[] = [
+    'just-because',
+    'blessings',
+    'encouragement',
+    'love',
+    'thanks',
+    'heritage',
+  ];
+
+export const primaryCatalogOccasions:
+  readonly CardOccasion[] = [
+    'wedding',
+    'birthday',
+    'henna',
+    'eid',
+    'graduation',
+    'just-because',
+  ];
+
+function isCategory(
+  value:
+    string | null,
+): value is CardCategory {
+  return (
+    value ===
+      'celebrations' ||
+    value ===
+      'milestones'
+  );
 }
 
-function isOccasion(value: string | null): value is CardOccasion {
-  return value !== null && cardOccasions.some((occasion) => occasion === value);
+function isOccasion(
+  value:
+    string | null,
+): value is CardOccasion {
+  return (
+    value !== null &&
+    cardOccasions.some(
+      (
+        occasion,
+      ) =>
+        occasion ===
+        value,
+    )
+  );
 }
 
-export function isRecipientType(value: string): value is RecipientType {
-  return recipientTypes.some((recipient) => recipient === value);
+export function isRecipientType(
+  value: string,
+): value is RecipientType {
+  return recipientTypes.some(
+    (
+      recipient,
+    ) =>
+      recipient ===
+      value,
+  );
 }
 
-export function isCardStyle(value: string): value is CardStyle {
-  return cardStyles.some((style) => style === value);
+export function isCardStyle(
+  value: string,
+): value is CardStyle {
+  return cardStyles.some(
+    (
+      style,
+    ) =>
+      style ===
+      value,
+  );
 }
 
-export function isCardColor(value: string): value is CardColor {
-  return cardColors.some((color) => color === value);
+export function isCardColor(
+  value: string,
+): value is CardColor {
+  return cardColors.some(
+    (
+      color,
+    ) =>
+      color ===
+      value,
+  );
 }
 
-export function isCardLanguage(value: string): value is CardLanguage {
-  return value === 'so' || value === 'en' || value === 'nl';
+export function isCardLanguage(
+  value: string,
+): value is CardLanguage {
+  return (
+    value === 'so' ||
+    value === 'en' ||
+    value === 'nl'
+  );
 }
 
-export function isCardOrientation(value: string): value is CardOrientation {
-  return value === 'portrait' || value === 'landscape';
+export function isCardOrientation(
+  value: string,
+): value is CardOrientation {
+  return (
+    value ===
+      'portrait' ||
+    value ===
+      'landscape'
+  );
 }
 
-export function isCatalogSort(value: string): value is CatalogSort {
-  return value === 'featured' || value === 'name-asc' || value === 'name-desc';
+export function isCatalogSort(
+  value: string,
+): value is CatalogSort {
+  return (
+    value ===
+      'featured' ||
+    value ===
+      'name-asc' ||
+    value ===
+      'name-desc'
+  );
 }
 
-export function normalizeSearch(value: string): string {
+export function normalizeSearch(
+  value: string,
+): string {
   return value
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .normalize(
+      'NFKD',
+    )
+    .replace(
+      /[\u0300-\u036f]/g,
+      '',
+    )
     .toLocaleLowerCase()
     .trim();
 }
 
+/*
+ * Returns true when a card belongs to the selected
+ * customer-facing occasion.
+ *
+ * Most occasions use a direct match. Just Because
+ * is a curated collection containing several
+ * related underlying occasions.
+ */
+export function cardMatchesOccasion(
+  card:
+    CardOption,
+  selectedOccasion:
+    CardOccasion,
+): boolean {
+  if (
+    selectedOccasion ===
+    'just-because'
+  ) {
+    return justBecauseOccasions.includes(
+      card.occasion,
+    );
+  }
+
+  return (
+    card.occasion ===
+    selectedOccasion
+  );
+}
+
 export function parseCatalogFilters(
-  params: URLSearchParams,
-  defaultOccasion: CardOccasion | 'all' = 'all',
+  params:
+    URLSearchParams,
+  defaultOccasion:
+    CardOccasion | 'all' =
+    'all',
 ): CatalogFilters {
-  const rawOccasion = params.get('occasion');
-  const rawCategory = params.get('category');
-  const rawRecipient = params.get('recipient');
-  const rawStyle = params.get('style');
-  const rawColor = params.get('color');
-  const rawLanguage = params.get('language');
-  const rawOrientation = params.get('orientation');
-  const rawSort = params.get('sort');
+  const rawOccasion =
+    params.get(
+      'occasion',
+    );
+
+  const rawCategory =
+    params.get(
+      'category',
+    );
+
+  const rawRecipient =
+    params.get(
+      'recipient',
+    );
+
+  const rawStyle =
+    params.get(
+      'style',
+    );
+
+  const rawColor =
+    params.get(
+      'color',
+    );
+
+  const rawLanguage =
+    params.get(
+      'language',
+    );
+
+  const rawOrientation =
+    params.get(
+      'orientation',
+    );
+
+  const rawSort =
+    params.get(
+      'sort',
+    );
 
   return {
-    query: (params.get('q') ?? '').slice(0, 100),
-    category: isCategory(rawCategory) ? rawCategory : 'all',
-    occasion: rawOccasion === 'all'
-      ? 'all'
-      : isOccasion(rawOccasion)
-        ? rawOccasion
-        : defaultOccasion,
-    recipient: rawRecipient !== null && isRecipientType(rawRecipient) ? rawRecipient : 'all',
-    style: rawStyle !== null && isCardStyle(rawStyle) ? rawStyle : 'all',
-    color: rawColor !== null && isCardColor(rawColor) ? rawColor : 'all',
-    language: rawLanguage !== null && isCardLanguage(rawLanguage) ? rawLanguage : 'all',
-    orientation: rawOrientation !== null && isCardOrientation(rawOrientation) ? rawOrientation : 'all',
-    sort: rawSort !== null && isCatalogSort(rawSort) ? rawSort : 'featured',
+    query:
+      (
+        params.get(
+          'q',
+        ) ??
+        ''
+      ).slice(
+        0,
+        100,
+      ),
+
+    category:
+      isCategory(
+        rawCategory,
+      )
+        ? rawCategory
+        : 'all',
+
+    occasion:
+      rawOccasion ===
+        'all'
+        ? 'all'
+        : isOccasion(
+              rawOccasion,
+            )
+          ? rawOccasion
+          : defaultOccasion,
+
+    recipient:
+      rawRecipient !==
+        null &&
+      isRecipientType(
+        rawRecipient,
+      )
+        ? rawRecipient
+        : 'all',
+
+    style:
+      rawStyle !==
+        null &&
+      isCardStyle(
+        rawStyle,
+      )
+        ? rawStyle
+        : 'all',
+
+    color:
+      rawColor !==
+        null &&
+      isCardColor(
+        rawColor,
+      )
+        ? rawColor
+        : 'all',
+
+    language:
+      rawLanguage !==
+        null &&
+      isCardLanguage(
+        rawLanguage,
+      )
+        ? rawLanguage
+        : 'all',
+
+    orientation:
+      rawOrientation !==
+        null &&
+      isCardOrientation(
+        rawOrientation,
+      )
+        ? rawOrientation
+        : 'all',
+
+    sort:
+      rawSort !==
+        null &&
+      isCatalogSort(
+        rawSort,
+      )
+        ? rawSort
+        : 'featured',
   };
 }
 
 export function updateCatalogParams(
-  current: URLSearchParams,
-  filters: CatalogFilters,
-  defaultOccasion: CardOccasion | 'all' = 'all',
+  current:
+    URLSearchParams,
+  filters:
+    CatalogFilters,
+  defaultOccasion:
+    CardOccasion | 'all' =
+    'all',
 ): URLSearchParams {
-  const next = new URLSearchParams(current);
-  catalogParamKeys.forEach((key) => next.delete(key));
+  const next =
+    new URLSearchParams(
+      current,
+    );
 
-  if (filters.query) next.set('q', filters.query.slice(0, 100));
-  if (filters.category !== 'all') next.set('category', filters.category);
-  if (filters.occasion !== defaultOccasion) next.set('occasion', filters.occasion);
-  if (filters.recipient !== 'all') next.set('recipient', filters.recipient);
-  if (filters.style !== 'all') next.set('style', filters.style);
-  if (filters.color !== 'all') next.set('color', filters.color);
-  if (filters.language !== 'all') next.set('language', filters.language);
-  if (filters.orientation !== 'all') next.set('orientation', filters.orientation);
-  if (filters.sort !== 'featured') next.set('sort', filters.sort);
+  catalogParamKeys.forEach(
+    (
+      key,
+    ) =>
+      next.delete(
+        key,
+      ),
+  );
+
+  if (filters.query) {
+    next.set(
+      'q',
+      filters.query.slice(
+        0,
+        100,
+      ),
+    );
+  }
+
+  if (
+    filters.category !==
+    'all'
+  ) {
+    next.set(
+      'category',
+      filters.category,
+    );
+  }
+
+  if (
+    filters.occasion !==
+    defaultOccasion
+  ) {
+    next.set(
+      'occasion',
+      filters.occasion,
+    );
+  }
+
+  if (
+    filters.recipient !==
+    'all'
+  ) {
+    next.set(
+      'recipient',
+      filters.recipient,
+    );
+  }
+
+  if (
+    filters.style !==
+    'all'
+  ) {
+    next.set(
+      'style',
+      filters.style,
+    );
+  }
+
+  if (
+    filters.color !==
+    'all'
+  ) {
+    next.set(
+      'color',
+      filters.color,
+    );
+  }
+
+  if (
+    filters.language !==
+    'all'
+  ) {
+    next.set(
+      'language',
+      filters.language,
+    );
+  }
+
+  if (
+    filters.orientation !==
+    'all'
+  ) {
+    next.set(
+      'orientation',
+      filters.orientation,
+    );
+  }
+
+  if (
+    filters.sort !==
+    'featured'
+  ) {
+    next.set(
+      'sort',
+      filters.sort,
+    );
+  }
 
   return next;
 }
 
 export function filterAndSortCards(
-  cards: readonly CardOption[],
-  filters: CatalogFilters,
-  language: CardLanguage,
+  cards:
+    readonly CardOption[],
+  filters:
+    CatalogFilters,
+  language:
+    CardLanguage,
 ): CardOption[] {
-  const query = normalizeSearch(filters.query);
-  const filtered = cards.filter((card) => {
-    if (filters.category !== 'all' && card.category !== filters.category) return false;
-    if (filters.occasion !== 'all' && card.occasion !== filters.occasion) return false;
-    if (filters.recipient !== 'all' && !card.recipientTypes.includes(filters.recipient)) return false;
-    if (filters.style !== 'all' && !card.styles.includes(filters.style)) return false;
-    if (filters.color !== 'all' && !card.colors.includes(filters.color)) return false;
-    if (filters.language !== 'all' && !card.languages.includes(filters.language)) return false;
-    if (filters.orientation !== 'all' && card.orientation !== filters.orientation) return false;
-    if (!query) return true;
+  const query =
+    normalizeSearch(
+      filters.query,
+    );
 
-    const searchable = [
-      ...Object.values(card.title),
-      ...Object.values(card.badge),
-      ...Object.values(card.description),
-      card.occasion,
-      ...card.searchTerms,
-    ].map(normalizeSearch).join(' ');
+  const filtered =
+    cards.filter(
+      (
+        card,
+      ) => {
+        if (
+          filters.category !==
+            'all' &&
+          card.category !==
+            filters.category
+        ) {
+          return false;
+        }
 
-    return searchable.includes(query);
-  });
+        if (
+          filters.occasion !==
+            'all' &&
+          !cardMatchesOccasion(
+            card,
+            filters.occasion,
+          )
+        ) {
+          return false;
+        }
 
-  if (filters.sort === 'name-asc' || filters.sort === 'name-desc') {
-    const collator = new Intl.Collator(language, { sensitivity: 'base' });
-    return filtered.sort((left, right) => {
-      const comparison = collator.compare(left.title[language], right.title[language]);
-      return filters.sort === 'name-asc' ? comparison : -comparison;
-    });
+        if (
+          filters.recipient !==
+            'all' &&
+          !card.recipientTypes.includes(
+            filters.recipient,
+          )
+        ) {
+          return false;
+        }
+
+        if (
+          filters.style !==
+            'all' &&
+          !card.styles.includes(
+            filters.style,
+          )
+        ) {
+          return false;
+        }
+
+        if (
+          filters.color !==
+            'all' &&
+          !card.colors.includes(
+            filters.color,
+          )
+        ) {
+          return false;
+        }
+
+        if (
+          filters.language !==
+            'all' &&
+          !card.languages.includes(
+            filters.language,
+          )
+        ) {
+          return false;
+        }
+
+        if (
+          filters.orientation !==
+            'all' &&
+          card.orientation !==
+            filters.orientation
+        ) {
+          return false;
+        }
+
+        if (!query) {
+          return true;
+        }
+
+        const searchable = [
+          ...Object.values(
+            card.title,
+          ),
+
+          ...Object.values(
+            card.badge,
+          ),
+
+          ...Object.values(
+            card.description,
+          ),
+
+          card.occasion,
+
+          ...card.searchTerms,
+        ]
+          .map(
+            normalizeSearch,
+          )
+          .join(
+            ' ',
+          );
+
+        return searchable.includes(
+          query,
+        );
+      },
+    );
+
+  if (
+    filters.sort ===
+      'name-asc' ||
+    filters.sort ===
+      'name-desc'
+  ) {
+    const collator =
+      new Intl.Collator(
+        language,
+        {
+          sensitivity:
+            'base',
+        },
+      );
+
+    return filtered.sort(
+      (
+        left,
+        right,
+      ) => {
+        const comparison =
+          collator.compare(
+            left.title[
+              language
+            ],
+            right.title[
+              language
+            ],
+          );
+
+        return filters.sort ===
+          'name-asc'
+          ? comparison
+          : -comparison;
+      },
+    );
   }
 
   return filtered.sort(
-    (left, right) =>
-      Number(Boolean(right.featured)) - Number(Boolean(left.featured)) ||
-      cards.indexOf(left) - cards.indexOf(right),
+    (
+      left,
+      right,
+    ) =>
+      Number(
+        Boolean(
+          right.featured,
+        ),
+      ) -
+        Number(
+          Boolean(
+            left.featured,
+          ),
+        ) ||
+      cards.indexOf(
+        left,
+      ) -
+        cards.indexOf(
+          right,
+        ),
   );
 }
 
-export function getCardBySlug(slug: string): CardOption | undefined {
-  return cardOptions.find((card) => card.slug === slug);
+export function getCardBySlug(
+  slug:
+    string,
+): CardOption | undefined {
+  return cardOptions.find(
+    (
+      card,
+    ) =>
+      card.slug ===
+      slug,
+  );
 }
 
-export function getCardsByOccasion(occasion: CardOccasion): CardOption[] {
-  return cardOptions.filter((card) => card.occasion === occasion);
+/*
+ * Just Because returns all cards from the curated
+ * Just Because collection.
+ *
+ * All other occasions keep their normal exact
+ * occasion matching.
+ */
+export function getCardsByOccasion(
+  occasion:
+    CardOccasion,
+): CardOption[] {
+  return cardOptions.filter(
+    (
+      card,
+    ) =>
+      cardMatchesOccasion(
+        card,
+        occasion,
+      ),
+  );
 }
 
-export function isCardOccasion(value: string): value is CardOccasion {
-  return cardOccasions.some((occasion) => occasion === value);
+export function isCardOccasion(
+  value:
+    string,
+): value is CardOccasion {
+  return cardOccasions.some(
+    (
+      occasion,
+    ) =>
+      occasion ===
+      value,
+  );
 }
 
-export function isCatalogCategory(value: string): value is CardCategory {
-  return value === 'celebrations' || value === 'milestones';
+export function isCatalogCategory(
+  value:
+    string,
+): value is CardCategory {
+  return (
+    value ===
+      'celebrations' ||
+    value ===
+      'milestones'
+  );
 }
 
-export function getArtworkPath(card: CardOption): string {
-  return card.artwork.type === 'local-image' ? card.artwork.src : '/images/logo.jpg';
+export function getArtworkPath(
+  card:
+    CardOption,
+): string {
+  return card.artwork.type ===
+    'local-image'
+    ? card.artwork.src
+    : '/images/logo.jpg';
 }

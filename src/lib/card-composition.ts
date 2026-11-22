@@ -3,10 +3,11 @@ import type {
   CardOption,
 } from './card-types';
 
-import type {
-  EditorPosition,
-  EditorSideState,
-  EditorTextLayer,
+import {
+  PHOTO_FRAME_SIZES,
+  type EditorPosition,
+  type EditorSideState,
+  type EditorTextLayer,
 } from './card-editor';
 
 import {
@@ -55,27 +56,42 @@ const standardTextHeights: Record<
   EditorTextLayer,
   number
 > = {
-  recipient: 18,
-  message: 28,
-  sender: 16,
+  recipient:
+    18,
+
+  message:
+    28,
+
+  sender:
+    16,
 };
 
 const birthdayFrontTextHeights: Record<
   EditorTextLayer,
   number
 > = {
-  recipient: 7,
-  message: 23,
-  sender: 7,
+  recipient:
+    7,
+
+  message:
+    23,
+
+  sender:
+    7,
 };
 
 const insideTextHeights: Record<
   EditorTextLayer,
   number
 > = {
-  recipient: 10,
-  message: 30,
-  sender: 9,
+  recipient:
+    10,
+
+  message:
+    30,
+
+  sender:
+    9,
 };
 
 const standardFrontPositions: Record<
@@ -83,18 +99,27 @@ const standardFrontPositions: Record<
   EditorPosition
 > = {
   recipient: {
-    x: 50,
-    y: 14,
+    x:
+      50,
+
+    y:
+      14,
   },
 
   message: {
-    x: 50,
-    y: 70,
+    x:
+      50,
+
+    y:
+      70,
   },
 
   sender: {
-    x: 50,
-    y: 92,
+    x:
+      50,
+
+    y:
+      92,
   },
 };
 
@@ -103,18 +128,27 @@ const birthdayFrontPositions: Record<
   EditorPosition
 > = {
   recipient: {
-    x: 50,
-    y: 65,
+    x:
+      50,
+
+    y:
+      65,
   },
 
   message: {
-    x: 50,
-    y: 80,
+    x:
+      50,
+
+    y:
+      80,
   },
 
   sender: {
-    x: 50,
-    y: 96,
+    x:
+      50,
+
+    y:
+      96,
   },
 };
 
@@ -123,18 +157,27 @@ const insidePositions: Record<
   EditorPosition
 > = {
   recipient: {
-    x: 50,
-    y: 20,
+    x:
+      50,
+
+    y:
+      20,
   },
 
   message: {
-    x: 50,
-    y: 53,
+    x:
+      50,
+
+    y:
+      53,
   },
 
   sender: {
-    x: 50,
-    y: 84,
+    x:
+      50,
+
+    y:
+      84,
   },
 };
 
@@ -143,8 +186,10 @@ export function getCardComposition(
   side: CardSide,
 ): CardCompositionLayout {
   const isBirthdayFront =
-    card.id === 'dhalasho' &&
-    side === 'front';
+    card.id ===
+      'dhalasho' &&
+    side ===
+      'front';
 
   const productionProfile =
     getCardProductionProfile(
@@ -153,7 +198,8 @@ export function getCardComposition(
 
   return {
     showArtwork:
-      side === 'front',
+      side ===
+      'front',
 
     showBrand:
       false,
@@ -162,7 +208,8 @@ export function getCardComposition(
       isBirthdayFront,
 
     defaultTextColor:
-      side === 'inside'
+      side ===
+        'inside'
         ? cardInsideColors.text
         : isBirthdayFront
           ? '#5a3129'
@@ -171,32 +218,49 @@ export function getCardComposition(
     textHeights:
       isBirthdayFront
         ? birthdayFrontTextHeights
-        : side === 'inside'
+        : side ===
+            'inside'
           ? insideTextHeights
           : standardTextHeights,
 
     defaultTextPositions:
-      side === 'inside'
+      side ===
+        'inside'
         ? insidePositions
         : isBirthdayFront
           ? birthdayFrontPositions
           : standardFrontPositions,
 
     defaultPhotoPosition:
-      side === 'front' &&
-      productionProfile
-        ? productionProfile
-            .photo
-            .defaultPosition
-        : isBirthdayFront
-          ? {
-              x: 89,
-              y: 31,
-            }
-          : {
-              x: 84,
-              y: 80,
-            },
+      side ===
+        'inside'
+        ? {
+            x:
+              50,
+
+            y:
+              50,
+          }
+        : side ===
+              'front' &&
+            productionProfile
+          ? productionProfile.photo
+              .defaultPosition
+          : isBirthdayFront
+            ? {
+                x:
+                  89,
+
+                y:
+                  31,
+              }
+            : {
+                x:
+                  50,
+
+                y:
+                  50,
+              },
   };
 }
 
@@ -253,7 +317,8 @@ function getSvgFontFamily(
   family: string,
 ): string {
   if (
-    family in fontFamilies
+    family in
+    fontFamilies
   ) {
     return fontFamilies[
       family as keyof
@@ -278,16 +343,23 @@ function renderTextLayer(
   }
 
   const position =
-    side.textPositions[layer];
+    side.textPositions[
+      layer
+    ];
 
   const style =
-    side.textStyles[layer];
+    side.textStyles[
+      layer
+    ];
 
   const height =
-    layout.textHeights[layer];
+    layout.textHeights[
+      layer
+    ];
 
   const x =
-    position.x - 43;
+    position.x -
+    43;
 
   const y =
     position.y -
@@ -295,7 +367,8 @@ function renderTextLayer(
 
   const fontSize =
     layout.protectsBirthdayArtwork
-      ? layer === 'message'
+      ? layer ===
+          'message'
         ? Math.max(
             8,
             Math.min(
@@ -304,6 +377,7 @@ function renderTextLayer(
                 canvasWidth
               ) /
                 550,
+
               canvasWidth *
                 0.052,
             ),
@@ -314,6 +388,7 @@ function renderTextLayer(
               canvasWidth
             ) /
               500,
+
             canvasWidth *
               0.065,
           )
@@ -329,7 +404,8 @@ function renderTextLayer(
       : 1.18;
 
   const justifyContent =
-    style.align === 'left'
+    style.align ===
+      'left'
       ? 'flex-start'
       : style.align ===
           'right'
@@ -338,8 +414,7 @@ function renderTextLayer(
 
   const textShadow =
     layout.showArtwork &&
-    !layout
-      .protectsBirthdayArtwork
+    !layout.protectsBirthdayArtwork
       ? '0 2px 8px #000, 0 1px 2px #000'
       : 'none';
 
@@ -370,6 +445,7 @@ function renderTextLayer(
     '<foreignObject',
 
     ` x="${x}%"`,
+
     ` y="${y}%"`,
 
     ' width="86%"',
@@ -446,6 +522,230 @@ function renderTextLayer(
   ].join('');
 }
 
+function renderPhotoLayer(
+  side: EditorSideState,
+  canvasWidth: number,
+  canvasHeight: number,
+  photoDataUrl?: string,
+): string {
+  const photo =
+    side.photo;
+
+  if (
+    !photo ||
+    !photoDataUrl
+  ) {
+    return '';
+  }
+
+  const framePercent =
+    PHOTO_FRAME_SIZES[
+      photo.frameSize
+    ] ??
+    PHOTO_FRAME_SIZES.large;
+
+  const frameWidth =
+    canvasWidth *
+    (
+      framePercent /
+      100
+    );
+
+  const frameHeight =
+    canvasHeight *
+    (
+      framePercent /
+      100
+    );
+
+  const frameX =
+    (
+      canvasWidth -
+      frameWidth
+    ) /
+    2;
+
+  const frameY =
+    (
+      canvasHeight -
+      frameHeight
+    ) /
+    2;
+
+  const zoom =
+    Math.max(
+      1,
+      photo.scale,
+    );
+
+  const scaledWidth =
+    frameWidth *
+    zoom;
+
+  const scaledHeight =
+    frameHeight *
+    zoom;
+
+  const focusX =
+    Math.min(
+      100,
+      Math.max(
+        0,
+        photo.x,
+      ),
+    ) /
+    100;
+
+  const focusY =
+    Math.min(
+      100,
+      Math.max(
+        0,
+        photo.y,
+      ),
+    ) /
+    100;
+
+  const overflowX =
+    Math.max(
+      0,
+      scaledWidth -
+      frameWidth,
+    );
+
+  const overflowY =
+    Math.max(
+      0,
+      scaledHeight -
+      frameHeight,
+    );
+
+  const imageX =
+    frameX -
+    overflowX *
+      focusX;
+
+  const imageY =
+    frameY -
+    overflowY *
+      focusY;
+
+  const centerX =
+    frameX +
+    frameWidth / 2;
+
+  const centerY =
+    frameY +
+    frameHeight / 2;
+
+  const clipRadius =
+    Math.max(
+      18,
+      Math.min(
+        frameWidth,
+        frameHeight,
+      ) *
+        0.035,
+    );
+
+  return [
+    '<defs>',
+
+    '<clipPath id="photo-frame-clip">',
+
+    '<rect',
+
+    ` x="${frameX}"`,
+
+    ` y="${frameY}"`,
+
+    ` width="${frameWidth}"`,
+
+    ` height="${frameHeight}"`,
+
+    ` rx="${clipRadius}"`,
+
+    ` ry="${clipRadius}"`,
+
+    '/>',
+
+    '</clipPath>',
+
+    '</defs>',
+
+    '<rect',
+
+    ` x="${frameX}"`,
+
+    ` y="${frameY}"`,
+
+    ` width="${frameWidth}"`,
+
+    ` height="${frameHeight}"`,
+
+    ` rx="${clipRadius}"`,
+
+    ` ry="${clipRadius}"`,
+
+    ' fill="#f6eddf"',
+
+    ` stroke="${cardInsideColors.border}"`,
+
+    ' stroke-width="3"',
+
+    '/>',
+
+    '<image',
+
+    ` href="${escapeXml(
+      photoDataUrl,
+    )}"`,
+
+    ` x="${imageX}"`,
+
+    ` y="${imageY}"`,
+
+    ` width="${scaledWidth}"`,
+
+    ` height="${scaledHeight}"`,
+
+    ' preserveAspectRatio="xMidYMid slice"',
+
+    ` transform="rotate(${
+      photo.rotation ??
+      0
+    } ${centerX} ${centerY})"`,
+
+    ' clip-path="url(#photo-frame-clip)"',
+
+    '/>',
+
+    '<rect',
+
+    ` x="${frameX}"`,
+
+    ` y="${frameY}"`,
+
+    ` width="${frameWidth}"`,
+
+    ` height="${frameHeight}"`,
+
+    ` rx="${clipRadius}"`,
+
+    ` ry="${clipRadius}"`,
+
+    ' fill="none"',
+
+    ' stroke="#ffffff"',
+
+    ' stroke-opacity=".7"',
+
+    ' stroke-width="5"',
+
+    '/>',
+  ].join('');
+}
+
 export function renderCardSvg(
   card: CardOption,
   language: CardLanguage,
@@ -459,13 +759,6 @@ export function renderCardSvg(
       card.id,
     );
 
-  /*
-   * Cards with a production profile use their
-   * supplier-independent digital canvas.
-   *
-   * Existing cards without a production profile
-   * keep their historical dimensions unchanged.
-   */
   const width =
     productionProfile
       ?.digital.width ??
@@ -476,7 +769,7 @@ export function renderCardSvg(
       ?.digital.height ??
     (
       card.orientation ===
-      'portrait'
+        'portrait'
         ? 1464
         : 968
     );
@@ -487,131 +780,18 @@ export function renderCardSvg(
       cardSide,
     );
 
-  const photo =
-    side.photo;
-
-  /*
-   * Keep the current 22% photo sizing for now so
-   * existing editor behaviour remains unchanged.
-   *
-   * Production-profile photo sizing will be wired
-   * in only after the digital preview and SVG export
-   * have been verified to match.
-   */
-  const photoWidthPercent =
-    22;
-
-  const photoSize =
-    width *
-    (
-      photoWidthPercent /
-      100
-    ) *
-    (
-      photo?.scale ??
-      1
-    );
-
-  const photoCenterX =
-    (
-      (
-        photo?.x ??
-        50
-      ) /
-      100
-    ) *
-    width;
-
-  const photoCenterY =
-    (
-      (
-        photo?.y ??
-        50
-      ) /
-      100
-    ) *
-    height;
-
-  const photoRadius =
-    width *
-    (
-      photoWidthPercent /
-      200
-    );
-
   const photoMarkup =
-    photo &&
-    photoDataUrl
-      ? [
-          '<defs>',
-
-          '<clipPath id="photo-clip">',
-
-          '<circle',
-
-          ` cx="${photoCenterX}"`,
-
-          ` cy="${photoCenterY}"`,
-
-          ` r="${photoRadius}"`,
-
-          '/>',
-
-          '</clipPath>',
-
-          '</defs>',
-
-          '<circle',
-
-          ` cx="${photoCenterX}"`,
-
-          ` cy="${photoCenterY}"`,
-
-          ` r="${photoRadius}"`,
-
-          ' fill="#fffefa"',
-
-          ' opacity=".96"',
-
-          '/>',
-
-          '<image',
-
-          ` href="${escapeXml(
-            photoDataUrl,
-          )}"`,
-
-          ` x="${
-            photoCenterX -
-            photoSize / 2
-          }"`,
-
-          ` y="${
-            photoCenterY -
-            photoSize / 2
-          }"`,
-
-          ` width="${photoSize}"`,
-
-          ` height="${photoSize}"`,
-
-          ' preserveAspectRatio="xMidYMid slice"',
-
-          ` transform="rotate(${
-            photo.rotation ??
-            0
-          } ${photoCenterX} ${photoCenterY})"`,
-
-          ' clip-path="url(#photo-clip)"',
-
-          '/>',
-        ].join('')
-      : '';
+    renderPhotoLayer(
+      side,
+      width,
+      height,
+      photoDataUrl,
+    );
 
   const artwork =
     layout.showArtwork
       ? card.artwork.type ===
-        'local-image'
+          'local-image'
         ? [
             '<image',
 
@@ -620,6 +800,7 @@ export function renderCardSvg(
             )}"`,
 
             ' x="0"',
+
             ' y="0"',
 
             ` width="${width}"`,
@@ -638,8 +819,7 @@ export function renderCardSvg(
             ` height="${height}"`,
 
             ` fill="${escapeXml(
-              card.artwork
-                .background,
+              card.artwork.background,
             )}"`,
 
             '/>',
@@ -658,6 +838,7 @@ export function renderCardSvg(
           '<rect',
 
           ' x="28"',
+
           ' y="28"',
 
           ` width="${
@@ -669,6 +850,7 @@ export function renderCardSvg(
           }"`,
 
           ' rx="28"',
+
           ' fill="none"',
 
           ` stroke="${cardInsideColors.border}"`,

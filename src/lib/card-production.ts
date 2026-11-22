@@ -2,6 +2,10 @@ import type {
   CardOrientation,
 } from './card-types';
 
+import type {
+  EditorPhotoFrameSize,
+} from './card-editor';
+
 export type ProductionProductType =
   | 'digital'
   | 'premium-print'
@@ -25,13 +29,35 @@ export interface ProductionSafeZone {
   left: number;
 }
 
+export interface ProductionPhotoFrame {
+  widthPercent: number;
+  heightPercent: number;
+}
+
 export interface ProductionPhotoProfile {
   allowed: boolean;
-  shape: 'circle';
-  widthPercent: number;
+
+  shape:
+    'rounded-rectangle';
+
+  defaultFrameSize:
+    EditorPhotoFrameSize;
+
+  frameSizes: Record<
+    EditorPhotoFrameSize,
+    ProductionPhotoFrame
+  >;
+
   defaultPosition: {
     x: number;
     y: number;
+  };
+
+  safeInsetPercent: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
   };
 }
 
@@ -47,104 +73,151 @@ export interface CardProductionProfile {
 
   digital: ProductionDimensions;
 
-  /**
-   * High-resolution internal production master.
-   *
-   * This is intentionally supplier-independent.
-   * Gelato/Printful-specific bleed dimensions will
-   * be added only after we select and test a product.
-   */
-  productionMaster: ProductionDimensions;
+  productionMaster:
+    ProductionDimensions;
 
-  physical: ProductionPhysicalDimensions;
+  physical:
+    ProductionPhysicalDimensions;
 
-  /**
-   * Percentage of the finished design that should
-   * remain clear of critical text and personalisation.
-   */
-  safeZone: ProductionSafeZone;
+  safeZone:
+    ProductionSafeZone;
 
-  photo: ProductionPhotoProfile;
+  photo:
+    ProductionPhotoProfile;
 
-  products: ProductionProductType[];
+  products:
+    ProductionProductType[];
 }
 
-/**
- * First HadiyadPay physical-production master.
- *
- * The original wedding.svg artwork has a native
- * 1200 × 900 viewBox, which is exactly 4:3.
- *
- * We preserve that ratio across:
- *
- * - digital Hadiyad
- * - production master
- * - 40 × 30 cm print
- * - 40 × 30 cm framed products
- */
-const aroosProductionProfile: CardProductionProfile = {
-  cardId:
-    'aroos',
+const aroosProductionProfile:
+  CardProductionProfile = {
+    cardId:
+      'aroos',
 
-  orientation:
-    'landscape',
+    orientation:
+      'landscape',
 
-  aspectRatio: {
-    width: 4,
-    height: 3,
-  },
+    aspectRatio: {
+      width:
+        4,
 
-  digital: {
-    width: 1200,
-    height: 900,
-  },
-
-  productionMaster: {
-    width: 4800,
-    height: 3600,
-  },
-
-  physical: {
-    widthMm: 400,
-    heightMm: 300,
-  },
-
-  safeZone: {
-    top: 8,
-    right: 8,
-    bottom: 8,
-    left: 8,
-  },
-
-  photo: {
-    allowed: true,
-
-    shape:
-      'circle',
-
-    widthPercent: 20,
-
-    defaultPosition: {
-      x: 84,
-      y: 76,
+      height:
+        3,
     },
-  },
 
-  products: [
-    'digital',
-    'premium-print',
-    'black-frame',
-    'natural-frame',
-  ],
-};
+    digital: {
+      width:
+        1200,
 
-const productionProfiles: Record<
-  string,
-  CardProductionProfile
-> = {
-  aroos:
-    aroosProductionProfile,
-};
+      height:
+        900,
+    },
+
+    productionMaster: {
+      width:
+        4800,
+
+      height:
+        3600,
+    },
+
+    physical: {
+      widthMm:
+        400,
+
+      heightMm:
+        300,
+    },
+
+    safeZone: {
+      top:
+        8,
+
+      right:
+        8,
+
+      bottom:
+        8,
+
+      left:
+        8,
+    },
+
+    photo: {
+      allowed:
+        true,
+
+      shape:
+        'rounded-rectangle',
+
+      defaultFrameSize:
+        'large',
+
+      frameSizes: {
+        small: {
+          widthPercent:
+            58,
+
+          heightPercent:
+            58,
+        },
+
+        medium: {
+          widthPercent:
+            76,
+
+          heightPercent:
+            76,
+        },
+
+        large: {
+          widthPercent:
+            92,
+
+          heightPercent:
+            92,
+        },
+      },
+
+      defaultPosition: {
+        x:
+          50,
+
+        y:
+          50,
+      },
+
+      safeInsetPercent: {
+        top:
+          4,
+
+        right:
+          5,
+
+        bottom:
+          4,
+
+        left:
+          4,
+      },
+    },
+
+    products: [
+      'digital',
+      'premium-print',
+      'black-frame',
+      'natural-frame',
+    ],
+  };
+
+const productionProfiles:
+  Record<
+    string,
+    CardProductionProfile
+  > = {
+    aroos:
+      aroosProductionProfile,
+  };
 
 export function getCardProductionProfile(
   cardId: string,
@@ -170,7 +243,10 @@ export function hasPhysicalProductionProfile(
   }
 
   return profile.products.some(
-    (product) =>
-      product !== 'digital',
+    (
+      product,
+    ) =>
+      product !==
+      'digital',
   );
 }

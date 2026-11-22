@@ -3,9 +3,10 @@ import type {
   CardOption,
 } from './card-types';
 
-import type {
-  EditorSideState,
-  EditorTextLayer,
+import {
+  PHOTO_FRAME_SIZES,
+  type EditorSideState,
+  type EditorTextLayer,
 } from './card-editor';
 
 import {
@@ -60,8 +61,7 @@ function getSvgFontFamily(
     family in fontFamilies
   ) {
     return fontFamilies[
-      family as keyof
-        typeof fontFamilies
+      family as keyof typeof fontFamilies
     ];
   }
 
@@ -82,14 +82,10 @@ function renderProductionTextLayer(
   }
 
   const position =
-    side.textPositions[
-      layer
-    ];
+    side.textPositions[layer];
 
   const style =
-    side.textStyles[
-      layer
-    ];
+    side.textStyles[layer];
 
   const x =
     position.x - 43;
@@ -98,15 +94,6 @@ function renderProductionTextLayer(
     position.y -
     textHeightPercent / 2;
 
-  /*
-   * The digital renderer uses:
-   *
-   * style.size * 1200 / 400
-   *
-   * By tying typography to canvasWidth,
-   * the same visual scale is preserved
-   * when moving from 1200px to 4800px.
-   */
   const fontSize =
     (
       style.size *
@@ -217,6 +204,229 @@ function renderProductionTextLayer(
   ].join('');
 }
 
+function renderProductionPhotoLayer(
+  side: EditorSideState,
+  canvasWidth: number,
+  canvasHeight: number,
+  photoDataUrl?: string,
+): string {
+  const photo =
+    side.photo;
+
+  if (
+    !photo ||
+    !photoDataUrl
+  ) {
+    return '';
+  }
+
+  const framePercent =
+    PHOTO_FRAME_SIZES[
+      photo.frameSize
+    ] ??
+    PHOTO_FRAME_SIZES.large;
+
+  const frameWidth =
+    canvasWidth *
+    (
+      framePercent /
+      100
+    );
+
+  const frameHeight =
+    canvasHeight *
+    (
+      framePercent /
+      100
+    );
+
+  const frameX =
+    (
+      canvasWidth -
+      frameWidth
+    ) /
+    2;
+
+  const frameY =
+    (
+      canvasHeight -
+      frameHeight
+    ) /
+    2;
+
+  const zoom =
+    Math.max(
+      1,
+      photo.scale,
+    );
+
+  const imageWidth =
+    frameWidth *
+    zoom;
+
+  const imageHeight =
+    frameHeight *
+    zoom;
+
+  const focusX =
+    Math.min(
+      100,
+      Math.max(
+        0,
+        photo.x,
+      ),
+    ) /
+    100;
+
+  const focusY =
+    Math.min(
+      100,
+      Math.max(
+        0,
+        photo.y,
+      ),
+    ) /
+    100;
+
+  const horizontalOverflow =
+    Math.max(
+      0,
+      imageWidth -
+        frameWidth,
+    );
+
+  const verticalOverflow =
+    Math.max(
+      0,
+      imageHeight -
+        frameHeight,
+    );
+
+  const imageX =
+    frameX -
+    horizontalOverflow *
+      focusX;
+
+  const imageY =
+    frameY -
+    verticalOverflow *
+      focusY;
+
+  const centerX =
+    frameX +
+    frameWidth / 2;
+
+  const centerY =
+    frameY +
+    frameHeight / 2;
+
+  const cornerRadius =
+    Math.max(
+      24,
+      Math.min(
+        frameWidth,
+        frameHeight,
+      ) *
+        0.035,
+    );
+
+  return [
+    '<defs>',
+
+    '<clipPath id="production-photo-clip">',
+
+    '<rect',
+
+    ` x="${frameX}"`,
+
+    ` y="${frameY}"`,
+
+    ` width="${frameWidth}"`,
+
+    ` height="${frameHeight}"`,
+
+    ` rx="${cornerRadius}"`,
+
+    ` ry="${cornerRadius}"`,
+
+    '/>',
+
+    '</clipPath>',
+
+    '</defs>',
+
+    '<rect',
+
+    ` x="${frameX}"`,
+
+    ` y="${frameY}"`,
+
+    ` width="${frameWidth}"`,
+
+    ` height="${frameHeight}"`,
+
+    ` rx="${cornerRadius}"`,
+
+    ` ry="${cornerRadius}"`,
+
+    ' fill="#f6eddf"',
+
+    ' stroke="#d8bd8d"',
+
+    ' stroke-width="4"',
+
+    '/>',
+
+    '<image',
+
+    ` href="${escapeXml(
+      photoDataUrl,
+    )}"`,
+
+    ` x="${imageX}"`,
+
+    ` y="${imageY}"`,
+
+    ` width="${imageWidth}"`,
+
+    ` height="${imageHeight}"`,
+
+    ' preserveAspectRatio="xMidYMid slice"',
+
+    ` transform="rotate(${
+      photo.rotation
+    } ${centerX} ${centerY})"`,
+
+    ' clip-path="url(#production-photo-clip)"',
+
+    '/>',
+
+    '<rect',
+
+    ` x="${frameX}"`,
+
+    ` y="${frameY}"`,
+
+    ` width="${frameWidth}"`,
+
+    ` height="${frameHeight}"`,
+
+    ` rx="${cornerRadius}"`,
+
+    ` ry="${cornerRadius}"`,
+
+    ' fill="none"',
+
+    ' stroke="#ffffff"',
+
+    ' stroke-opacity=".75"',
+
+    ' stroke-width="6"',
+
+    '/>',
+  ].join('');
+}
+
 export function renderProductionCardSvg(
   card: CardOption,
   language: CardLanguage,
@@ -251,128 +461,16 @@ export function renderProductionCardSvg(
       'front',
     );
 
-  const photo =
-    side.photo;
-
-  const photoWidthPercent =
-    productionProfile
-      .photo
-      .widthPercent;
-
-  const photoSize =
-    width *
-    (
-      photoWidthPercent /
-      100
-    ) *
-    (
-      photo?.scale ??
-      1
-    );
-
-  const photoCenterX =
-    (
-      (
-        photo?.x ??
-        productionProfile
-          .photo
-          .defaultPosition
-          .x
-      ) /
-      100
-    ) *
-    width;
-
-  const photoCenterY =
-    (
-      (
-        photo?.y ??
-        productionProfile
-          .photo
-          .defaultPosition
-          .y
-      ) /
-      100
-    ) *
-    height;
-
-  const photoRadius =
-    width *
-    (
-      photoWidthPercent /
-      200
-    );
-
   const photoMarkup =
     productionProfile
       .photo
-      .allowed &&
-    photo &&
-    photoDataUrl
-      ? [
-          '<defs>',
-
-          '<clipPath id="production-photo-clip">',
-
-          '<circle',
-
-          ` cx="${photoCenterX}"`,
-
-          ` cy="${photoCenterY}"`,
-
-          ` r="${photoRadius}"`,
-
-          '/>',
-
-          '</clipPath>',
-
-          '</defs>',
-
-          '<circle',
-
-          ` cx="${photoCenterX}"`,
-
-          ` cy="${photoCenterY}"`,
-
-          ` r="${photoRadius}"`,
-
-          ' fill="#fffefa"',
-
-          ' opacity=".96"',
-
-          '/>',
-
-          '<image',
-
-          ` href="${escapeXml(
-            photoDataUrl,
-          )}"`,
-
-          ` x="${
-            photoCenterX -
-            photoSize / 2
-          }"`,
-
-          ` y="${
-            photoCenterY -
-            photoSize / 2
-          }"`,
-
-          ` width="${photoSize}"`,
-
-          ` height="${photoSize}"`,
-
-          ' preserveAspectRatio="xMidYMid slice"',
-
-          ` transform="rotate(${
-            photo.rotation ??
-            0
-          } ${photoCenterX} ${photoCenterY})"`,
-
-          ' clip-path="url(#production-photo-clip)"',
-
-          '/>',
-        ].join('')
+      .allowed
+      ? renderProductionPhotoLayer(
+          side,
+          width,
+          height,
+          photoDataUrl,
+        )
       : '';
 
   const artwork =
@@ -405,8 +503,7 @@ export function renderProductionCardSvg(
           ` height="${height}"`,
 
           ` fill="${escapeXml(
-            card.artwork
-              .background,
+            card.artwork.background,
           )}"`,
 
           '/>',
@@ -417,8 +514,7 @@ export function renderProductionCardSvg(
       side,
       'recipient',
       width,
-      layout
-        .textHeights
+      layout.textHeights
         .recipient,
     );
 
@@ -427,8 +523,7 @@ export function renderProductionCardSvg(
       side,
       'message',
       width,
-      layout
-        .textHeights
+      layout.textHeights
         .message,
     );
 
@@ -437,8 +532,7 @@ export function renderProductionCardSvg(
       side,
       'sender',
       width,
-      layout
-        .textHeights
+      layout.textHeights
         .sender,
     );
 

@@ -16,6 +16,11 @@ import {
 } from '../../../../data/cardOptions';
 
 import {
+  getCardArtworkSource,
+  type CardArtworkSource,
+} from '../../../../../lib/card-types';
+
+import {
   parseOrderDraft,
 } from '../../../../../lib/card-order';
 
@@ -41,6 +46,36 @@ import {
 
 export const runtime =
   'nodejs';
+
+function getArtworkMimeType(
+  source: CardArtworkSource,
+): string {
+  if (
+    source.endsWith(
+      '.svg',
+    )
+  ) {
+    return 'image/svg+xml';
+  }
+
+  if (
+    source.endsWith(
+      '.png',
+    )
+  ) {
+    return 'image/png';
+  }
+
+  if (
+    source.endsWith(
+      '.webp',
+    )
+  ) {
+    return 'image/webp';
+  }
+
+  return 'image/jpeg';
+}
 
 export async function GET(
   request: NextRequest,
@@ -225,12 +260,35 @@ export async function GET(
     );
   }
 
+  /*
+   * The physical production master must use the
+   * same language artwork that the customer selected.
+   */
+  const artworkSource =
+    getCardArtworkSource(
+      card.artwork,
+      paidOrder.language,
+    );
+
+  if (!artworkSource) {
+    return NextResponse.json(
+      {
+        error:
+          'This card artwork is unavailable for production',
+      },
+      {
+        status:
+          500,
+      },
+    );
+  }
+
   try {
     const artworkPath =
       join(
         process.cwd(),
         'public',
-        card.artwork.src.slice(
+        artworkSource.slice(
           1,
         ),
       );
@@ -241,15 +299,9 @@ export async function GET(
       );
 
     const artworkMime =
-      card.artwork.src.endsWith(
-        '.svg',
-      )
-        ? 'image/svg+xml'
-        : card.artwork.src.endsWith(
-              '.webp',
-            )
-          ? 'image/webp'
-          : 'image/jpeg';
+      getArtworkMimeType(
+        artworkSource,
+      );
 
     const artworkDataUrl =
       `data:${artworkMime};base64,${artwork.toString('base64')}`;
@@ -325,6 +377,8 @@ export async function GET(
 
         cardId:
           card.id,
+
+        artworkSource,
 
         errorType:
           error instanceof Error

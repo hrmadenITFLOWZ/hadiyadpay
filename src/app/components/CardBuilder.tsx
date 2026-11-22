@@ -1,13 +1,11 @@
 'use client';
 
 import {
-  useCallback,
   useEffect,
   useReducer,
   useRef,
   useState,
   type ChangeEvent,
-  type PointerEvent,
 } from 'react';
 
 import type {
@@ -16,22 +14,13 @@ import type {
 } from '../../lib/card-types';
 
 import {
-  getCardComposition,
-} from '../../lib/card-composition';
-
-import {
-  getCardProductionProfile,
-} from '../../lib/card-production';
-
-import {
   createEditorRuntimeState,
   editorColorOptions,
   editorReducer,
   loadDraftFromStorage,
   saveDraftToStorage,
-  PHOTO_SCALE_MAX,
-  PHOTO_SCALE_MIN,
   type EditorAction,
+  type EditorPhotoFrameSize,
   type EditorPhotoLayer,
   type EditorPreviewMode,
   type EditorTextLayer,
@@ -41,8 +30,12 @@ import {
   serializeEditorDraft,
 } from '../../lib/card-order';
 
+import {
+  getCardComposition,
+} from '../../lib/card-composition';
+
 import CheckoutModal from './CheckoutModal';
-import CardComposition from './CardComposition';
+import OpenCardPreview from './OpenCardPreview';
 import useDialogAccessibility from '../hooks/useDialogAccessibility';
 import TextControls from './editor/TextControls';
 import PhotoControls from './editor/PhotoControls';
@@ -172,8 +165,7 @@ async function compressPhotoForOrder(
             resolve,
             'image/jpeg',
             0.86 -
-              attempt *
-                0.08,
+              attempt * 0.08,
           );
         },
       );
@@ -230,15 +222,13 @@ export default function CardBuilder({
         ...savedDraft,
 
         side:
-          'front' as const,
+          'inside' as const,
 
         previewMode:
-          savedDraft
-            .previewMode ===
+          savedDraft.previewMode ===
           'full'
             ? 'clean' as const
-            : savedDraft
-                .previewMode,
+            : savedDraft.previewMode,
       };
 
       return {
@@ -264,15 +254,13 @@ export default function CardBuilder({
       ...runtime.draft,
 
       side:
-        'front' as const,
+        'inside' as const,
 
       previewMode:
-        runtime.draft
-          .previewMode ===
+        runtime.draft.previewMode ===
         'full'
           ? 'clean' as const
-          : runtime.draft
-              .previewMode,
+          : runtime.draft.previewMode,
     };
 
     return {
@@ -303,29 +291,16 @@ export default function CardBuilder({
   );
 
   const [
-    dragStart,
-    setDragStart,
-  ] = useState<{
-    pointerId: number;
-    startX: number;
-    startY: number;
-    originX: number;
-    originY: number;
-    layer:
-      | 'photo'
-      | 'text';
-    textLayer?:
-      EditorTextLayer;
-  } | null>(
-    null,
+    isCardOpen,
+    setIsCardOpen,
+  ] = useState(
+    false,
   );
 
   const [
     activeTextLayer,
     setActiveTextLayer,
-  ] = useState<
-    EditorTextLayer
-  >(
+  ] = useState<EditorTextLayer>(
     'message',
   );
 
@@ -381,9 +356,9 @@ export default function CardBuilder({
       >(),
     );
 
-  const dragMovedRef =
-    useRef(
-      false,
+  const photoInputRef =
+    useRef<HTMLInputElement>(
+      null,
     );
 
   const checkoutSubmittingRef =
@@ -396,15 +371,8 @@ export default function CardBuilder({
       false,
     );
 
-  const previewRef =
-    useRef<HTMLDivElement>(
-      null,
-    );
-
   const dialogRef =
-    useDialogAccessibility<
-      HTMLDivElement
-    >(
+    useDialogAccessibility<HTMLDivElement>(
       !isCheckoutOpen,
       onClose,
     );
@@ -412,74 +380,13 @@ export default function CardBuilder({
   const draft =
     editorState.draft;
 
-  /*
-   * HadiyadPay is presented as one
-   * complete single-sided card.
-   */
   const activeSideData =
-    draft.front;
+    draft.inside;
 
   const currentTextStyle =
-    activeSideData
-      .textStyles[
-        activeTextLayer
-      ];
-
-  const productionProfile =
-    getCardProductionProfile(
-      card.id,
-    );
-
-  const safeZone =
-    productionProfile
-      ?.safeZone;
-
-  /*
-   * Physical-production templates keep personal
-   * content within the safe area.
-   *
-   * Cards without a production profile keep the
-   * existing unrestricted editor behaviour.
-   */
-  const clampToSafeZone =
-    useCallback(
-      (
-        x: number,
-        y: number,
-      ) => {
-        if (!safeZone) {
-          return {
-            x,
-            y,
-          };
-        }
-
-        return {
-          x:
-            Math.min(
-              100 -
-                safeZone.right,
-              Math.max(
-                safeZone.left,
-                x,
-              ),
-            ),
-
-          y:
-            Math.min(
-              100 -
-                safeZone.bottom,
-              Math.max(
-                safeZone.top,
-                y,
-              ),
-            ),
-        };
-      },
-      [
-        safeZone,
-      ],
-    );
+    activeSideData.textStyles[
+      activeTextLayer
+    ];
 
   const commitAction = (
     action: EditorAction,
@@ -493,385 +400,10 @@ export default function CardBuilder({
     );
   };
 
-  useEffect(() => {
-    if (
-      draft.side !==
-      'front'
-    ) {
-      dispatch({
-        type:
-          'SET_SIDE',
-
-        side:
-          'front',
-      });
-
-      return;
-    }
-
-    if (
-      draft.previewMode ===
-      'full'
-    ) {
-      dispatch({
-        type:
-          'SET_PREVIEW_MODE',
-
-        mode:
-          'clean',
-      });
-    }
-  }, [
-    draft.side,
-    draft.previewMode,
-  ]);
-
-  useEffect(() => {
-    const timer =
-      window.setTimeout(
-        () => {
-          saveDraftToStorage(
-            card,
-            draft,
-          );
-
-          setHasUnsavedChanges(
-            false,
-          );
-        },
-        250,
-      );
-
-    return () =>
-      window.clearTimeout(
-        timer,
-      );
-  }, [
-    card,
-    draft,
-  ]);
-
-  useEffect(() => {
-    const referencedUrls =
-      new Set<string>();
-
-    for (
-      const snapshot of [
-        editorState.draft,
-        ...editorState.history,
-      ]
-    ) {
-      const source =
-        snapshot.front
-          .photo?.src;
-
-      if (
-        source?.startsWith(
-          'blob:',
-        )
-      ) {
-        referencedUrls.add(
-          source,
-        );
-      }
-    }
-
-    for (
-      const url of
-      ownedPhotoUrlsRef
-        .current
-    ) {
-      if (
-        !referencedUrls.has(
-          url,
-        )
-      ) {
-        revokeOwnedPhotoUrl(
-          url,
-          ownedPhotoUrlsRef
-            .current,
-          photoFilesRef
-            .current,
-        );
-      }
-    }
-  }, [
-    editorState,
-  ]);
-
-  useEffect(() => {
-    isMountedRef.current =
-      true;
-
-    const ownedPhotoUrls =
-      ownedPhotoUrlsRef
-        .current;
-
-    const photoFiles =
-      photoFilesRef
-        .current;
-
-    return () => {
-      isMountedRef.current =
-        false;
-
-      for (
-        const url of
-        ownedPhotoUrls
-      ) {
-        revokeOwnedPhotoUrl(
-          url,
-          ownedPhotoUrls,
-          photoFiles,
-        );
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (
-      !hasUnsavedChanges
-    ) {
-      return;
-    }
-
-    const handleBeforeUnload =
-      (
-        event:
-          BeforeUnloadEvent,
-      ) => {
-        event.preventDefault();
-
-        event.returnValue =
-          '';
-      };
-
-    window.addEventListener(
-      'beforeunload',
-      handleBeforeUnload,
-    );
-
-    return () =>
-      window.removeEventListener(
-        'beforeunload',
-        handleBeforeUnload,
-      );
-  }, [
-    hasUnsavedChanges,
-  ]);
-
-  useEffect(() => {
-    const handleKeyDown = (
-      event: KeyboardEvent,
-    ) => {
-      if (
-        isCheckoutOpen
-      ) {
-        return;
-      }
-
-      const target =
-        event.target as
-          | HTMLElement
-          | null;
-
-      const isTypingTarget =
-        Boolean(
-          target &&
-            (
-              target.tagName ===
-                'INPUT' ||
-              target.tagName ===
-                'TEXTAREA' ||
-              target
-                .isContentEditable
-            ),
-        );
-
-      if (
-        isTypingTarget
-      ) {
-        return;
-      }
-
-      const modifier =
-        event.ctrlKey ||
-        event.metaKey;
-
-      const key =
-        event.key
-          .toLowerCase();
-
-      if (
-        modifier &&
-        (
-          key === 'z' ||
-          key === 'y'
-        )
-      ) {
-        event.preventDefault();
-
-        if (
-          event.shiftKey &&
-          key === 'z'
-        ) {
-          dispatch({
-            type:
-              'REDO',
-          });
-        } else if (
-          key === 'y'
-        ) {
-          dispatch({
-            type:
-              'REDO',
-          });
-        } else {
-          dispatch({
-            type:
-              'UNDO',
-          });
-        }
-
-        setHasUnsavedChanges(
-          true,
-        );
-
-        return;
-      }
-
-      const direction = {
-        ArrowLeft: [
-          -1,
-          0,
-        ],
-
-        ArrowRight: [
-          1,
-          0,
-        ],
-
-        ArrowUp: [
-          0,
-          -1,
-        ],
-
-        ArrowDown: [
-          0,
-          1,
-        ],
-      }[
-        event.key
-      ];
-
-      if (
-        !direction
-      ) {
-        return;
-      }
-
-      event.preventDefault();
-
-      const step =
-        event.shiftKey
-          ? 5
-          : 1.5;
-
-      if (
-        selectedLayer ===
-          'photo' &&
-        activeSideData.photo &&
-        !activeSideData
-          .photo
-          .requiresReselection
-      ) {
-        const nextPosition =
-          clampToSafeZone(
-            activeSideData
-              .photo.x +
-              direction[0] *
-                step,
-
-            activeSideData
-              .photo.y +
-              direction[1] *
-                step,
-          );
-
-        commitAction({
-          type:
-            'ADJUST_PHOTO',
-
-          changes:
-            nextPosition,
-        });
-
-        return;
-      }
-
-      const position =
-        activeSideData
-          .textPositions[
-            activeTextLayer
-          ];
-
-      const nextPosition =
-        clampToSafeZone(
-          position.x +
-            direction[0] *
-              step,
-
-          position.y +
-            direction[1] *
-              step,
-        );
-
-      commitAction({
-        type:
-          'SET_TEXT_POSITION',
-
-        layer:
-          activeTextLayer,
-
-        position:
-          nextPosition,
-      });
-    };
-
-    window.addEventListener(
-      'keydown',
-      handleKeyDown,
-    );
-
-    return () =>
-      window.removeEventListener(
-        'keydown',
-        handleKeyDown,
-      );
-  }, [
-    activeSideData,
-    activeTextLayer,
-    clampToSafeZone,
-    isCheckoutOpen,
-    selectedLayer,
-  ]);
-
   const text = {
     so: {
-      title:
-        'Shakhsiyeey Kaarkaaga',
-
-      photo:
-        'Sawir ikhtiyaari ah',
-
-      remove:
-        'Ka saar',
-
       close:
         'Xir tifaftiraha',
-
-      personalize:
-        'Bixi · €2.00',
 
       invalidImage:
         'Dooro sawir JPEG, PNG ama WebP oo aan ka weynayn 8 MB.',
@@ -883,54 +415,99 @@ export default function CardBuilder({
         'Dib u celin',
 
       redo:
-        'Mara u samee',
+        'Mar kale samee',
 
       resetCard:
-        'Dib u celi kaar dhan',
+        'Dib u celi kaarka oo dhan',
 
       resetSide:
-        'Dib u celi kaarka',
+        'Dib u celi gudaha',
 
       resetConfirm:
         'Ma hubtaa inaad dib u habeyneysid kaarka oo dhan?',
 
-      edit:
-        'Tifaftire',
+      editing:
+        'Wax ka beddel',
 
-      clean:
-        'Eegis nadiif',
+      preview:
+        'Tusaale',
 
       full:
-        'Eegis buuxa',
+        'Buuxa',
 
-      privacy:
-        'Xogta shakhsi ahaaneed ma la abuuri doono link cusub.',
-
-      zoom:
+      photoSize:
         'Cabbirka sawirka',
 
+      small:
+        'Yar',
+
+      medium:
+        'Dhexdhexaad',
+
+      large:
+        'Weyn',
+
       resetTransform:
-        'Dib u celi qaabeynta',
+        'Dib u celi sawirka',
 
       reselectPhoto:
         'Sawirka hore waa in dib loo doorataa.',
+
+      adjustPhoto:
+        'Hagaaji sawirka',
+
+      remove:
+        'Ka saar',
+
+      changePhoto:
+        'Sawir kale dooro',
+
+      dragPhoto:
+        'Sawirka ku jiid bogga bidix si aad u doorato qaybta muuqata.',
+
+      closedPreview:
+        'Kaarkaaga',
+
+      openPreview:
+        'Hadiyaddaada',
+
+      closedTitle:
+        'Ka dhig mid adiga kuu gaar ah',
+
+      openTitle:
+        'Ka dhig mid gaar ah',
+
+      closedDescription:
+        'Fur kaarka oo fariintaada gaarka ah ku qor gudaha.',
+
+      openDescription:
+        'Ku qor fariin gaar ah oo gudaha Hadiyadda ka muuqan doonta.',
+
+      openCard:
+        'Fur kaarka',
+
+      giftSection:
+        'Ka dhig mid sii gaar ah',
+
+      giftTitle:
+        'Ku dar hadiyad',
+
+      giftDescription:
+        'Mustaqbalka Hadiyadda ku dar daabacaad, jir ama hadiyad gaar ah.',
+
+      comingSoon:
+        'Dhawaan',
+
+      moreOptions:
+        'Ikhtiyaarro kale',
+
+      continue:
+        'Sii wad',
     },
 
     en: {
-      title:
-        'Personalize your card',
-
-      photo:
-        'Optional photo',
-
-      remove:
-        'Remove',
-
       close:
         'Close card editor',
-
-      personalize:
-        'Pay · €2.00',
 
       invalidImage:
         'Choose a JPEG, PNG, or WebP image no larger than 8 MB.',
@@ -948,48 +525,93 @@ export default function CardBuilder({
         'Reset full card',
 
       resetSide:
-        'Reset card',
+        'Reset inside',
 
       resetConfirm:
         'Are you sure you want to reset the full card?',
 
-      edit:
-        'Edit',
+      editing:
+        'Editing',
 
-      clean:
+      preview:
         'Preview',
 
       full:
         'Full',
 
-      privacy:
-        'New personal-data share links are not generated.',
+      photoSize:
+        'Photo size',
 
-      zoom:
-        'Photo zoom',
+      small:
+        'Small',
+
+      medium:
+        'Medium',
+
+      large:
+        'Large',
 
       resetTransform:
-        'Reset transform',
+        'Reset photo',
 
       reselectPhoto:
         'The previous photo needs to be selected again.',
+
+      adjustPhoto:
+        'Adjust photo',
+
+      remove:
+        'Remove',
+
+      changePhoto:
+        'Choose another photo',
+
+      dragPhoto:
+        'Drag the photo on the left page to choose which part of the image is visible.',
+
+      closedPreview:
+        'Your card',
+
+      openPreview:
+        'Your Hadiyad',
+
+      closedTitle:
+        'Make it yours',
+
+      openTitle:
+        'Make it personal',
+
+      closedDescription:
+        'Open the card and add your personal message inside.',
+
+      openDescription:
+        'Write something meaningful for the person receiving your Hadiyad.',
+
+      openCard:
+        'Open card',
+
+      giftSection:
+        'Make it extra special',
+
+      giftTitle:
+        'Add a gift',
+
+      giftDescription:
+        'Pair your Hadiyad with a print, frame or special keepsake.',
+
+      comingSoon:
+        'Coming soon',
+
+      moreOptions:
+        'More options',
+
+      continue:
+        'Continue',
     },
 
     nl: {
-      title:
-        'Personaliseer je kaart',
-
-      photo:
-        'Optionele foto',
-
-      remove:
-        'Verwijderen',
-
       close:
         'Kaarteditor sluiten',
-
-      personalize:
-        'Betalen · €2,00',
 
       invalidImage:
         'Kies een JPEG-, PNG- of WebP-afbeelding van maximaal 8 MB.',
@@ -1007,45 +629,284 @@ export default function CardBuilder({
         'Kaart volledig resetten',
 
       resetSide:
-        'Kaart resetten',
+        'Binnenkant resetten',
 
       resetConfirm:
         'Weet je zeker dat je de hele kaart wilt resetten?',
 
-      edit:
+      editing:
         'Bewerken',
 
-      clean:
+      preview:
         'Voorbeeld',
 
       full:
         'Volledig',
 
-      privacy:
-        'Nieuwe links met persoonlijke gegevens worden niet gemaakt.',
+      photoSize:
+        'Fotoformaat',
 
-      zoom:
-        'Fotozoom',
+      small:
+        'Klein',
+
+      medium:
+        'Middel',
+
+      large:
+        'Groot',
 
       resetTransform:
         'Foto resetten',
 
       reselectPhoto:
         'De vorige foto moet opnieuw worden geselecteerd.',
+
+      adjustPhoto:
+        'Foto aanpassen',
+
+      remove:
+        'Verwijderen',
+
+      changePhoto:
+        'Andere foto kiezen',
+
+      dragPhoto:
+        'Sleep de foto op de linkerpagina om te kiezen welk deel zichtbaar is.',
+
+      closedPreview:
+        'Jouw kaart',
+
+      openPreview:
+        'Jouw Hadiyad',
+
+      closedTitle:
+        'Maak het van jou',
+
+      openTitle:
+        'Maak het persoonlijk',
+
+      closedDescription:
+        'Open de kaart en voeg binnenin je persoonlijke boodschap toe.',
+
+      openDescription:
+        'Schrijf iets bijzonders voor degene die jouw Hadiyad ontvangt.',
+
+      openCard:
+        'Open kaart',
+
+      giftSection:
+        'Maak het extra bijzonder',
+
+      giftTitle:
+        'Voeg een cadeau toe',
+
+      giftDescription:
+        'Combineer je Hadiyad later met een print, lijst of bijzonder cadeau.',
+
+      comingSoon:
+        'Binnenkort',
+
+      moreOptions:
+        'Meer opties',
+
+      continue:
+        'Verder',
     },
   }[
     currentLanguage
   ];
 
+  useEffect(
+    () => {
+      if (
+        draft.side !==
+        'inside'
+      ) {
+        dispatch({
+          type:
+            'SET_SIDE',
+
+          side:
+            'inside',
+        });
+
+        return;
+      }
+
+      if (
+        draft.previewMode ===
+        'full'
+      ) {
+        dispatch({
+          type:
+            'SET_PREVIEW_MODE',
+
+          mode:
+            'clean',
+        });
+      }
+    },
+    [
+      draft.side,
+      draft.previewMode,
+    ],
+  );
+
+  useEffect(
+    () => {
+      const timer =
+        window.setTimeout(
+          () => {
+            saveDraftToStorage(
+              card,
+              draft,
+            );
+
+            setHasUnsavedChanges(
+              false,
+            );
+          },
+          250,
+        );
+
+      return () =>
+        window.clearTimeout(
+          timer,
+        );
+    },
+    [
+      card,
+      draft,
+    ],
+  );
+
+  useEffect(
+    () => {
+      const referencedUrls =
+        new Set<string>();
+
+      for (
+        const snapshot of [
+          editorState.draft,
+          ...editorState.history,
+        ]
+      ) {
+        const sources = [
+          snapshot.front.photo
+            ?.src,
+
+          snapshot.inside.photo
+            ?.src,
+        ];
+
+        for (
+          const source of
+          sources
+        ) {
+          if (
+            source?.startsWith(
+              'blob:',
+            )
+          ) {
+            referencedUrls.add(
+              source,
+            );
+          }
+        }
+      }
+
+      for (
+        const url of
+        ownedPhotoUrlsRef.current
+      ) {
+        if (
+          !referencedUrls.has(
+            url,
+          )
+        ) {
+          revokeOwnedPhotoUrl(
+            url,
+            ownedPhotoUrlsRef.current,
+            photoFilesRef.current,
+          );
+        }
+      }
+    },
+    [
+      editorState,
+    ],
+  );
+
+  useEffect(
+    () => {
+      isMountedRef.current =
+        true;
+
+      const ownedPhotoUrls =
+        ownedPhotoUrlsRef.current;
+
+      const photoFiles =
+        photoFilesRef.current;
+
+      return () => {
+        isMountedRef.current =
+          false;
+
+        for (
+          const url of
+          ownedPhotoUrls
+        ) {
+          revokeOwnedPhotoUrl(
+            url,
+            ownedPhotoUrls,
+            photoFiles,
+          );
+        }
+      };
+    },
+    [],
+  );
+
+  useEffect(
+    () => {
+      if (
+        !hasUnsavedChanges
+      ) {
+        return;
+      }
+
+      const handleBeforeUnload = (
+        event:
+          BeforeUnloadEvent,
+      ) => {
+        event.preventDefault();
+        event.returnValue = '';
+      };
+
+      window.addEventListener(
+        'beforeunload',
+        handleBeforeUnload,
+      );
+
+      return () =>
+        window.removeEventListener(
+          'beforeunload',
+          handleBeforeUnload,
+        );
+    },
+    [
+      hasUnsavedChanges,
+    ],
+  );
+
   const handleImageUpload = (
     event:
-      ChangeEvent<
-        HTMLInputElement
-      >,
+      ChangeEvent<HTMLInputElement>,
   ) => {
     const file =
-      event.target
-        .files?.[0];
+      event.target.files?.[
+        0
+      ];
 
     if (!file) {
       return;
@@ -1073,29 +934,14 @@ export default function CardBuilder({
         file,
       );
 
-    ownedPhotoUrlsRef
-      .current
-      .add(
-        nextUrl,
-      );
+    ownedPhotoUrlsRef.current.add(
+      nextUrl,
+    );
 
-    photoFilesRef
-      .current
-      .set(
-        nextUrl,
-        file,
-      );
-
-    const savedTransform =
-      activeSideData.photo ??
-      null;
-
-    const defaultPhotoPosition =
-      getCardComposition(
-        card,
-        'front',
-      )
-        .defaultPhotoPosition;
+    photoFilesRef.current.set(
+      nextUrl,
+      file,
+    );
 
     const previewImage =
       new window.Image();
@@ -1104,10 +950,8 @@ export default function CardBuilder({
       () => {
         revokeOwnedPhotoUrl(
           nextUrl,
-          ownedPhotoUrlsRef
-            .current,
-          photoFilesRef
-            .current,
+          ownedPhotoUrlsRef.current,
+          photoFilesRef.current,
         );
 
         window.alert(
@@ -1122,23 +966,12 @@ export default function CardBuilder({
         ) {
           revokeOwnedPhotoUrl(
             nextUrl,
-            ownedPhotoUrlsRef
-              .current,
-            photoFilesRef
-              .current,
+            ownedPhotoUrlsRef.current,
+            photoFilesRef.current,
           );
 
           return;
         }
-
-        const initialPosition =
-          clampToSafeZone(
-            savedTransform?.x ??
-              defaultPhotoPosition.x,
-
-            savedTransform?.y ??
-              defaultPhotoPosition.y,
-          );
 
         const photo:
           EditorPhotoLayer = {
@@ -1146,32 +979,33 @@ export default function CardBuilder({
               nextUrl,
 
             width:
-              previewImage
-                .naturalWidth,
+              previewImage.naturalWidth,
 
             height:
-              previewImage
-                .naturalHeight,
+              previewImage.naturalHeight,
 
             scale:
-              savedTransform
-                ?.scale ??
               1,
 
             x:
-              initialPosition.x,
+              50,
 
             y:
-              initialPosition.y,
+              50,
 
             rotation:
-              savedTransform
-                ?.rotation ??
               0,
+
+            frameSize:
+              'large',
 
             requiresReselection:
               false,
           };
+
+        setSelectedLayer(
+          'photo',
+        );
 
         commitAction({
           type:
@@ -1188,8 +1022,9 @@ export default function CardBuilder({
       '';
   };
 
-  const handleZoom = (
-    scale: number,
+  const handleFrameSizeChange = (
+    frameSize:
+      EditorPhotoFrameSize,
   ) => {
     if (
       !activeSideData.photo
@@ -1197,349 +1032,118 @@ export default function CardBuilder({
       return;
     }
 
-    const nextScale =
-      Number(
-        Math.min(
-          Math.max(
-            PHOTO_SCALE_MIN,
-            scale,
-          ),
-          PHOTO_SCALE_MAX,
-        ).toFixed(
-          2,
-        ),
-      );
-
     commitAction({
       type:
         'ADJUST_PHOTO',
 
       changes: {
-        scale:
-          nextScale,
+        frameSize,
       },
     });
   };
 
-  const handlePointerDown = (
-    event:
-      PointerEvent<
-        HTMLDivElement
-      >,
+  const handleMoveText = (
+    direction:
+      'up' | 'down',
   ) => {
-    if (
-      draft.previewMode !==
-      'edit'
-    ) {
-      return;
-    }
+    const currentPosition =
+      activeSideData.textPositions[
+        activeTextLayer
+      ];
 
-    const target =
-      event.target as
-        HTMLElement;
+    const movement =
+      direction === 'up'
+        ? -3
+        : 3;
 
-    const layerElement =
-      target.closest<
-        HTMLElement
-      >(
-        '[data-editor-layer]',
-      );
+    commitAction({
+      type:
+        'SET_TEXT_POSITION',
 
-    if (
-      !layerElement
-    ) {
-      return;
-    }
+      layer:
+        activeTextLayer,
 
-    const layer =
-      layerElement.dataset
-        .editorLayer;
+      position: {
+        x:
+          currentPosition.x,
 
-    if (
-      layer ===
-      'photo'
-    ) {
-      if (
-        !activeSideData.photo ||
-        activeSideData.photo
-          .requiresReselection
-      ) {
-        return;
-      }
-
-      setSelectedLayer(
-        'photo',
-      );
-
-      dragMovedRef.current =
-        false;
-
-      event.currentTarget
-        .setPointerCapture(
-          event.pointerId,
-        );
-
-      setDragStart({
-        pointerId:
-          event.pointerId,
-
-        startX:
-          event.clientX,
-
-        startY:
-          event.clientY,
-
-        originX:
-          activeSideData
-            .photo.x,
-
-        originY:
-          activeSideData
-            .photo.y,
-
-        layer:
-          'photo',
-      });
-
-      return;
-    }
-
-    if (
-      layer ===
-      'text'
-    ) {
-      const textLayer =
-        layerElement.dataset
-          .textLayer as
-          | EditorTextLayer
-          | undefined;
-
-      if (
-        !textLayer
-      ) {
-        return;
-      }
-
-      const position =
-        activeSideData
-          .textPositions[
-            textLayer
-          ];
-
-      setActiveTextLayer(
-        textLayer,
-      );
-
-      setSelectedLayer(
-        'text',
-      );
-
-      dragMovedRef.current =
-        false;
-
-      event.currentTarget
-        .setPointerCapture(
-          event.pointerId,
-        );
-
-      setDragStart({
-        pointerId:
-          event.pointerId,
-
-        startX:
-          event.clientX,
-
-        startY:
-          event.clientY,
-
-        originX:
-          position.x,
-
-        originY:
-          position.y,
-
-        layer:
-          'text',
-
-        textLayer,
-      });
-    }
+        y:
+          Math.min(
+            92,
+            Math.max(
+              8,
+              currentPosition.y +
+                movement,
+            ),
+          ),
+      },
+    });
   };
 
-  const handlePointerMove = (
-    event:
-      PointerEvent<
-        HTMLDivElement
-      >,
-  ) => {
-    if (
-      !dragStart ||
-      dragStart.pointerId !==
-        event.pointerId
-    ) {
-      return;
-    }
+  const handleResetTextPosition =
+    () => {
+      const composition =
+        getCardComposition(
+          card,
+          'inside',
+        );
 
-    const bounds =
-      event.currentTarget
-        .getBoundingClientRect();
-
-    if (
-      bounds.width ===
-        0 ||
-      bounds.height ===
-        0
-    ) {
-      return;
-    }
-
-    const x =
-      dragStart.originX +
-      (
-        (
-          event.clientX -
-          dragStart.startX
-        ) /
-        bounds.width
-      ) *
-        100;
-
-    const y =
-      dragStart.originY +
-      (
-        (
-          event.clientY -
-          dragStart.startY
-        ) /
-        bounds.height
-      ) *
-        100;
-
-    const safePosition =
-      clampToSafeZone(
-        x,
-        y,
-      );
-
-    if (
-      dragStart.layer ===
-      'photo'
-    ) {
-      dragMovedRef.current =
-        true;
-
-      commitAction({
-        type:
-          'ADJUST_PHOTO',
-
-        changes:
-          safePosition,
-
-        recordHistory:
-          false,
-      });
-
-      return;
-    }
-
-    if (
-      dragStart.textLayer
-    ) {
-      dragMovedRef.current =
-        true;
+      const defaultPosition =
+        composition
+          .defaultTextPositions[
+          activeTextLayer
+        ];
 
       commitAction({
         type:
           'SET_TEXT_POSITION',
 
         layer:
-          dragStart
-            .textLayer,
+          activeTextLayer,
 
-        position:
-          safePosition,
+        position: {
+          x:
+            defaultPosition.x,
 
-        recordHistory:
-          false,
+          y:
+            defaultPosition.y,
+        },
       });
-    }
-  };
+    };
 
-  const handlePointerUp = (
-    event:
-      PointerEvent<
-        HTMLDivElement
-      >,
-  ) => {
-    if (
-      dragStart?.pointerId !==
-      event.pointerId
-    ) {
-      return;
-    }
-
-    if (
-      dragMovedRef.current
-    ) {
-      dispatch({
-        type:
-          'COMMIT_DRAFT',
-      });
-    }
-
-    dragMovedRef.current =
-      false;
-
-    setDragStart(
-      null,
-    );
-  };
-
-  const handleRotate = (
-    amount: number,
-  ) => {
-    if (
-      !activeSideData.photo
-    ) {
-      return;
-    }
-
-    const nextRotation =
-      Math.min(
-        Math.max(
-          (
-            activeSideData
-              .photo.rotation ??
-            0
-          ) +
-            amount,
-          -180,
-        ),
-        180,
-      );
-
-    commitAction({
-      type:
-        'ADJUST_PHOTO',
-
-      changes: {
-        rotation:
-          nextRotation,
-      },
-    });
-  };
-
-  const handleCheckout =
-    async () => {
+  const handleResetCard =
+    () => {
       if (
-        checkoutSubmittingRef
-          .current
+        !window.confirm(
+          text.resetConfirm,
+        )
       ) {
         return;
       }
 
-      checkoutSubmittingRef
-        .current =
+      commitAction({
+        type:
+          'RESET_CARD',
+
+        card,
+
+        currentLanguage,
+      });
+
+      setIsCardOpen(
+        false,
+      );
+    };
+
+  const handleCheckout =
+    async () => {
+      if (
+        checkoutSubmittingRef.current
+      ) {
+        return;
+      }
+
+      checkoutSubmittingRef.current =
         true;
 
       setCheckoutError(
@@ -1567,32 +1171,27 @@ export default function CardBuilder({
         formData.set(
           'draft',
           JSON.stringify(
-            serializeEditorDraft(
-              {
-                ...draft,
+            serializeEditorDraft({
+              ...draft,
 
-                side:
-                  'front',
+              side:
+                'inside',
 
-                previewMode:
-                  draft
-                    .previewMode ===
-                  'full'
-                    ? 'clean'
-                    : draft
-                        .previewMode,
-              },
-            ),
+              previewMode:
+                draft.previewMode ===
+                'full'
+                  ? 'clean'
+                  : draft.previewMode,
+            }),
           ),
         );
 
         const photo =
-          draft.front.photo;
+          draft.inside.photo;
 
         if (photo) {
           if (
-            photo
-              .requiresReselection ||
+            photo.requiresReselection ||
             !photo.src
           ) {
             throw new Error(
@@ -1601,22 +1200,18 @@ export default function CardBuilder({
           }
 
           const sourceFile =
-            photoFilesRef
-              .current
-              .get(
-                photo.src,
-              );
+            photoFilesRef.current.get(
+              photo.src,
+            );
 
-          if (
-            !sourceFile
-          ) {
+          if (!sourceFile) {
             throw new Error(
               text.reselectPhoto,
             );
           }
 
           formData.set(
-            'photoFront',
+            'photoInside',
             await compressPhotoForOrder(
               sourceFile,
             ),
@@ -1640,7 +1235,8 @@ export default function CardBuilder({
           await response
             .json()
             .catch(
-              () => null,
+              () =>
+                null,
             );
 
         if (
@@ -1652,16 +1248,14 @@ export default function CardBuilder({
             'checkoutUrl' in
             result
           ) ||
-          typeof result
-            .checkoutUrl !==
+          typeof result.checkoutUrl !==
             'string'
         ) {
           const message =
             result &&
             typeof result ===
               'object' &&
-            'error' in
-              result &&
+            'error' in result &&
             typeof result.error ===
               'string'
               ? result.error
@@ -1677,13 +1271,23 @@ export default function CardBuilder({
             result.checkoutUrl,
           );
 
+        const isStripeCheckout =
+          checkoutUrl.protocol ===
+            'https:' &&
+          checkoutUrl.hostname ===
+            'checkout.stripe.com' &&
+          !checkoutUrl.username &&
+          !checkoutUrl.password;
+
+        const isDevelopmentOrder =
+          process.env.NODE_ENV ===
+            'development' &&
+          checkoutUrl.origin ===
+            window.location.origin;
+
         if (
-          checkoutUrl.protocol !==
-            'https:' ||
-          checkoutUrl.hostname !==
-            'checkout.stripe.com' ||
-          checkoutUrl.username ||
-          checkoutUrl.password
+          !isStripeCheckout &&
+          !isDevelopmentOrder
         ) {
           throw new Error(
             'The secure checkout URL was not valid',
@@ -1694,13 +1298,11 @@ export default function CardBuilder({
           checkoutUrl.toString(),
         );
       } catch (error) {
-        checkoutSubmittingRef
-          .current =
+        checkoutSubmittingRef.current =
           false;
 
         setCheckoutError(
-          error instanceof
-            Error
+          error instanceof Error
             ? error.message
             : 'Checkout could not be started. Please try again later.',
         );
@@ -1711,56 +1313,68 @@ export default function CardBuilder({
       }
     };
 
-  const handleResetCard =
+  const handleOpenCard =
     () => {
+      setIsCardOpen(
+        true,
+      );
+
       if (
-        !window.confirm(
-          text.resetConfirm,
-        )
+        draft.side !==
+        'inside'
       ) {
-        return;
+        commitAction({
+          type:
+            'SET_SIDE',
+
+          side:
+            'inside',
+        });
       }
-
-      commitAction({
-        type:
-          'RESET_CARD',
-
-        card,
-
-        currentLanguage,
-      });
     };
 
   const renderPreviewCard =
-    (
-      showEditGuides =
-        draft.previewMode ===
-        'edit',
-    ) => (
-      <CardComposition
+    () => (
+      <OpenCardPreview
         card={
           card
         }
         language={
           currentLanguage
         }
-        cardSide="front"
-        side={
-          draft.front
+        inside={
+          draft.inside
+        }
+        isOpen={
+          isCardOpen
         }
         interactive={
-          showEditGuides &&
+          isCardOpen &&
           draft.previewMode ===
             'edit'
         }
         showEditGuides={
-          showEditGuides
+          isCardOpen &&
+          draft.previewMode ===
+            'edit'
         }
         activeTextLayer={
           activeTextLayer
         }
         selectedLayer={
           selectedLayer
+        }
+        onOpen={
+          handleOpenCard
+        }
+        onClose={() =>
+          setIsCardOpen(
+            false,
+          )
+        }
+        onRequestPhoto={() =>
+          photoInputRef.current
+            ?.click()
         }
         onTextSelect={(
           layer,
@@ -1773,17 +1387,75 @@ export default function CardBuilder({
             'text',
           );
         }}
+        onTextPositionChange={(
+          layer,
+          position,
+          recordHistory,
+        ) => {
+          dispatch({
+            type:
+              'SET_TEXT_POSITION',
+
+            layer,
+
+            position,
+
+            recordHistory:
+              false,
+          });
+
+          setHasUnsavedChanges(
+            true,
+          );
+
+          if (
+            recordHistory
+          ) {
+            dispatch({
+              type:
+                'COMMIT_DRAFT',
+            });
+          }
+        }}
         onPhotoSelect={() =>
           setSelectedLayer(
             'photo',
           )
         }
+        onPhotoPositionChange={(
+          position,
+          recordHistory,
+        ) => {
+          dispatch({
+            type:
+              'ADJUST_PHOTO',
+
+            changes:
+              position,
+
+            recordHistory:
+              false,
+          });
+
+          setHasUnsavedChanges(
+            true,
+          );
+
+          if (
+            recordHistory
+          ) {
+            dispatch({
+              type:
+                'COMMIT_DRAFT',
+            });
+          }
+        }}
       />
     );
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm sm:items-center">
+      <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-3 backdrop-blur-sm sm:items-center sm:p-4">
         <div
           ref={
             dialogRef
@@ -1799,7 +1471,7 @@ export default function CardBuilder({
             isCheckoutOpen
           }
           aria-labelledby="card-editor-heading"
-          className="relative my-4 flex max-h-[calc(100vh-2rem)] w-full max-w-5xl flex-col gap-8 overflow-y-auto rounded-3xl border border-stone-200 bg-white p-5 shadow-2xl sm:my-8 sm:max-h-[calc(100vh-4rem)] sm:p-8 lg:flex-row"
+          className="relative my-3 flex max-h-[calc(100vh-1.5rem)] w-full max-w-7xl flex-col gap-7 overflow-y-auto rounded-3xl border border-stone-200 bg-white p-5 shadow-2xl sm:my-6 sm:max-h-[calc(100vh-3rem)] sm:p-7 lg:flex-row"
         >
           <button
             type="button"
@@ -1812,15 +1484,12 @@ export default function CardBuilder({
             aria-label={
               text.close
             }
-            className="card-editor-close-button absolute right-4 top-4 z-30 flex h-11 w-11 items-center justify-center rounded-full bg-stone-100 text-stone-800 transition hover:bg-stone-200 disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
+            className="absolute right-4 top-4 z-30 flex h-11 w-11 items-center justify-center rounded-full bg-stone-100 text-stone-800 transition hover:bg-stone-200 disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
           >
             ×
           </button>
 
           <section
-            ref={
-              previewRef
-            }
             aria-label={
               currentLanguage ===
               'nl'
@@ -1830,20 +1499,18 @@ export default function CardBuilder({
                   ? 'Tusaalaha kaarka'
                   : 'Card preview'
             }
-            className="flex w-full flex-col gap-4 self-start lg:sticky lg:top-4 lg:w-1/2"
+            className="flex w-full flex-col gap-4 self-start lg:sticky lg:top-4 lg:w-[58%]"
           >
-            <div className="flex items-center justify-between gap-3 pr-12">
-              <span className="text-xs font-black uppercase tracking-wider text-stone-800">
-                {currentLanguage ===
-                'nl'
-                  ? 'Live voorbeeld'
-                  : currentLanguage ===
-                      'so'
-                    ? 'Tusaalaha tooska ah'
-                    : 'Live card preview'}
+            <div className="flex min-h-8 items-center justify-between gap-3 pr-12">
+              <span className="text-xs font-black uppercase tracking-[0.18em] text-stone-700">
+                {
+                  isCardOpen
+                    ? text.openPreview
+                    : text.closedPreview
+                }
               </span>
 
-              <span className="rounded-full bg-amber-100 px-3 py-1 text-[10px] font-bold text-amber-900">
+              <span className="rounded-full bg-amber-100 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-amber-900">
                 {
                   card.badge[
                     currentLanguage
@@ -1852,398 +1519,457 @@ export default function CardBuilder({
               </span>
             </div>
 
-            <div
-              className={
-                draft.previewMode ===
-                'clean'
-                  ? ''
-                  : 'relative'
+            <div>
+              {
+                renderPreviewCard()
               }
-              onPointerDown={
-                draft.previewMode ===
-                'edit'
-                  ? handlePointerDown
-                  : undefined
-              }
-              onPointerMove={
-                draft.previewMode ===
-                'edit'
-                  ? handlePointerMove
-                  : undefined
-              }
-              onPointerUp={
-                draft.previewMode ===
-                'edit'
-                  ? handlePointerUp
-                  : undefined
-              }
-              onPointerCancel={
-                draft.previewMode ===
-                'edit'
-                  ? handlePointerUp
-                  : undefined
-              }
-            >
-              {renderPreviewCard()}
             </div>
           </section>
 
-          <section className="flex w-full flex-col justify-between gap-5 lg:w-1/2">
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-wrap items-center justify-between gap-3 pr-8">
+          <section className="flex w-full flex-col justify-between gap-6 lg:w-[42%]">
+            <div className="flex flex-col gap-5">
+              <div className="pr-10">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#8a7257]">
+                  HadiyadPay
+                </p>
+
                 <h2
                   id="card-editor-heading"
-                  className="text-lg font-black tracking-tight text-stone-900"
+                  className="mt-2 font-serif text-3xl leading-tight text-[#263e36]"
                 >
-                  {text.title}
+                  {
+                    isCardOpen
+                      ? text.openTitle
+                      : text.closedTitle
+                  }
                 </h2>
 
-                <span className="rounded-full bg-stone-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-stone-700">
-                  {text.privacy}
-                </span>
+                <p className="mt-3 max-w-md text-sm leading-6 text-stone-600">
+                  {
+                    isCardOpen
+                      ? text.openDescription
+                      : text.closedDescription
+                  }
+                </p>
               </div>
 
-              <PreviewControls
-                activeMode={
-                  draft.previewMode
-                }
-                onSelect={(
-                  mode:
-                    EditorPreviewMode,
-                ) =>
-                  commitAction({
-                    type:
-                      'SET_PREVIEW_MODE',
+              {!isCardOpen && (
+                <button
+                  type="button"
+                  onClick={
+                    handleOpenCard
+                  }
+                  className="inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-2xl bg-[#285347] px-5 py-3 text-sm font-bold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-[#1e4338] hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
+                >
+                  {
+                    text.openCard
+                  }
 
-                    mode,
-                  })
-                }
-                labels={{
-                  edit:
-                    text.edit,
-
-                  clean:
-                    text.clean,
-
-                  full:
-                    text.full,
-                }}
-              />
-
-              <TextControls
-                currentLanguage={
-                  currentLanguage
-                }
-                activeLayer={
-                  activeTextLayer
-                }
-                value={
-                  activeSideData[
-                    activeTextLayer
-                  ]
-                }
-                style={
-                  currentTextStyle
-                }
-                onLayerSelect={(
-                  layer,
-                ) => {
-                  setActiveTextLayer(
-                    layer,
-                  );
-
-                  setSelectedLayer(
-                    'text',
-                  );
-                }}
-                onValueChange={(
-                  value,
-                ) =>
-                  commitAction({
-                    type:
-                      'SET_FIELD',
-
-                    field:
-                      activeTextLayer,
-
-                    value,
-                  })
-                }
-                onColorSelect={(
-                  color,
-                ) =>
-                  commitAction({
-                    type:
-                      'SET_TEXT_STYLE',
-
-                    layer:
-                      activeTextLayer,
-
-                    style: {
-                      color,
-                    },
-                  })
-                }
-                onAlignSelect={(
-                  align,
-                ) =>
-                  commitAction({
-                    type:
-                      'SET_TEXT_STYLE',
-
-                    layer:
-                      activeTextLayer,
-
-                    style: {
-                      align,
-                    },
-                  })
-                }
-                onSizeChange={(
-                  size,
-                ) =>
-                  commitAction({
-                    type:
-                      'SET_TEXT_STYLE',
-
-                    layer:
-                      activeTextLayer,
-
-                    style: {
-                      size,
-                    },
-                  })
-                }
-                onFontFamilyChange={(
-                  family,
-                ) =>
-                  commitAction({
-                    type:
-                      'SET_TEXT_FORMAT',
-
-                    layer:
-                      activeTextLayer,
-
-                    field:
-                      'family',
-
-                    value:
-                      family,
-                  })
-                }
-                onToggleStyle={(
-                  field,
-                ) =>
-                  commitAction({
-                    type:
-                      'SET_TEXT_FORMAT',
-
-                    layer:
-                      activeTextLayer,
-
-                    field,
-
-                    value:
-                      !currentTextStyle[
-                        field
-                      ],
-                  })
-                }
-                onResetStyle={() =>
-                  commitAction({
-                    type:
-                      'RESET_TEXT_STYLE',
-
-                    layer:
-                      activeTextLayer,
-                  })
-                }
-                colorOptions={
-                  editorColorOptions
-                }
-              />
-
-              <PhotoControls
-                hasPhoto={Boolean(
-                  activeSideData
-                    .photo &&
-                    !activeSideData
-                      .photo
-                      .requiresReselection,
-                )}
-                onUpload={
-                  handleImageUpload
-                }
-                onRemove={() =>
-                  commitAction({
-                    type:
-                      'REMOVE_PHOTO',
-                  })
-                }
-                onRotate={
-                  handleRotate
-                }
-                onZoom={
-                  handleZoom
-                }
-                scale={
-                  activeSideData
-                    .photo
-                    ?.scale ??
-                  1
-                }
-                rotation={
-                  activeSideData
-                    .photo
-                    ?.rotation ??
-                  0
-                }
-                onResetTransform={() =>
-                  commitAction({
-                    type:
-                      'RESET_PHOTO_TRANSFORM',
-
-                    position:
-                      clampToSafeZone(
-                        getCardComposition(
-                          card,
-                          'front',
-                        )
-                          .defaultPhotoPosition
-                          .x,
-
-                        getCardComposition(
-                          card,
-                          'front',
-                        )
-                          .defaultPhotoPosition
-                          .y,
-                      ),
-                  })
-                }
-                labels={{
-                  photo:
-                    text.photo,
-
-                  remove:
-                    text.remove,
-
-                  adjust:
-                    currentLanguage ===
-                    'nl'
-                      ? 'Foto aanpassen'
-                      : currentLanguage ===
-                          'so'
-                        ? 'Hagaaji sawirka'
-                        : 'Adjust photo',
-
-                  rotate:
-                    currentLanguage ===
-                    'nl'
-                      ? 'Rotatie'
-                      : currentLanguage ===
-                          'so'
-                        ? 'Wareeg'
-                        : 'Rotation',
-
-                  zoom:
-                    text.zoom,
-
-                  reset:
-                    text.resetTransform,
-                }}
-              />
-            </div>
-
-            <HistoryControls
-              canUndo={
-                editorState
-                  .historyIndex >
-                0
-              }
-              canRedo={
-                editorState
-                  .historyIndex <
-                editorState
-                  .history
-                  .length -
-                  1
-              }
-              onUndo={() =>
-                dispatch({
-                  type:
-                    'UNDO',
-                })
-              }
-              onRedo={() =>
-                dispatch({
-                  type:
-                    'REDO',
-                })
-              }
-              labels={{
-                undo:
-                  text.undo,
-
-                redo:
-                  text.redo,
-              }}
-            />
-
-            <ResetControls
-              onResetActiveSide={() =>
-                commitAction({
-                  type:
-                    'RESET_ACTIVE_SIDE',
-
-                  card,
-
-                  currentLanguage,
-                })
-              }
-              onResetCard={
-                handleResetCard
-              }
-              labels={{
-                activeSide:
-                  text.resetSide,
-
-                card:
-                  text.resetCard,
-              }}
-            />
-
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setCheckoutError(
-                    null,
-                  );
-
-                  setIsCheckoutOpen(
-                    true,
-                  );
-                }}
-                className="col-span-2 min-h-14 rounded-2xl bg-[#285347] px-4 text-sm font-black uppercase tracking-wider text-white shadow-lg transition hover:bg-[#1e4338] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
-              >
-                {text.personalize}
-              </button>
-            </div>
-
-            <EditorStatus
-              currentLanguage={
-                currentLanguage
-              }
-              shareNotice={
-                null
-              }
-              photoRequiresReselection={Boolean(
-                activeSideData
-                  .photo
-                  ?.requiresReselection,
+                  <span aria-hidden="true">
+                    →
+                  </span>
+                </button>
               )}
-            />
+
+              {isCardOpen && (
+                <>
+                  <PreviewControls
+                    activeMode={
+                      draft.previewMode
+                    }
+                    onSelect={(
+                      mode:
+                        EditorPreviewMode,
+                    ) =>
+                      commitAction({
+                        type:
+                          'SET_PREVIEW_MODE',
+
+                        mode,
+                      })
+                    }
+                    labels={{
+                      edit:
+                        text.editing,
+
+                      clean:
+                        text.preview,
+
+                      full:
+                        text.full,
+                    }}
+                  />
+
+                  <TextControls
+                    currentLanguage={
+                      currentLanguage
+                    }
+                    activeLayer={
+                      activeTextLayer
+                    }
+                    value={
+                      activeSideData[
+                        activeTextLayer
+                      ]
+                    }
+                    style={
+                      currentTextStyle
+                    }
+                    onLayerSelect={(
+                      layer,
+                    ) => {
+                      setActiveTextLayer(
+                        layer,
+                      );
+
+                      setSelectedLayer(
+                        'text',
+                      );
+                    }}
+                    onValueChange={(
+                      value,
+                    ) =>
+                      commitAction({
+                        type:
+                          'SET_FIELD',
+
+                        field:
+                          activeTextLayer,
+
+                        value,
+                      })
+                    }
+                    onColorSelect={(
+                      color,
+                    ) =>
+                      commitAction({
+                        type:
+                          'SET_TEXT_STYLE',
+
+                        layer:
+                          activeTextLayer,
+
+                        style: {
+                          color,
+                        },
+                      })
+                    }
+                    onAlignSelect={(
+                      align,
+                    ) =>
+                      commitAction({
+                        type:
+                          'SET_TEXT_STYLE',
+
+                        layer:
+                          activeTextLayer,
+
+                        style: {
+                          align,
+                        },
+                      })
+                    }
+                    onSizeChange={(
+                      size,
+                    ) =>
+                      commitAction({
+                        type:
+                          'SET_TEXT_STYLE',
+
+                        layer:
+                          activeTextLayer,
+
+                        style: {
+                          size,
+                        },
+                      })
+                    }
+                    onFontFamilyChange={(
+                      family,
+                    ) =>
+                      commitAction({
+                        type:
+                          'SET_TEXT_FORMAT',
+
+                        layer:
+                          activeTextLayer,
+
+                        field:
+                          'family',
+
+                        value:
+                          family,
+                      })
+                    }
+                    onToggleStyle={(
+                      field,
+                    ) =>
+                      commitAction({
+                        type:
+                          'SET_TEXT_FORMAT',
+
+                        layer:
+                          activeTextLayer,
+
+                        field,
+
+                        value:
+                          !currentTextStyle[
+                            field
+                          ],
+                      })
+                    }
+                    onMoveUp={() =>
+                      handleMoveText(
+                        'up',
+                      )
+                    }
+                    onMoveDown={() =>
+                      handleMoveText(
+                        'down',
+                      )
+                    }
+                    onResetPosition={
+                      handleResetTextPosition
+                    }
+                    onResetStyle={() =>
+                      commitAction({
+                        type:
+                          'RESET_TEXT_STYLE',
+
+                        layer:
+                          activeTextLayer,
+                      })
+                    }
+                    colorOptions={
+                      editorColorOptions
+                    }
+                  />
+
+                  <PhotoControls
+                    hasPhoto={Boolean(
+                      activeSideData.photo &&
+                      !activeSideData.photo
+                        .requiresReselection,
+                    )}
+                    inputRef={
+                      photoInputRef
+                    }
+                    onUpload={
+                      handleImageUpload
+                    }
+                    onRemove={() =>
+                      commitAction({
+                        type:
+                          'REMOVE_PHOTO',
+                      })
+                    }
+                    onFrameSizeChange={
+                      handleFrameSizeChange
+                    }
+                    frameSize={
+                      activeSideData.photo
+                        ?.frameSize ??
+                      'large'
+                    }
+                    onResetTransform={() =>
+                      commitAction({
+                        type:
+                          'RESET_PHOTO_TRANSFORM',
+
+                        position: {
+                          x:
+                            50,
+
+                          y:
+                            50,
+                        },
+                      })
+                    }
+                    labels={{
+                      photo:
+                        text.changePhoto,
+
+                      remove:
+                        text.remove,
+
+                      adjust:
+                        text.adjustPhoto,
+
+                      size:
+                        text.photoSize,
+
+                      small:
+                        text.small,
+
+                      medium:
+                        text.medium,
+
+                      large:
+                        text.large,
+
+                      reset:
+                        text.resetTransform,
+
+                      drag:
+                        text.dragPhoto,
+                    }}
+                  />
+
+                  <section
+                    aria-label={
+                      text.giftSection
+                    }
+                    className="rounded-2xl border border-[#dfd3c1] bg-gradient-to-br from-[#fffaf1] to-[#f7efe2] p-4"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div
+                        aria-hidden="true"
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-xl shadow-sm"
+                      >
+                        🎁
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <h3 className="text-sm font-bold text-[#3d352d]">
+                              {
+                                text.giftTitle
+                              }
+                            </h3>
+
+                            <p className="mt-1 text-xs leading-5 text-[#75695d]">
+                              {
+                                text.giftDescription
+                              }
+                            </p>
+                          </div>
+
+                          <span className="rounded-full border border-[#d9c5a5] bg-white/80 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-[#806442]">
+                            {
+                              text.comingSoon
+                            }
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                </>
+              )}
+            </div>
+
+            {isCardOpen && (
+              <div className="space-y-4">
+                <details className="rounded-2xl border border-stone-200 bg-white">
+                  <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-semibold text-stone-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]">
+                    <span>
+                      {
+                        text.moreOptions
+                      }
+                    </span>
+
+                    <span
+                      aria-hidden="true"
+                      className="text-stone-400"
+                    >
+                      ↓
+                    </span>
+                  </summary>
+
+                  <div className="space-y-3 border-t border-stone-100 p-3">
+                    <HistoryControls
+                      canUndo={
+                        editorState.historyIndex >
+                        0
+                      }
+                      canRedo={
+                        editorState.historyIndex <
+                        editorState.history.length -
+                          1
+                      }
+                      onUndo={() =>
+                        dispatch({
+                          type:
+                            'UNDO',
+                        })
+                      }
+                      onRedo={() =>
+                        dispatch({
+                          type:
+                            'REDO',
+                        })
+                      }
+                      labels={{
+                        undo:
+                          text.undo,
+
+                        redo:
+                          text.redo,
+                      }}
+                    />
+
+                    <ResetControls
+                      onResetActiveSide={() =>
+                        commitAction({
+                          type:
+                            'RESET_ACTIVE_SIDE',
+
+                          card,
+
+                          currentLanguage,
+                        })
+                      }
+                      onResetCard={
+                        handleResetCard
+                      }
+                      labels={{
+                        activeSide:
+                          text.resetSide,
+
+                        card:
+                          text.resetCard,
+                      }}
+                    />
+                  </div>
+                </details>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCheckoutError(
+                      null,
+                    );
+
+                    setIsCheckoutOpen(
+                      true,
+                    );
+                  }}
+                  className="inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-2xl bg-[#285347] px-5 py-3 text-sm font-bold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-[#1e4338] hover:shadow-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
+                >
+                  {
+                    text.continue
+                  }
+
+                  <span aria-hidden="true">
+                    →
+                  </span>
+                </button>
+
+                <EditorStatus
+                  currentLanguage={
+                    currentLanguage
+                  }
+                  shareNotice={
+                    null
+                  }
+                  photoRequiresReselection={Boolean(
+                    activeSideData.photo
+                      ?.requiresReselection,
+                  )}
+                />
+              </div>
+            )}
           </section>
         </div>
       </div>
@@ -2264,14 +1990,13 @@ export default function CardBuilder({
           ...draft,
 
           side:
-            'front',
+            'inside',
 
           previewMode:
             draft.previewMode ===
             'full'
               ? 'clean'
-              : draft
-                  .previewMode,
+              : draft.previewMode,
         }}
         cardPrice={
           2

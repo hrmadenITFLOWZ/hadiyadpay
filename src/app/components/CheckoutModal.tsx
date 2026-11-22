@@ -1,11 +1,17 @@
 'use client';
 
-import type { CardOption } from '../data/cardOptions';
-import useDialogAccessibility from '../hooks/useDialogAccessibility';
-import type { CardLanguage } from '../../lib/card-types';
-import type { EditorDraft } from '../../lib/card-editor';
+import type {
+  CardLanguage,
+  CardOption,
+} from '../../lib/card-types';
 
-import CardComposition from './CardComposition';
+import type {
+  EditorDraft,
+} from '../../lib/card-editor';
+
+import useDialogAccessibility from '../hooks/useDialogAccessibility';
+import CardArtworkLayer from './CardArtworkLayer';
+import OpenCardPreview from './OpenCardPreview';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -42,61 +48,129 @@ export default function CheckoutModal({
     return null;
   }
 
-  const lang = initialLanguage;
-  const preview = draft.front;
+  const lang =
+    initialLanguage;
+
+  const inside =
+    draft.inside;
 
   const content = {
     so: {
-      title: 'Hubi kaarkaaga',
+      eyebrow:
+        'Hadiyaddaada',
+
+      title:
+        'Hubi Hadiyaddaada',
+
       description:
-        'Eeg kaarkaaga gaarka ah ka hor intaadan u gudbin lacag-bixinta.',
-      preview: 'Tusaalaha kaarka',
-      card: 'Kaarka',
-      recipient: 'Qaataha',
-      sender: 'Diraha',
-      message: 'Fariinta',
-      price: 'Qiimaha kaarka',
-      edit: 'Wax kale beddel',
-      pay: 'Bixi',
-      waiting: 'Lacag-bixinta diyaarinaysa…',
-      close: 'Xir',
-      empty: 'Lama gelin',
+        'Hal mar oo ugu dambeysa eeg Hadiyaddaada ka hor intaadan sii wadin.',
+
+      cover:
+        'Dibadda',
+
+      inside:
+        'Gudaha',
+
+      digital:
+        'Hadiyad dijitaal ah',
+
+      total:
+        'Wadarta',
+
+      edit:
+        'Wax ka beddel',
+
+      pay:
+        'Dhammaystir dalabka',
+
+      waiting:
+        'Dalabka diyaarinaya…',
+
+      close:
+        'Xir',
+
+      secure:
+        'Lacag-bixin ammaan ah',
     },
 
     en: {
-      title: 'Review your card',
+      eyebrow:
+        'Your Hadiyad',
+
+      title:
+        'Review your Hadiyad',
+
       description:
-        'Preview your personalized card before continuing to payment.',
-      preview: 'Card preview',
-      card: 'Card',
-      recipient: 'Recipient',
-      sender: 'Sender',
-      message: 'Message',
-      price: 'Card price',
-      edit: 'Make another change',
-      pay: 'Pay',
-      waiting: 'Preparing payment…',
-      close: 'Close',
-      empty: 'Not added',
+        'Take one last look before sending your Hadiyad.',
+
+      cover:
+        'Cover',
+
+      inside:
+        'Inside',
+
+      digital:
+        'Digital Hadiyad',
+
+      total:
+        'Total',
+
+      edit:
+        'Make a change',
+
+      pay:
+        'Complete purchase',
+
+      waiting:
+        'Preparing checkout…',
+
+      close:
+        'Close',
+
+      secure:
+        'Secure checkout',
     },
 
     nl: {
-      title: 'Controleer je kaart',
+      eyebrow:
+        'Jouw Hadiyad',
+
+      title:
+        'Controleer je Hadiyad',
+
       description:
-        'Bekijk je persoonlijke kaart voordat je verdergaat naar de betaling.',
-      preview: 'Kaartvoorbeeld',
-      card: 'Kaart',
-      recipient: 'Ontvanger',
-      sender: 'Verzender',
-      message: 'Bericht',
-      price: 'Kaartprijs',
-      edit: 'Nog iets aanpassen',
-      pay: 'Betalen',
-      waiting: 'Betaling voorbereiden…',
-      close: 'Sluiten',
-      empty: 'Niet ingevuld',
+        'Bekijk je Hadiyad nog één keer voordat je verdergaat.',
+
+      cover:
+        'Voorkant',
+
+      inside:
+        'Binnenkant',
+
+      digital:
+        'Digitale Hadiyad',
+
+      total:
+        'Totaal',
+
+      edit:
+        'Nog iets aanpassen',
+
+      pay:
+        'Bestelling afronden',
+
+      waiting:
+        'Afrekenen voorbereiden…',
+
+      close:
+        'Sluiten',
+
+      secure:
+        'Veilig afrekenen',
     },
-  }[lang];
+  }[
+    lang
+  ];
 
   const formattedPrice =
     new Intl.NumberFormat(
@@ -106,142 +180,270 @@ export default function CheckoutModal({
           ? 'so-SO'
           : 'en-IE',
       {
-        style: 'currency',
-        currency: 'EUR',
+        style:
+          'currency',
+
+        currency:
+          'EUR',
       },
-    ).format(cardPrice);
+    ).format(
+      cardPrice,
+    );
+
+  const coverAspectRatio =
+    selectedOccasion.orientation ===
+    'portrait'
+      ? '2 / 3'
+      : '4 / 3';
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-3 backdrop-blur-sm sm:p-5">
+    <div className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/60 p-3 backdrop-blur-sm sm:items-center sm:p-5">
       <section
-        ref={dialogRef}
-        tabIndex={-1}
+        ref={
+          dialogRef
+        }
+        tabIndex={
+          -1
+        }
         role="dialog"
         aria-modal="true"
         aria-labelledby="checkout-title"
         aria-describedby="checkout-description"
-        className="relative max-h-[calc(100dvh-1.5rem)] w-full max-w-3xl overflow-y-auto rounded-3xl border border-gray-100 bg-white shadow-2xl sm:max-h-[calc(100dvh-2.5rem)]"
+        className="relative my-3 max-h-[calc(100dvh-1.5rem)] w-full max-w-[980px] overflow-y-auto rounded-[28px] border border-stone-200 bg-[#fffdf9] shadow-2xl sm:my-5 sm:max-h-[calc(100dvh-2.5rem)]"
       >
-        <div className="flex items-start justify-between gap-4 border-b border-gray-100 p-5 sm:p-6">
-          <div>
+        <button
+          type="button"
+          onClick={
+            onClose
+          }
+          disabled={
+            isSubmitting
+          }
+          aria-label={
+            content.close
+          }
+          className="absolute right-5 top-5 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-[#285347] bg-white text-base text-[#285347] transition hover:bg-[#eef4f1] disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347] sm:right-7 sm:top-7"
+        >
+          ×
+        </button>
+
+        <div className="px-5 pb-7 pt-6 sm:px-8 sm:pb-8 sm:pt-7">
+          <header className="mx-auto max-w-2xl pr-12 text-center sm:pr-0">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#9a7146]">
+              {
+                content.eyebrow
+              }
+            </p>
+
             <h2
               id="checkout-title"
-              className="text-xl font-black text-gray-900"
+              className="mt-1.5 font-serif text-3xl leading-tight text-[#173f35] sm:text-[2.2rem]"
             >
-              {content.title}
+              {
+                content.title
+              }
             </h2>
 
             <p
               id="checkout-description"
-              className="mt-1 text-sm text-gray-600"
+              className="mx-auto mt-1.5 max-w-lg text-sm leading-6 text-stone-500"
             >
-              {content.description}
+              {
+                content.description
+              }
             </p>
-          </div>
+          </header>
 
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSubmitting}
-            aria-label={content.close}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-700 transition hover:bg-gray-200 disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
-          >
-            ✕
-          </button>
-        </div>
-
-        <div className="grid gap-6 p-5 sm:p-6 md:grid-cols-[minmax(190px,0.8fr)_minmax(0,1.2fr)]">
-          <section
-            aria-label={content.preview}
-            className="mx-auto w-full max-w-[230px]"
-          >
-            <h3 className="mb-3 text-center text-xs font-bold uppercase tracking-wider text-gray-500">
-              {content.preview}
-            </h3>
-
-            <CardComposition
-              card={selectedOccasion}
-              language={lang}
-              cardSide="front"
-              side={preview}
-            />
-          </section>
-
-          <div className="flex min-w-0 flex-col gap-4 text-sm text-gray-700">
-            <div>
-              <p className="text-xs font-bold uppercase text-gray-500">
-                {content.card}
-              </p>
-
-              <p className="font-semibold text-gray-900">
-                {selectedOccasion.title[lang]}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-xs font-bold uppercase text-gray-500">
-                {content.recipient}
-              </p>
-
-              <p className="break-words text-gray-900">
-                {preview.recipient.trim() || content.empty}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-xs font-bold uppercase text-gray-500">
-                {content.sender}
-              </p>
-
-              <p className="break-words text-gray-900">
-                {preview.sender.trim() || content.empty}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-xs font-bold uppercase text-gray-500">
-                {content.message}
-              </p>
-
-              <p className="max-h-28 overflow-y-auto whitespace-pre-wrap break-words text-gray-900">
-                {preview.message.trim() || content.empty}
-              </p>
-            </div>
-
-            <div className="mt-auto flex justify-between border-t border-gray-200 pt-3 font-bold text-gray-900">
-              <span>{content.price}</span>
-              <span>{formattedPrice}</span>
-            </div>
-
-            {error && (
-              <p
-                role="alert"
-                className="rounded-xl bg-rose-50 p-3 text-rose-800"
+          <main className="mx-auto mt-7 max-w-[800px]">
+            <div className="grid items-center justify-center gap-8 md:grid-cols-[290px_450px]">
+              <section
+                aria-label={
+                  content.cover
+                }
+                className="mx-auto flex w-full max-w-[290px] items-center justify-center"
               >
-                {error}
-              </p>
-            )}
+                <div
+                  className="relative w-full overflow-hidden rounded-[20px] border border-[#ded7cc] bg-[#f7f1e8] shadow-[0_12px_30px_rgba(75,57,35,0.14)]"
+                  style={{
+                    aspectRatio:
+                      coverAspectRatio,
+                  }}
+                >
+                  <CardArtworkLayer
+                    artwork={
+                      selectedOccasion.artwork
+                    }
+                    language={
+                      lang
+                    }
+                    decorative={
+                      false
+                    }
+                    overlay={
+                      false
+                    }
+                    fit="contain"
+                    backgroundColor="#f7f1e8"
+                  />
+                </div>
+              </section>
 
-            <button
-              type="button"
-              onClick={onEdit}
-              disabled={isSubmitting}
-              className="min-h-11 w-full rounded-xl border border-stone-300 bg-white px-4 py-2.5 font-semibold text-stone-800 transition hover:bg-stone-50 disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
-            >
-              {content.edit}
-            </button>
+              <section
+                aria-label={
+                  content.inside
+                }
+                className="mx-auto w-full max-w-[450px]"
+              >
+                <div className="relative h-[330px] w-full overflow-visible">
+                  <div
+                    className="absolute left-1/2 top-1/2 w-[620px]"
+                    style={{
+                      transform:
+                        'translate(-50%, -50%) scale(0.72)',
 
-            <button
-              type="button"
-              onClick={onPay}
-              disabled={isSubmitting}
-              className="min-h-12 w-full rounded-2xl bg-[#285347] px-4 py-3 font-bold text-white transition-colors hover:bg-[#1e4338] disabled:cursor-wait disabled:opacity-70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
-            >
-              {isSubmitting
-                ? content.waiting
-                : `${content.pay} · ${formattedPrice}`}
-            </button>
-          </div>
+                      transformOrigin:
+                        'center center',
+                    }}
+                  >
+                    <OpenCardPreview
+                      card={
+                        selectedOccasion
+                      }
+                      language={
+                        lang
+                      }
+                      inside={
+                        inside
+                      }
+                      isOpen={
+                        true
+                      }
+                      interactive={
+                        false
+                      }
+                      showEditGuides={
+                        false
+                      }
+                    />
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <div className="mx-auto mt-6 max-w-[750px] border-t border-stone-200 pt-5">
+              <div className="flex items-end justify-between gap-5">
+                <div className="min-w-0">
+                  <p className="font-serif text-lg leading-tight text-[#173f35] sm:text-xl">
+                    {
+                      selectedOccasion.title[
+                        lang
+                      ]
+                    }
+                  </p>
+
+                  <p className="mt-1 text-xs text-stone-400">
+                    {
+                      content.digital
+                    }
+                  </p>
+                </div>
+
+                <div className="shrink-0 text-right">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-stone-400">
+                    {
+                      content.total
+                    }
+                  </p>
+
+                  <p className="mt-0.5 text-2xl font-black tracking-tight text-[#173f35]">
+                    {
+                      formattedPrice
+                    }
+                  </p>
+                </div>
+              </div>
+
+              {error && (
+                <p
+                  role="alert"
+                  className="mt-4 rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm leading-5 text-rose-800"
+                >
+                  {
+                    error
+                  }
+                </p>
+              )}
+
+              <div className="mt-5 grid gap-3 sm:grid-cols-[190px_minmax(0,1fr)]">
+                <button
+                  type="button"
+                  onClick={
+                    onEdit
+                  }
+                  disabled={
+                    isSubmitting
+                  }
+                  className="min-h-12 rounded-xl border border-stone-300 bg-white px-4 text-sm font-semibold text-stone-700 transition hover:border-stone-400 hover:bg-stone-50 disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
+                >
+                  {
+                    content.edit
+                  }
+                </button>
+
+                <button
+                  type="button"
+                  onClick={
+                    onPay
+                  }
+                  disabled={
+                    isSubmitting
+                  }
+                  className="min-h-12 rounded-xl bg-[#285347] px-5 text-sm font-bold text-white shadow-[0_7px_18px_rgba(40,83,71,0.18)] transition hover:-translate-y-0.5 hover:bg-[#1e4338] hover:shadow-[0_9px_22px_rgba(40,83,71,0.22)] disabled:cursor-wait disabled:opacity-70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
+                >
+                  {isSubmitting ? (
+                    content.waiting
+                  ) : (
+                    <span className="flex w-full items-center justify-between gap-4">
+                      <span className="font-bold">
+                        {
+                          content.pay
+                        }
+                      </span>
+
+                      <span className="flex shrink-0 items-center gap-3 border-l border-white/20 pl-4">
+                        <span className="font-bold">
+                          {
+                            formattedPrice
+                          }
+                        </span>
+
+                        <span
+                          aria-hidden="true"
+                          className="text-base"
+                        >
+                          →
+                        </span>
+                      </span>
+                    </span>
+                  )}
+                </button>
+              </div>
+
+              <div className="mt-3 flex items-center justify-center gap-1.5 text-[10px] font-medium text-stone-400">
+                <span
+                  aria-hidden="true"
+                >
+                  🔒
+                </span>
+
+                <span>
+                  {
+                    content.secure
+                  }
+                </span>
+              </div>
+            </div>
+          </main>
         </div>
       </section>
     </div>
