@@ -69,14 +69,14 @@ const copy = {
     invitations:
       'Uitnodigingen',
 
-    nikah:
-      'Nikah',
-
     hennaWedding:
       'Henna',
 
+    nikah:
+      'Nikah',
+
     walima:
-      'Walima',
+      'Trouwfeest',
 
     congratulations:
       'Felicitatie',
@@ -152,11 +152,11 @@ const copy = {
     invitations:
       'Invitations',
 
-    nikah:
-      'Nikah',
-
     hennaWedding:
       'Henna',
+
+    nikah:
+      'Nikah',
 
     walima:
       'Walima',
@@ -235,11 +235,11 @@ const copy = {
     invitations:
       'Casuumad',
 
-    nikah:
-      'Nikah',
-
     hennaWedding:
       'Henna',
+
+    nikah:
+      'Nikah',
 
     walima:
       'Walima',
@@ -374,8 +374,8 @@ export default function HomeStorefront() {
   const weddingMoments = [
     text.saveTheDate,
     text.invitations,
-    text.nikah,
     text.hennaWedding,
+    text.nikah,
     text.walima,
     text.congratulations,
   ];
@@ -390,7 +390,10 @@ export default function HomeStorefront() {
 
       <AnimatedCardShowcase />
 
-      <section className="px-5 py-16 sm:px-8 sm:py-20 lg:px-12">
+      <section
+        id="occasions"
+        className="px-5 py-16 sm:px-8 sm:py-20 lg:px-12"
+      >
         <div className="mx-auto w-full max-w-7xl">
           <div className="max-w-3xl">
             <p className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-[#7f6b62]">
@@ -555,9 +558,9 @@ export default function HomeStorefront() {
 
                   <p className="mt-3 text-xs leading-5 text-white/70">
                     {
-                      text.nikah
-                    } · {
                       text.hennaWedding
+                    } · {
+                      text.nikah
                     } · {
                       text.walima
                     }
