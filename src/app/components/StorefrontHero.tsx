@@ -17,18 +17,25 @@ const copy = {
   so: {
     eyebrow:
       'KAARAR SALAAN OO SHAQSI AH',
+
     title:
       'Eray yar. Xusuus weyn.',
+
     description:
       'Dooro naqshad, qor fariin kuu gaar ah, kadibna la wadaag qof aad jeceshahay.',
+
     primaryAction:
       'Eeg kaararka',
+
     secondaryAction:
       'Dooro munaasabad',
+
     collectionLabel:
       'URURINTA HADIYADPAY',
+
     collectionTitle:
       'Kaar munaasabad kasta loogu talagalay',
+
     previewAlt:
       'Xulasho ka mid ah kaararka HadiyadPay',
   },
@@ -36,18 +43,25 @@ const copy = {
   en: {
     eyebrow:
       'PERSONAL DIGITAL GREETING CARDS',
+
     title:
       'A few words. A lasting moment.',
+
     description:
       'Choose a design, write a personal message, and share it with someone you care about.',
+
     primaryAction:
       'Explore the cards',
+
     secondaryAction:
       'Choose an occasion',
+
     collectionLabel:
       'THE HADIYADPAY COLLECTION',
+
     collectionTitle:
       'A card for every meaningful moment',
+
     previewAlt:
       'A selection of HadiyadPay greeting cards',
   },
@@ -55,18 +69,25 @@ const copy = {
   nl: {
     eyebrow:
       'PERSOONLIJKE DIGITALE KAARTEN',
+
     title:
       'Een klein gebaar. Een blijvende herinnering.',
+
     description:
       'Kies een ontwerp, schrijf een persoonlijke boodschap en deel je kaart.',
+
     primaryAction:
       'Bekijk de kaarten',
+
     secondaryAction:
       'Kies een gelegenheid',
+
     collectionLabel:
       'DE HADIYADPAY COLLECTIE',
+
     collectionTitle:
       'Een kaart voor ieder bijzonder moment',
+
     previewAlt:
       'Een selectie uit de HadiyadPay collectie',
   },
@@ -128,18 +149,24 @@ export default function StorefrontHero({
     >
       <div className="relative z-10 max-w-2xl">
         <p className="mb-5 text-xs font-bold uppercase tracking-[0.2em] text-[#527369]">
-          {text.eyebrow}
+          {
+            text.eyebrow
+          }
         </p>
 
         <h1
           id="storefront-hero-title"
           className="max-w-xl font-serif text-4xl font-medium leading-[1.08] tracking-tight text-[#233c35] sm:text-5xl lg:text-6xl"
         >
-          {text.title}
+          {
+            text.title
+          }
         </h1>
 
         <p className="mt-6 max-w-lg text-base leading-7 text-[#59655d] sm:text-lg">
-          {text.description}
+          {
+            text.description
+          }
         </p>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -147,14 +174,18 @@ export default function StorefrontHero({
             href="#card-catalog"
             className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#285347] px-7 text-sm font-semibold text-white transition-colors hover:bg-[#1e4238] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#285347]"
           >
-            {text.primaryAction}
+            {
+              text.primaryAction
+            }
           </a>
 
           <a
             href="#occasions"
             className="inline-flex min-h-12 items-center justify-center rounded-full border border-[#9aa99e] px-7 text-sm font-semibold text-[#29483e] transition-colors hover:bg-white/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#285347]"
           >
-            {text.secondaryAction}
+            {
+              text.secondaryAction
+            }
           </a>
         </div>
       </div>
@@ -174,7 +205,7 @@ export default function StorefrontHero({
 
           <div
             aria-hidden="true"
-            className="absolute left-[1%] top-[13%] z-10 aspect-[0.78] w-[44%] -rotate-[7deg] overflow-hidden rounded-[1.6rem] border border-white/65 bg-[#f8f1e6] shadow-[0_24px_55px_rgba(53,62,54,0.20)] transition duration-500 hover:-translate-x-1 hover:-rotate-[9deg] sm:left-[3%] sm:w-[42%]"
+            className="absolute left-[2%] top-[19%] z-10 aspect-[0.78] w-[40%] -rotate-[6deg] overflow-hidden rounded-[1.6rem] border border-white/65 bg-[#f8f1e6] shadow-[0_24px_55px_rgba(53,62,54,0.20)] transition duration-500 hover:-translate-x-1 hover:-rotate-[8deg] sm:left-[4%] sm:top-[17%] sm:w-[40%]"
           >
             <CardArtworkLayer
               artwork={
@@ -227,11 +258,15 @@ export default function StorefrontHero({
           <span className="mx-auto block h-px w-10 bg-[#b48a54]" />
 
           <p className="mt-4 text-[0.62rem] font-bold uppercase tracking-[0.2em] text-[#8b704e]">
-            {text.collectionLabel}
+            {
+              text.collectionLabel
+            }
           </p>
 
           <p className="mt-2 font-serif text-lg leading-snug text-[#29483e] sm:text-xl">
-            {text.collectionTitle}
+            {
+              text.collectionTitle
+            }
           </p>
         </div>
       </div>
