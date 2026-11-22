@@ -3,6 +3,8 @@
 import {
   useRef,
   useState,
+  type CSSProperties,
+  type SyntheticEvent,
 } from 'react';
 
 import type {
@@ -131,6 +133,14 @@ export default function HadiyadReveal({
       'closed',
     );
 
+  const [
+    coverAspectRatio,
+    setCoverAspectRatio,
+  ] =
+    useState<number | null>(
+      null,
+    );
+
   const hasStartedRef =
     useRef(false);
 
@@ -175,6 +185,36 @@ export default function HadiyadReveal({
 
   const hasCardStarted =
     !isClosed;
+
+  const cardBookStyle =
+    coverAspectRatio
+      ? ({
+          '--cover-aspect-ratio':
+            coverAspectRatio,
+        } as CSSProperties)
+      : undefined;
+
+  const handleCoverLoad = (
+    event:
+      SyntheticEvent<HTMLImageElement>,
+  ) => {
+    const image =
+      event.currentTarget;
+
+    if (
+      image.naturalWidth <=
+        0 ||
+      image.naturalHeight <=
+        0
+    ) {
+      return;
+    }
+
+    setCoverAspectRatio(
+      image.naturalWidth /
+        image.naturalHeight,
+    );
+  };
 
   const handleOpen =
     async () => {
@@ -347,7 +387,10 @@ export default function HadiyadReveal({
                 className="hadiyad-card-glow"
               />
 
-              <div className="hadiyad-card-book">
+              <div
+                className="hadiyad-card-book"
+                style={cardBookStyle}
+              >
                 <div className="hadiyad-inside-right">
                   <img
                     src={insideUrl}
@@ -363,6 +406,9 @@ export default function HadiyadReveal({
                       alt=""
                       aria-hidden="true"
                       className="hadiyad-cover-image"
+                      onLoad={
+                        handleCoverLoad
+                      }
                     />
 
                     <div
@@ -616,7 +662,8 @@ export default function HadiyadReveal({
           align-items: center;
           justify-content: center;
           gap: 0.75rem;
-          padding: 1.4rem 1rem 0;
+          padding:
+            1.4rem 1rem 0;
         }
 
         .hadiyad-monogram {
@@ -837,13 +884,17 @@ export default function HadiyadReveal({
           max-width: 48rem;
         }
 
-        .is-opening .hadiyad-card-stage.is-portrait,
-        .is-open .hadiyad-card-stage.is-portrait {
+        .is-opening
+          .hadiyad-card-stage.is-portrait,
+        .is-open
+          .hadiyad-card-stage.is-portrait {
           max-width: 58rem;
         }
 
-        .is-opening .hadiyad-card-stage.is-landscape,
-        .is-open .hadiyad-card-stage.is-landscape {
+        .is-opening
+          .hadiyad-card-stage.is-landscape,
+        .is-open
+          .hadiyad-card-stage.is-landscape {
           max-width: 72rem;
         }
 
@@ -887,15 +938,37 @@ export default function HadiyadReveal({
             both;
         }
 
-        .is-showing-cover .hadiyad-card-book {
-          width: 100%;
-          margin-left: 0;
+        .is-showing-cover
+          .hadiyad-card-book {
+          width:
+            min(
+              100%,
+              29rem
+            );
+          margin:
+            0 auto;
+          aspect-ratio:
+            var(
+              --cover-aspect-ratio,
+              0.82
+            );
         }
 
-        .is-opening .hadiyad-card-book,
-        .is-open .hadiyad-card-book {
+        .is-showing-cover
+          .hadiyad-inside-right {
+          position: absolute;
+          inset: 0;
+          opacity: 0;
+          pointer-events: none;
+        }
+
+        .is-opening
+          .hadiyad-card-book,
+        .is-open
+          .hadiyad-card-book {
           width: 50%;
           margin-left: 50%;
+          aspect-ratio: auto;
         }
 
         .hadiyad-inside-right {
@@ -911,6 +984,8 @@ export default function HadiyadReveal({
           box-shadow:
             inset 0 0 0 1px
             rgba(181, 139, 75, 0.25);
+          transition:
+            opacity 300ms ease;
         }
 
         .hadiyad-inside-image {
@@ -944,13 +1019,16 @@ export default function HadiyadReveal({
             transform;
         }
 
-        .is-showing-cover .hadiyad-cover-panel {
+        .is-showing-cover
+          .hadiyad-cover-panel {
           transform:
             rotateY(0deg);
         }
 
-        .is-opening .hadiyad-cover-panel,
-        .is-open .hadiyad-cover-panel {
+        .is-opening
+          .hadiyad-cover-panel,
+        .is-open
+          .hadiyad-cover-panel {
           transform:
             rotateY(-180deg);
         }
@@ -992,10 +1070,8 @@ export default function HadiyadReveal({
           display: block;
           width: 100%;
           height: 100%;
-          object-fit: contain;
-          object-position: center;
+          object-fit: fill;
           border-radius: 1.5rem;
-          background: #fffaf0;
         }
 
         .hadiyad-inside-photo-image {
@@ -1056,8 +1132,10 @@ export default function HadiyadReveal({
             opacity 500ms ease;
         }
 
-        .is-opening .hadiyad-card-spine,
-        .is-open .hadiyad-card-spine {
+        .is-opening
+          .hadiyad-card-spine,
+        .is-open
+          .hadiyad-card-spine {
           opacity: 1;
         }
 
@@ -1354,8 +1432,19 @@ export default function HadiyadReveal({
             margin-top: 1.35rem;
           }
 
-          .is-opening .hadiyad-card-stage.is-portrait,
-          .is-open .hadiyad-card-stage.is-portrait {
+          .is-showing-cover
+            .hadiyad-card-book {
+            width:
+              min(
+                86vw,
+                25rem
+              );
+          }
+
+          .is-opening
+            .hadiyad-card-stage.is-portrait,
+          .is-open
+            .hadiyad-card-stage.is-portrait {
             width:
               min(
                 96vw,
@@ -1363,8 +1452,10 @@ export default function HadiyadReveal({
               );
           }
 
-          .is-opening .hadiyad-card-stage.is-landscape,
-          .is-open .hadiyad-card-stage.is-landscape {
+          .is-opening
+            .hadiyad-card-stage.is-landscape,
+          .is-open
+            .hadiyad-card-stage.is-landscape {
             width:
               min(
                 96vw,
@@ -1447,8 +1538,10 @@ export default function HadiyadReveal({
               0.01ms !important;
           }
 
-          .is-opening .hadiyad-cover-panel,
-          .is-open .hadiyad-cover-panel {
+          .is-opening
+            .hadiyad-cover-panel,
+          .is-open
+            .hadiyad-cover-panel {
             transform:
               rotateY(-180deg);
           }
