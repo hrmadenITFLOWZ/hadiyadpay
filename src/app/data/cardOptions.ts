@@ -1582,7 +1582,7 @@ export const cardOptions: CardOption[] = [
 
       localizedSrc: {
         so:
-          '/images/cards/love-01-so.png',
+          '/images/cards/love-02-so.png',
       },
 
       alt: {
@@ -1711,7 +1711,7 @@ export const cardOptions: CardOption[] = [
 
       localizedSrc: {
         so:
-          '/images/cards/love-02-so.png',
+          '/images/cards/love-01-so.png',
       },
 
       alt: {

@@ -16,6 +16,11 @@ import {
 } from '../../../../data/cardOptions';
 
 import {
+  getCardArtworkSource,
+  type CardArtworkSource,
+} from '../../../../../lib/card-types';
+
+import {
   parseOrderDraft,
 } from '../../../../../lib/card-order';
 
@@ -27,24 +32,80 @@ import {
   getOrderForShareToken,
 } from '../../../../../lib/server/share-access';
 
-export const runtime = 'nodejs';
+export const runtime =
+  'nodejs';
+
+function getArtworkMimeType(
+  source:
+    CardArtworkSource,
+): string {
+  if (
+    source.endsWith(
+      '.svg',
+    )
+  ) {
+    return 'image/svg+xml';
+  }
+
+  if (
+    source.endsWith(
+      '.png',
+    )
+  ) {
+    return 'image/png';
+  }
+
+  if (
+    source.endsWith(
+      '.webp',
+    )
+  ) {
+    return 'image/webp';
+  }
+
+  if (
+    source.endsWith(
+      '.jpg',
+    ) ||
+    source.endsWith(
+      '.jpeg',
+    )
+  ) {
+    return 'image/jpeg';
+  }
+
+  return 'application/octet-stream';
+}
+
+function createDataUrl(
+  mimeType: string,
+  content: Buffer,
+): string {
+  return `data:${mimeType};base64,${content.toString(
+    'base64',
+  )}`;
+}
 
 export async function GET(
-  request: NextRequest,
+  request:
+    NextRequest,
   context: {
     params: Promise<{
       token: string;
     }>;
   },
 ) {
-  const { token } =
+  const {
+    token,
+  } =
     await context.params;
 
-  let sharedOrder: Awaited<
-    ReturnType<
-      typeof getOrderForShareToken
-    >
-  >;
+  let sharedOrder:
+    Awaited<
+      ReturnType<
+        typeof getOrderForShareToken
+      >
+    >;
 
   try {
     sharedOrder =
@@ -59,6 +120,11 @@ export async function GET(
           error instanceof Error
             ? error.name
             : 'unknown',
+
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : 'Unknown error',
       },
     );
 
@@ -68,7 +134,9 @@ export async function GET(
           'The card is temporarily unavailable',
       },
       {
-        status: 503,
+        status:
+          503,
+
         headers: {
           'Cache-Control':
             'no-store',
@@ -84,7 +152,9 @@ export async function GET(
           'This card link is unavailable',
       },
       {
-        status: 404,
+        status:
+          404,
+
         headers: {
           'Cache-Control':
             'no-store',
@@ -95,23 +165,86 @@ export async function GET(
 
   const card =
     cardOptions.find(
-      (option) =>
+      (
+        option,
+      ) =>
         option.id ===
         sharedOrder.card_id,
     );
 
-  if (
-    !card ||
-    card.artwork.type !==
-      'local-image'
-  ) {
+  if (!card) {
+    console.error(
+      'Shared card references an unknown card',
+      {
+        shareId:
+          sharedOrder.share_id,
+
+        cardId:
+          sharedOrder.card_id,
+      },
+    );
+
     return NextResponse.json(
       {
         error:
           'The card cannot be displayed',
       },
       {
-        status: 500,
+        status:
+          500,
+
+        headers: {
+          'Cache-Control':
+            'no-store',
+        },
+      },
+    );
+  }
+
+  if (
+    card.artwork.type !==
+    'local-image'
+  ) {
+    return NextResponse.json(
+      {
+        error:
+          'The card artwork is unavailable',
+      },
+      {
+        status:
+          500,
+
+        headers: {
+          'Cache-Control':
+            'no-store',
+        },
+      },
+    );
+  }
+
+  /*
+   * Resolve the card artwork using the language
+   * stored with the paid order.
+   *
+   * This ensures that Somali orders use
+   * localizedSrc.so when one is available.
+   */
+  const artworkSource =
+    getCardArtworkSource(
+      card.artwork,
+      sharedOrder.language,
+    );
+
+  if (!artworkSource) {
+    return NextResponse.json(
+      {
+        error:
+          'The card artwork is unavailable',
+      },
+      {
+        status:
+          500,
+
         headers: {
           'Cache-Control':
             'no-store',
@@ -125,50 +258,69 @@ export async function GET(
       join(
         process.cwd(),
         'public',
-        card.artwork.src.slice(1),
+        artworkSource.slice(
+          1,
+        ),
       );
 
-    const artwork =
+    const artworkBuffer =
       await readFile(
         artworkPath,
       );
 
-    const artworkMime =
-      card.artwork.src.endsWith(
-        '.svg',
-      )
-        ? 'image/svg+xml'
-        : card.artwork.src.endsWith(
-              '.webp',
-            )
-          ? 'image/webp'
-          : 'image/jpeg';
+    const artworkMimeType =
+      getArtworkMimeType(
+        artworkSource,
+      );
 
     const artworkDataUrl =
-      `data:${artworkMime};base64,${artwork.toString('base64')}`;
+      createDataUrl(
+        artworkMimeType,
+        artworkBuffer,
+      );
 
+    const hasInsidePhoto =
+      sharedOrder.photo_inside !==
+      null;
+
+    /*
+     * The current editor stores customization
+     * on the inside of the card.
+     *
+     * The fourth argument represents whether
+     * there is a front photo.
+     *
+     * The fifth argument represents whether
+     * there is an inside photo.
+     */
     const draft =
       parseOrderDraft(
         sharedOrder.customization,
         card,
         sharedOrder.language,
-        sharedOrder.photo_front !==
-          null,
         false,
+        hasInsidePhoto,
       );
 
     const photoDataUrl =
-      sharedOrder.photo_front &&
-      sharedOrder.photo_front_mime
-        ? `data:${sharedOrder.photo_front_mime};base64,${sharedOrder.photo_front.toString('base64')}`
+      sharedOrder.photo_inside &&
+      sharedOrder.photo_inside_mime
+        ? createDataUrl(
+            sharedOrder.photo_inside_mime,
+            sharedOrder.photo_inside,
+          )
         : undefined;
 
+    /*
+     * Render the personalized inside card,
+     * not the legacy front-only card.
+     */
     const svg =
       renderCardSvg(
         card,
         sharedOrder.language,
-        'front',
-        draft.front,
+        'inside',
+        draft.inside,
         artworkDataUrl,
         photoDataUrl,
       );
@@ -176,7 +328,8 @@ export async function GET(
     const shouldDownload =
       request.nextUrl.searchParams.get(
         'download',
-      ) === '1';
+      ) ===
+      '1';
 
     const filename =
       `${card.slug}-hadiyadpay-kaart.svg`;
@@ -184,7 +337,8 @@ export async function GET(
     return new Response(
       svg,
       {
-        status: 200,
+        status:
+          200,
 
         headers: {
           'Content-Type':
@@ -196,13 +350,16 @@ export async function GET(
               : `inline; filename="${filename}"`,
 
           'Cache-Control':
-            'private, no-store',
+            'private, no-store, max-age=0',
 
           'X-Content-Type-Options':
             'nosniff',
 
           'Content-Security-Policy':
             "default-src 'none'; img-src data:; style-src 'unsafe-inline'",
+
+          'Referrer-Policy':
+            'no-referrer',
         },
       },
     );
@@ -212,10 +369,31 @@ export async function GET(
       {
         shareId:
           sharedOrder.share_id,
+
+        orderId:
+          sharedOrder.order_id,
+
+        cardId:
+          sharedOrder.card_id,
+
+        language:
+          sharedOrder.language,
+
+        artworkSource,
+
+        hasInsidePhoto:
+          sharedOrder.photo_inside !==
+          null,
+
         errorType:
           error instanceof Error
             ? error.name
             : 'unknown',
+
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : 'Unknown error',
       },
     );
 
@@ -225,7 +403,9 @@ export async function GET(
           'The card could not be prepared',
       },
       {
-        status: 500,
+        status:
+          500,
+
         headers: {
           'Cache-Control':
             'no-store',

@@ -18,29 +18,48 @@ export interface SharedCardOrder
   share_id: string;
   order_id: string;
   card_id: string;
+
   language:
     | 'so'
     | 'en'
     | 'nl';
+
   status: string;
   customization: unknown;
-  photo_front: Buffer | null;
-  photo_front_mime:
-    | string
-    | null;
-  opened_at: Date | null;
-  open_count: number;
+
+  /*
+   * The database currently stores the uploaded
+   * inside photo in the legacy photo_front columns.
+   *
+   * The SQL query aliases those database columns
+   * to photo_inside so the reveal and rendering
+   * code can use the correct product terminology.
+   */
+  photo_inside:
+    Buffer | null;
+
+  photo_inside_mime:
+    string | null;
+
+  opened_at:
+    Date | null;
+
+  open_count:
+    number;
 }
 
 export async function getOrderForShareToken(
   token: string,
-): Promise<SharedCardOrder | null> {
+): Promise<
+  SharedCardOrder | null
+> {
   /*
-   * Token validation is centralized in share-token.ts.
+   * Token validation is centralized in
+   * share-token.ts.
    *
-   * This supports the current compact Hadiyad links
-   * while preserving compatibility with older,
-   * longer share tokens.
+   * This supports the current compact Hadiyad
+   * links while preserving compatibility with
+   * older, longer share tokens.
    */
   if (
     !isValidShareTokenFormat(
@@ -65,17 +84,26 @@ export async function getOrderForShareToken(
            orders.language,
            orders.status,
            orders.customization,
-           orders.photo_front,
-           orders.photo_front_mime,
+
+           orders.photo_front
+             AS photo_inside,
+
+           orders.photo_front_mime
+             AS photo_inside_mime,
+
            shares.opened_at,
            shares.open_count
+
          FROM card_order_shares shares
+
          INNER JOIN card_orders orders
            ON orders.id = shares.order_id
+
          WHERE
            shares.token_hash = $1
            AND shares.revoked_at IS NULL
            AND orders.status = 'paid'
+
          LIMIT 1`,
         [
           tokenHash,
@@ -93,15 +121,20 @@ export async function recordShareOpen(
 ): Promise<void> {
   await getDatabasePool().query(
     `UPDATE card_order_shares
+
      SET
        opened_at =
          COALESCE(
            opened_at,
            NOW()
          ),
+
        open_count =
          open_count + 1,
-       updated_at = NOW()
+
+       updated_at =
+         NOW()
+
      WHERE
        id = $1
        AND revoked_at IS NULL`,
