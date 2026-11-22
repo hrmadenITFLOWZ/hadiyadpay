@@ -244,10 +244,6 @@ export default function HadiyadReveal({
       hasStartedRef.current =
         true;
 
-      /*
-       * Prevent a delayed mobile click from the first
-       * button from immediately opening the cover.
-       */
       coverInteractiveAtRef.current =
         Date.now() + 900;
 
@@ -1196,10 +1192,12 @@ export default function HadiyadReveal({
           width:
             min(
               100%,
-              28rem
+              31rem
             );
           margin:
-            1.35rem auto 0;
+            1.45rem auto 0;
+          padding:
+            0 0.75rem;
           text-align: center;
           animation:
             instruction-arrive
@@ -1209,10 +1207,10 @@ export default function HadiyadReveal({
 
         .hadiyad-instruction-line {
           display: block;
-          width: 2.5rem;
+          width: 3rem;
           height: 1px;
           margin:
-            0 auto 0.85rem;
+            0 auto 0.9rem;
           background:
             linear-gradient(
               90deg,
@@ -1225,22 +1223,34 @@ export default function HadiyadReveal({
         .hadiyad-tap-title {
           margin: 0;
           color: #8e6b3d;
-          font-size: 0.68rem;
+          font-size:
+            clamp(
+              0.85rem,
+              2.2vw,
+              1rem
+            );
           font-weight: 900;
-          letter-spacing: 0.18em;
-          line-height: 1.5;
+          letter-spacing: 0.12em;
+          line-height: 1.45;
           text-transform: uppercase;
+          text-wrap: balance;
         }
 
         .hadiyad-tap-hint {
           margin:
-            0.5rem 0 0;
-          color: #69756f;
+            0.6rem 0 0;
+          color: #52655d;
           font-family:
             Georgia,
             serif;
-          font-size: 0.92rem;
+          font-size:
+            clamp(
+              1rem,
+              2.6vw,
+              1.15rem
+            );
           line-height: 1.5;
+          text-wrap: balance;
         }
 
         .hadiyad-opening-status {
@@ -1570,17 +1580,10 @@ export default function HadiyadReveal({
           }
 
           .hadiyad-tap-instruction {
+            width: 100%;
+            margin-top: 1.25rem;
             padding:
-              0 0.75rem;
-          }
-
-          .hadiyad-tap-title {
-            font-size: 0.62rem;
-            letter-spacing: 0.14em;
-          }
-
-          .hadiyad-tap-hint {
-            font-size: 0.84rem;
+              0 1rem;
           }
 
           .hadiyad-actions {
