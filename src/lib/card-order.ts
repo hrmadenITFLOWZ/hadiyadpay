@@ -60,7 +60,9 @@ function isRecord(
     typeof value ===
       'object' &&
     value !== null &&
-    !Array.isArray(value)
+    !Array.isArray(
+      value,
+    )
   );
 }
 
@@ -71,7 +73,9 @@ function boundedNumber(
   fallback: number,
 ): number {
   const parsed =
-    Number(value);
+    Number(
+      value,
+    );
 
   return Number.isFinite(
     parsed,
@@ -90,8 +94,10 @@ function parsePhotoFrameSize(
   value: unknown,
 ): EditorPhotoFrameSize {
   if (
-    value === 'small' ||
-    value === 'medium'
+    value ===
+      'small' ||
+    value ===
+      'medium'
   ) {
     return value;
   }
@@ -103,7 +109,11 @@ function parseStyle(
   value: unknown,
   fallback: EditorTextStyle,
 ): EditorTextStyle {
-  if (!isRecord(value)) {
+  if (
+    !isRecord(
+      value,
+    )
+  ) {
     return fallback;
   }
 
@@ -127,8 +137,10 @@ function parseStyle(
         : fallback.color,
 
     align:
-      value.align === 'left' ||
-      value.align === 'right'
+      value.align ===
+        'left' ||
+      value.align ===
+        'right'
         ? value.align
         : 'center',
 
@@ -143,10 +155,12 @@ function parseStyle(
     family,
 
     bold:
-      value.bold === true,
+      value.bold ===
+      true,
 
     italic:
-      value.italic === true,
+      value.italic ===
+      true,
 
     underline:
       value.underline ===
@@ -158,7 +172,11 @@ function parsePosition(
   value: unknown,
   fallback: EditorPosition,
 ): EditorPosition {
-  if (!isRecord(value)) {
+  if (
+    !isRecord(
+      value,
+    )
+  ) {
     return fallback;
   }
 
@@ -185,8 +203,13 @@ function parseSide(
   value: unknown,
   fallback: EditorSideState,
   hasPhotoFile: boolean,
+  strictPhotoValidation: boolean,
 ): EditorSideState {
-  if (!isRecord(value)) {
+  if (
+    !isRecord(
+      value,
+    )
+  ) {
     throw new Error(
       'Invalid card side',
     );
@@ -204,13 +227,16 @@ function parseSide(
   if (
     typeof recipient !==
       'string' ||
-    recipient.length > 80 ||
+    recipient.length >
+      80 ||
     typeof sender !==
       'string' ||
-    sender.length > 80 ||
+    sender.length >
+      80 ||
     typeof message !==
       'string' ||
-    message.length > 800
+    message.length >
+      800
   ) {
     throw new Error(
       'Invalid card text',
@@ -243,7 +269,9 @@ function parseSide(
     ) => {
       result[layer] =
         parseStyle(
-          styles[layer],
+          styles[
+            layer
+          ],
           legacyStyle,
         );
 
@@ -276,8 +304,11 @@ function parseSide(
     ) => {
       result[layer] =
         parsePosition(
-          positions[layer],
-          fallback.textPositions[
+          positions[
+            layer
+          ],
+          fallback
+            .textPositions[
             layer
           ],
         );
@@ -295,94 +326,144 @@ function parseSide(
     EditorPhotoLayer | null =
     null;
 
+  const hasSerializedPhoto =
+    value.photo !==
+      null &&
+    value.photo !==
+      undefined;
+
   if (
-    value.photo !== null &&
-    value.photo !== undefined
+    hasSerializedPhoto &&
+    hasPhotoFile
   ) {
     if (
       !isRecord(
         value.photo,
-      ) ||
-      !hasPhotoFile
+      )
+    ) {
+      if (
+        strictPhotoValidation
+      ) {
+        throw new Error(
+          'Reselect the card photo before checkout',
+        );
+      }
+    } else {
+      photo = {
+        width:
+          boundedNumber(
+            value.photo
+              .width,
+            1,
+            12000,
+            768,
+          ),
+
+        height:
+          boundedNumber(
+            value.photo
+              .height,
+            1,
+            12000,
+            768,
+          ),
+
+        scale:
+          boundedNumber(
+            value.photo
+              .scale,
+            PHOTO_SCALE_MIN,
+            PHOTO_SCALE_MAX,
+            1,
+          ),
+
+        x:
+          boundedNumber(
+            value.photo.x,
+            0,
+            100,
+            50,
+          ),
+
+        y:
+          boundedNumber(
+            value.photo.y,
+            0,
+            100,
+            50,
+          ),
+
+        rotation:
+          boundedNumber(
+            value.photo
+              .rotation,
+            -30,
+            30,
+            0,
+          ),
+
+        frameSize:
+          parsePhotoFrameSize(
+            value.photo
+              .frameSize,
+          ),
+
+        requiresReselection:
+          false,
+      };
+    }
+  } else if (
+    hasSerializedPhoto &&
+    !hasPhotoFile
+  ) {
+    /*
+     * Checkout/order validation remains strict:
+     * serialized photo metadata without an actual
+     * uploaded photo is rejected.
+     *
+     * Share/reveal rendering can explicitly disable
+     * strict validation. In that situation stale
+     * photo metadata is ignored and the card renders
+     * without a photo.
+     */
+    if (
+      strictPhotoValidation
     ) {
       throw new Error(
         'Reselect the card photo before checkout',
       );
     }
 
-    photo = {
-      width:
-        boundedNumber(
-          value.photo.width,
-          1,
-          12000,
-          768,
-        ),
-
-      height:
-        boundedNumber(
-          value.photo.height,
-          1,
-          12000,
-          768,
-        ),
-
-      scale:
-        boundedNumber(
-          value.photo.scale,
-          PHOTO_SCALE_MIN,
-          PHOTO_SCALE_MAX,
-          1,
-        ),
-
-      x:
-        boundedNumber(
-          value.photo.x,
-          0,
-          100,
-          50,
-        ),
-
-      y:
-        boundedNumber(
-          value.photo.y,
-          0,
-          100,
-          50,
-        ),
-
-      rotation:
-        boundedNumber(
-          value.photo.rotation,
-          -30,
-          30,
-          0,
-        ),
-
-      frameSize:
-        parsePhotoFrameSize(
-          value.photo.frameSize,
-        ),
-
-      requiresReselection:
-        false,
-    };
+    photo =
+      null;
   } else if (
+    !hasSerializedPhoto &&
     hasPhotoFile
   ) {
-    throw new Error(
-      'Unexpected card photo',
-    );
+    if (
+      strictPhotoValidation
+    ) {
+      throw new Error(
+        'Unexpected card photo',
+      );
+    }
+
+    photo =
+      null;
   }
 
   return {
     recipient,
     sender,
     message,
+
     textStyle:
       legacyStyle,
+
     textStyles,
+
     textPositions,
+
     photo,
   };
 }
@@ -391,7 +472,8 @@ export function serializeEditorDraft(
   draft: EditorDraft,
 ): SerializableOrderDraft {
   const serializeSide = (
-    side: EditorSideState,
+    side:
+      EditorSideState,
   ): SerializableOrderDraft['front'] => ({
     ...side,
 
@@ -399,13 +481,16 @@ export function serializeEditorDraft(
       side.photo
         ? {
             width:
-              side.photo.width,
+              side.photo
+                .width,
 
             height:
-              side.photo.height,
+              side.photo
+                .height,
 
             scale:
-              side.photo.scale,
+              side.photo
+                .scale,
 
             x:
               side.photo.x,
@@ -414,10 +499,12 @@ export function serializeEditorDraft(
               side.photo.y,
 
             rotation:
-              side.photo.rotation,
+              side.photo
+                .rotation,
 
             frameSize:
-              side.photo.frameSize,
+              side.photo
+                .frameSize,
           }
         : null,
   });
@@ -447,8 +534,13 @@ export function parseOrderDraft(
   language: CardLanguage,
   hasFrontPhoto: boolean,
   hasInsidePhoto: boolean,
+  strictPhotoValidation = true,
 ): EditorDraft {
-  if (!isRecord(value)) {
+  if (
+    !isRecord(
+      value,
+    )
+  ) {
     throw new Error(
       'Invalid card draft',
     );
@@ -475,6 +567,7 @@ export function parseOrderDraft(
         value.front,
         defaults.front,
         hasFrontPhoto,
+        strictPhotoValidation,
       ),
 
     inside:
@@ -482,6 +575,7 @@ export function parseOrderDraft(
         value.inside,
         defaults.inside,
         hasInsidePhoto,
+        strictPhotoValidation,
       ),
   };
 }

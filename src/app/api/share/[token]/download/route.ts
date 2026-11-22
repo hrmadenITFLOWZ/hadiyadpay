@@ -294,13 +294,14 @@ export async function GET(
      * there is an inside photo.
      */
     const draft =
-      parseOrderDraft(
-        sharedOrder.customization,
-        card,
-        sharedOrder.language,
-        false,
-        hasInsidePhoto,
-      );
+  parseOrderDraft(
+    sharedOrder.customization,
+    card,
+    sharedOrder.language,
+    false,
+    hasInsidePhoto,
+    false,
+  );
 
     const photoDataUrl =
       sharedOrder.photo_inside &&
