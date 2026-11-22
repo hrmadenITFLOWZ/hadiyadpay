@@ -6,7 +6,6 @@ import {
   useState,
   type CSSProperties,
   type KeyboardEvent,
-  type PointerEvent,
   type SyntheticEvent,
 } from 'react';
 
@@ -195,72 +194,58 @@ const copy = {
 
 const revealOrnaments = [
   {
-    left: '4%',
-    top: '76%',
-    size: 12,
+    left: '5%',
+    top: '80%',
+    size: 11,
     delay: 0,
     color: '#a66f54',
   },
   {
-    left: '9%',
-    top: '62%',
+    left: '12%',
+    top: '66%',
     size: 8,
     delay: 100,
     color: '#7f4d59',
   },
   {
-    left: '15%',
-    top: '86%',
-    size: 10,
+    left: '20%',
+    top: '88%',
+    size: 9,
     delay: 180,
     color: '#c09a5f',
   },
   {
-    left: '22%',
-    top: '72%',
+    left: '28%',
+    top: '74%',
     size: 7,
     delay: 260,
     color: '#687461',
   },
   {
-    left: '29%',
-    top: '91%',
-    size: 9,
-    delay: 340,
-    color: '#9a634e',
-  },
-  {
-    left: '71%',
-    top: '91%',
-    size: 9,
-    delay: 320,
-    color: '#9a634e',
-  },
-  {
-    left: '78%',
-    top: '72%',
+    left: '72%',
+    top: '74%',
     size: 7,
     delay: 240,
     color: '#687461',
   },
   {
-    left: '85%',
-    top: '86%',
-    size: 10,
+    left: '80%',
+    top: '88%',
+    size: 9,
     delay: 160,
     color: '#c09a5f',
   },
   {
-    left: '91%',
-    top: '62%',
+    left: '88%',
+    top: '66%',
     size: 8,
     delay: 80,
     color: '#7f4d59',
   },
   {
-    left: '96%',
-    top: '76%',
-    size: 12,
+    left: '95%',
+    top: '80%',
+    size: 11,
     delay: 20,
     color: '#a66f54',
   },
@@ -476,26 +461,6 @@ export default function HadiyadReveal({
       }
     };
 
-  const stopRevealAudio =
-    () => {
-      clearAudioTimers();
-
-      const audio =
-        audioRef.current;
-
-      if (!audio) {
-        return;
-      }
-
-      audio.pause();
-
-      audio.currentTime =
-        0;
-
-      audio.volume =
-        AUDIO_START_VOLUME;
-    };
-
   const scheduleRevealAudioStop =
     () => {
       clearAudioTimers();
@@ -507,7 +472,7 @@ export default function HadiyadReveal({
               AUDIO_STOP_MS -
               AUDIO_FADE_START_MS;
 
-            const totalSteps =
+            const numberOfSteps =
               Math.max(
                 1,
                 Math.ceil(
@@ -548,7 +513,7 @@ export default function HadiyadReveal({
                     Math.min(
                       1,
                       currentStep /
-                        totalSteps,
+                        numberOfSteps,
                     );
 
                   audio.volume =
@@ -719,7 +684,7 @@ export default function HadiyadReveal({
                     false,
                   );
                 },
-                700,
+                650,
               );
           },
           EFFECT_END_MS,
@@ -728,17 +693,31 @@ export default function HadiyadReveal({
 
   useEffect(
     () => {
+      if (
+        typeof Image ===
+        'undefined'
+      ) {
+        return;
+      }
+
       const preloadImage = (
         source: string,
       ) => {
         const image =
           new Image();
 
-        image.decoding =
-          'async';
-
         image.src =
           source;
+
+        if (
+          typeof image.decode ===
+          'function'
+        ) {
+          void image.decode().catch(
+            () =>
+              undefined,
+          );
+        }
       };
 
       preloadImage(
@@ -806,16 +785,6 @@ export default function HadiyadReveal({
     [
       hasWeddingHennaReveal,
     ],
-  );
-
-  useEffect(
-    () => {
-      return () => {
-        stopRevealAudio();
-        clearEffectTimers();
-      };
-    },
-    [],
   );
 
   const handleCoverLoad = (
@@ -886,10 +855,6 @@ export default function HadiyadReveal({
       if (
         hasWeddingHennaReveal
       ) {
-        /*
-         * Dit gebeurt rechtstreeks vanuit
-         * de click of pointer-up van de gebruiker.
-         */
         playRevealAudioFromUserGesture();
 
         setRevealState(
@@ -917,27 +882,6 @@ export default function HadiyadReveal({
 
       isOpeningRef.current =
         false;
-    };
-
-  const handleCardPointerUp = (
-    event:
-      PointerEvent<HTMLDivElement>,
-  ) => {
-    if (
-      event.pointerType ===
-        'mouse'
-    ) {
-      return;
-    }
-
-    event.preventDefault();
-
-    void handleOpenCard();
-  };
-
-  const handleCardClick =
-    () => {
-      void handleOpenCard();
     };
 
   const handleCardKeyDown = (
@@ -1010,10 +954,6 @@ export default function HadiyadReveal({
             <div className="hadiyad-special-bloom hadiyad-special-bloom-left" />
 
             <div className="hadiyad-special-bloom hadiyad-special-bloom-right" />
-
-            <div className="hadiyad-special-ornament hadiyad-special-ornament-left" />
-
-            <div className="hadiyad-special-ornament hadiyad-special-ornament-right" />
 
             {revealOrnaments.map(
               (
@@ -1162,16 +1102,13 @@ export default function HadiyadReveal({
                     ? text.tapToOpen
                     : undefined
                 }
-                aria-disabled={
-                  isPreparing ||
-                  isOpening
-                }
-                onPointerUp={
-                  handleCardPointerUp
-                }
-                onClick={
-                  handleCardClick
-                }
+                onClick={() => {
+                  if (
+                    isShowingCover
+                  ) {
+                    void handleOpenCard();
+                  }
+                }}
                 onKeyDown={
                   handleCardKeyDown
                 }
@@ -1311,10 +1248,12 @@ export default function HadiyadReveal({
       <style jsx global>{`
         .hadiyad-stage {
           position: relative;
-          min-height: 100svh;
-          overflow-x: hidden;
           display: flex;
+          min-height: 100svh;
           flex-direction: column;
+          overflow-x: hidden;
+          isolation: isolate;
+          color: #263e36;
           background:
             radial-gradient(
               circle at 50% 28%,
@@ -1322,8 +1261,6 @@ export default function HadiyadReveal({
               rgba(244, 237, 223, 0.96) 42%,
               rgba(226, 215, 194, 0.98) 100%
             );
-          color: #263e36;
-          isolation: isolate;
         }
 
         .hadiyad-stage::after {
@@ -1341,266 +1278,22 @@ export default function HadiyadReveal({
             );
         }
 
-        .hadiyad-special-reveal {
-          position: fixed;
-          inset: 0;
-          z-index: 100;
-          overflow: hidden;
-          pointer-events: none;
-          opacity: 1;
-        }
-
-        .hadiyad-special-wash {
-          position: absolute;
-          inset: 0;
-          opacity: 0;
-          background:
-            radial-gradient(
-              circle at 50% 48%,
-              rgba(207, 172, 107, 0.32),
-              rgba(121, 66, 73, 0.14) 34%,
-              transparent 70%
-            );
-          transition:
-            opacity 850ms ease;
-        }
-
-        .hadiyad-special-reveal.is-active
-          .hadiyad-special-wash {
-          opacity: 1;
-        }
-
-        .hadiyad-special-ring {
-          position: absolute;
-          left: 50%;
-          top: 50%;
-          border-radius: 999px;
-          opacity: 0.72;
-          transform:
-            translate(-50%, -50%)
-            scale(0.35);
-          transition:
-            transform 2100ms
-              cubic-bezier(
-                0.16,
-                1,
-                0.3,
-                1
-              ),
-            opacity 2100ms ease;
-        }
-
-        .hadiyad-special-ring-one {
-          width: 22rem;
-          height: 22rem;
-          border:
-            1px solid
-            rgba(194, 154, 88, 0.46);
-        }
-
-        .hadiyad-special-ring-two {
-          width: 15rem;
-          height: 15rem;
-          border:
-            1px solid
-            rgba(127, 75, 85, 0.38);
-          transition-delay: 130ms;
-        }
-
-        .hadiyad-special-reveal.is-active
-          .hadiyad-special-ring-one {
-          opacity: 0;
-          transform:
-            translate(-50%, -50%)
-            scale(2.2);
-        }
-
-        .hadiyad-special-reveal.is-active
-          .hadiyad-special-ring-two {
-          opacity: 0;
-          transform:
-            translate(-50%, -50%)
-            scale(2.7);
-        }
-
-        .hadiyad-special-bloom {
-          position: absolute;
-          bottom: -10rem;
-          width: 25rem;
-          height: 25rem;
-          border-radius: 999px;
-          opacity: 0;
-          filter: blur(55px);
-          transition:
-            opacity 1700ms ease,
-            transform 2200ms
-              cubic-bezier(
-                0.16,
-                1,
-                0.3,
-                1
-              );
-        }
-
-        .hadiyad-special-bloom-left {
-          left: -11rem;
-          background:
-            radial-gradient(
-              circle,
-              rgba(128, 72, 79, 0.74),
-              transparent 68%
-            );
-          transform:
-            translate(-2rem, 5rem)
-            scale(0.7);
-        }
-
-        .hadiyad-special-bloom-right {
-          right: -11rem;
-          background:
-            radial-gradient(
-              circle,
-              rgba(194, 150, 83, 0.72),
-              transparent 68%
-            );
-          transform:
-            translate(2rem, 5rem)
-            scale(0.7);
-        }
-
-        .hadiyad-special-reveal.is-active
-          .hadiyad-special-bloom-left {
-          opacity: 0.34;
-          transform:
-            translate(7rem, -8rem)
-            scale(1.25);
-        }
-
-        .hadiyad-special-reveal.is-active
-          .hadiyad-special-bloom-right {
-          opacity: 0.34;
-          transform:
-            translate(-7rem, -8rem)
-            scale(1.25);
-        }
-
-        .hadiyad-special-ornament {
-          position: absolute;
-          top: 54%;
-          width: 7.5rem;
-          height: 7.5rem;
-          opacity: 0.55;
-          border-radius:
-            55% 45% 60% 40%;
-          transition:
-            transform 2100ms
-              cubic-bezier(
-                0.16,
-                1,
-                0.3,
-                1
-              ),
-            opacity 2100ms ease;
-        }
-
-        .hadiyad-special-ornament-left {
-          left: 5%;
-          border:
-            1px solid
-            rgba(184, 139, 77, 0.45);
-          transform:
-            rotate(-26deg)
-            scale(0.7);
-        }
-
-        .hadiyad-special-ornament-right {
-          right: 5%;
-          border:
-            1px solid
-            rgba(126, 74, 83, 0.42);
-          transform:
-            rotate(26deg)
-            scale(0.7);
-        }
-
-        .hadiyad-special-reveal.is-active
-          .hadiyad-special-ornament-left {
-          opacity: 0;
-          transform:
-            translate(-5rem, -9rem)
-            rotate(-62deg)
-            scale(1.7);
-        }
-
-        .hadiyad-special-reveal.is-active
-          .hadiyad-special-ornament-right {
-          opacity: 0;
-          transform:
-            translate(5rem, -9rem)
-            rotate(62deg)
-            scale(1.7);
-        }
-
-        .hadiyad-special-particle {
-          position: absolute;
-          left:
-            var(--particle-left);
-          top:
-            var(--particle-top);
-          width:
-            var(--particle-size);
-          height:
-            var(--particle-size);
-          border-radius:
-            999px 999px 999px 0;
-          opacity: 0.74;
-          background:
-            var(--particle-color);
-          box-shadow:
-            0 0 14px
-            rgba(185, 139, 81, 0.32);
-          transform:
-            translateY(0)
-            rotate(45deg)
-            scale(1);
-          transition:
-            transform 1900ms
-              cubic-bezier(
-                0.16,
-                1,
-                0.3,
-                1
-              ),
-            opacity 1900ms ease;
-          transition-delay:
-            var(--particle-delay);
-        }
-
-        .hadiyad-special-reveal.is-active
-          .hadiyad-special-particle {
-          opacity: 0;
-          transform:
-            translateY(-13rem)
-            rotate(165deg)
-            scale(0.15);
-        }
-
         .hadiyad-ambient {
           position: absolute;
           z-index: -2;
           width: 28rem;
           height: 28rem;
           border-radius: 999px;
-          filter: blur(75px);
           opacity: 0.62;
+          filter: blur(75px);
           transition:
             transform 1800ms ease,
             opacity 1800ms ease;
         }
 
         .hadiyad-ambient-left {
-          left: -12rem;
           top: -10rem;
+          left: -12rem;
           background: #bfd6ca;
         }
 
@@ -1636,8 +1329,8 @@ export default function HadiyadReveal({
           position: absolute;
           inset: 0;
           z-index: -1;
-          opacity: 0.16;
           pointer-events: none;
+          opacity: 0.16;
           background-image:
             linear-gradient(
               30deg,
@@ -1663,19 +1356,6 @@ export default function HadiyadReveal({
             );
         }
 
-        .has-wedding-henna-reveal.is-preparing
-          .hadiyad-card-glow,
-        .has-wedding-henna-reveal.is-opening
-          .hadiyad-card-glow {
-          background:
-            radial-gradient(
-              circle,
-              rgba(205, 164, 93, 0.72),
-              rgba(126, 73, 81, 0.3) 46%,
-              transparent 72%
-            );
-        }
-
         .hadiyad-brand {
           position: relative;
           z-index: 20;
@@ -1693,23 +1373,23 @@ export default function HadiyadReveal({
           height: 2.7rem;
           align-items: center;
           justify-content: center;
-          border-radius: 1rem;
           border:
             1px solid
             rgba(184, 145, 81, 0.38);
+          border-radius: 1rem;
           background:
             rgba(255, 253, 248, 0.78);
           box-shadow:
             0 10px 30px
             rgba(53, 73, 63, 0.12);
-          backdrop-filter:
-            blur(14px);
+          color: #285347;
           font-family:
             Georgia,
             serif;
           font-size: 1.1rem;
           font-weight: 700;
-          color: #285347;
+          backdrop-filter:
+            blur(14px);
         }
 
         .hadiyad-brand-name {
@@ -1724,11 +1404,11 @@ export default function HadiyadReveal({
         .hadiyad-brand-label {
           margin:
             0.3rem 0 0;
+          color: #897b6c;
           font-size: 0.58rem;
           font-weight: 800;
           letter-spacing: 0.2em;
           text-transform: uppercase;
-          color: #897b6c;
         }
 
         .hadiyad-content {
@@ -1756,17 +1436,18 @@ export default function HadiyadReveal({
 
         .hadiyad-eyebrow {
           margin: 0;
+          color: #9a7441;
           font-size: 0.7rem;
           font-weight: 900;
           letter-spacing: 0.25em;
           text-transform: uppercase;
-          color: #9a7441;
         }
 
         .hadiyad-title {
           max-width: 32rem;
           margin:
             1rem auto 0;
+          color: #243d34;
           font-family:
             Georgia,
             serif;
@@ -1780,7 +1461,6 @@ export default function HadiyadReveal({
           line-height: 1.06;
           letter-spacing:
             -0.035em;
-          color: #243d34;
           text-wrap: balance;
         }
 
@@ -1788,9 +1468,9 @@ export default function HadiyadReveal({
           max-width: 29rem;
           margin:
             1.25rem auto 0;
+          color: #65726c;
           font-size: 1rem;
           line-height: 1.75;
-          color: #65726c;
           text-wrap: balance;
         }
 
@@ -1807,19 +1487,21 @@ export default function HadiyadReveal({
           justify-content: center;
           border: 0;
           border-radius: 1.15rem;
+          padding:
+            0.9rem 1.6rem;
+          cursor: pointer;
+          touch-action:
+            manipulation;
           background:
             linear-gradient(
               135deg,
               #315f51,
               #1f4439
             );
-          padding:
-            0.9rem 1.6rem;
           box-shadow:
             0 18px 50px
             rgba(40, 83, 71, 0.28);
           color: white;
-          cursor: pointer;
           font-size: 0.78rem;
           font-weight: 900;
           letter-spacing: 0.13em;
@@ -1827,8 +1509,6 @@ export default function HadiyadReveal({
           transition:
             transform 180ms ease,
             box-shadow 180ms ease;
-          touch-action:
-            manipulation;
           -webkit-tap-highlight-color:
             transparent;
         }
@@ -1863,6 +1543,7 @@ export default function HadiyadReveal({
         .hadiyad-card-title {
           margin:
             0.65rem 0 0;
+          color: #243d34;
           font-family:
             Georgia,
             serif;
@@ -1874,7 +1555,6 @@ export default function HadiyadReveal({
             );
           font-weight: 400;
           line-height: 1.1;
-          color: #243d34;
           text-wrap: balance;
         }
 
@@ -1902,6 +1582,8 @@ export default function HadiyadReveal({
           max-width: 48rem;
         }
 
+        .is-preparing
+          .hadiyad-card-stage.is-portrait,
         .is-opening
           .hadiyad-card-stage.is-portrait,
         .is-open
@@ -1909,6 +1591,8 @@ export default function HadiyadReveal({
           max-width: 58rem;
         }
 
+        .is-preparing
+          .hadiyad-card-stage.is-landscape,
         .is-opening
           .hadiyad-card-stage.is-landscape,
         .is-open
@@ -1921,15 +1605,28 @@ export default function HadiyadReveal({
           z-index: -1;
           inset: 8%;
           border-radius: 999px;
+          opacity: 0.7;
+          filter: blur(55px);
+          transform: scale(0.9);
           background:
             rgba(224, 181, 101, 0.5);
-          filter: blur(55px);
-          opacity: 0.7;
-          transform: scale(0.9);
           animation:
             card-glow
             2.8s ease-in-out
             infinite;
+        }
+
+        .has-wedding-henna-reveal.is-preparing
+          .hadiyad-card-glow,
+        .has-wedding-henna-reveal.is-opening
+          .hadiyad-card-glow {
+          background:
+            radial-gradient(
+              circle,
+              rgba(205, 164, 93, 0.72),
+              rgba(126, 73, 81, 0.3) 46%,
+              transparent 72%
+            );
         }
 
         .hadiyad-card-book {
@@ -1944,6 +1641,9 @@ export default function HadiyadReveal({
               0 35px 55px
               rgba(38, 62, 54, 0.24)
             );
+          transition:
+            transform 220ms ease,
+            filter 220ms ease;
           animation:
             card-book-arrive
             850ms
@@ -1954,14 +1654,9 @@ export default function HadiyadReveal({
               1
             )
             both;
-          transition:
-            transform 220ms ease,
-            filter 220ms ease;
         }
 
         .is-showing-cover
-          .hadiyad-card-book,
-        .is-preparing
           .hadiyad-card-book {
           width:
             min(
@@ -1977,16 +1672,28 @@ export default function HadiyadReveal({
             );
         }
 
+        .is-preparing
+          .hadiyad-card-book,
+        .is-opening
+          .hadiyad-card-book,
+        .is-open
+          .hadiyad-card-book {
+          width: 50%;
+          margin-left: 50%;
+          aspect-ratio: auto;
+          cursor: default;
+          animation: none;
+        }
+
         .hadiyad-card-book.is-interactive {
           cursor: pointer;
           touch-action:
             manipulation;
-          -webkit-tap-highlight-color:
-            transparent;
-          user-select:
-            none;
+          user-select: none;
           -webkit-user-select:
             none;
+          -webkit-tap-highlight-color:
+            transparent;
           animation:
             card-book-arrive
               850ms
@@ -2008,22 +1715,9 @@ export default function HadiyadReveal({
           transform:
             translateY(-4px)
             scale(1.008);
-          filter:
-            drop-shadow(
-              0 42px 62px
-              rgba(38, 62, 54, 0.3)
-            );
-        }
-
-        .hadiyad-card-book.is-interactive:active {
-          transform:
-            translateY(-1px)
-            scale(0.995);
         }
 
         .is-showing-cover
-          .hadiyad-inside-right,
-        .is-preparing
           .hadiyad-inside-right {
           position: absolute;
           inset: 0;
@@ -2031,15 +1725,13 @@ export default function HadiyadReveal({
           pointer-events: none;
         }
 
+        .is-preparing
+          .hadiyad-inside-right,
         .is-opening
-          .hadiyad-card-book,
+          .hadiyad-inside-right,
         .is-open
-          .hadiyad-card-book {
-          width: 50%;
-          margin-left: 50%;
-          aspect-ratio: auto;
-          cursor: default;
-          animation: none;
+          .hadiyad-inside-right {
+          opacity: 1;
         }
 
         .hadiyad-inside-right {
@@ -2055,8 +1747,6 @@ export default function HadiyadReveal({
           box-shadow:
             inset 0 0 0 1px
             rgba(181, 139, 75, 0.25);
-          transition:
-            opacity 300ms ease;
         }
 
         .hadiyad-inside-image {
@@ -2118,9 +1808,6 @@ export default function HadiyadReveal({
         .hadiyad-cover-front {
           z-index: 2;
           background: #fffaf0;
-          box-shadow:
-            inset 0 0 0 1px
-            rgba(181, 139, 75, 0.22);
         }
 
         .hadiyad-cover-back {
@@ -2133,27 +1820,24 @@ export default function HadiyadReveal({
             rgba(136, 95, 40, 0.12);
         }
 
-        .hadiyad-cover-image {
+        .hadiyad-cover-image,
+        .hadiyad-inside-photo-image {
           display: block;
           width: 100%;
           height: 100%;
-          object-fit: fill;
           border-radius: 1.5rem;
           pointer-events: none;
           user-select: none;
           -webkit-user-drag: none;
         }
 
+        .hadiyad-cover-image {
+          object-fit: fill;
+        }
+
         .hadiyad-inside-photo-image {
-          display: block;
-          width: 100%;
-          height: 100%;
           object-fit: cover;
           object-position: center;
-          border-radius: 1.5rem;
-          pointer-events: none;
-          user-select: none;
-          -webkit-user-drag: none;
         }
 
         .hadiyad-cover-shine {
@@ -2193,6 +1877,7 @@ export default function HadiyadReveal({
           bottom: 3%;
           width: 4px;
           border-radius: 999px;
+          opacity: 0;
           background:
             linear-gradient(
               180deg,
@@ -2200,7 +1885,6 @@ export default function HadiyadReveal({
               rgba(82, 59, 29, 0.34),
               transparent
             );
-          opacity: 0;
           transition:
             opacity 500ms ease;
         }
@@ -2215,7 +1899,7 @@ export default function HadiyadReveal({
         .hadiyad-preparing-overlay {
           position: absolute;
           inset: 0;
-          z-index: 30;
+          z-index: 20;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -2224,21 +1908,18 @@ export default function HadiyadReveal({
           background:
             radial-gradient(
               circle at center,
-              rgba(218, 181, 112, 0.12),
-              transparent 58%
+              rgba(218, 181, 112, 0.14),
+              transparent 60%
             );
         }
 
         .hadiyad-preparing-pulse {
           width: 3rem;
           height: 3rem;
-          border-radius: 999px;
           border:
             1px solid
             rgba(192, 151, 83, 0.55);
-          box-shadow:
-            0 0 0 0
-            rgba(192, 151, 83, 0.3);
+          border-radius: 999px;
           animation:
             preparing-pulse
             1200ms ease-out
@@ -2256,10 +1937,6 @@ export default function HadiyadReveal({
           padding:
             0 0.75rem;
           text-align: center;
-          animation:
-            instruction-arrive
-            600ms 300ms
-            ease both;
         }
 
         .hadiyad-instruction-line {
@@ -2280,17 +1957,11 @@ export default function HadiyadReveal({
         .hadiyad-tap-title {
           margin: 0;
           color: #8e6b3d;
-          font-size:
-            clamp(
-              0.85rem,
-              2.2vw,
-              1rem
-            );
+          font-size: 0.9rem;
           font-weight: 900;
           letter-spacing: 0.12em;
           line-height: 1.45;
           text-transform: uppercase;
-          text-wrap: balance;
         }
 
         .hadiyad-tap-hint {
@@ -2300,14 +1971,8 @@ export default function HadiyadReveal({
           font-family:
             Georgia,
             serif;
-          font-size:
-            clamp(
-              1rem,
-              2.6vw,
-              1.15rem
-            );
+          font-size: 1.05rem;
           line-height: 1.5;
-          text-wrap: balance;
         }
 
         .hadiyad-opening-status {
@@ -2320,7 +1985,6 @@ export default function HadiyadReveal({
           color: #65726c;
           font-size: 0.82rem;
           font-weight: 700;
-          letter-spacing: 0.04em;
         }
 
         .hadiyad-opening-dot {
@@ -2328,9 +1992,6 @@ export default function HadiyadReveal({
           height: 0.5rem;
           border-radius: 999px;
           background: #b4823d;
-          box-shadow:
-            0 0 0 0
-            rgba(180, 130, 61, 0.4);
           animation:
             opening-dot
             1.4s ease-out
@@ -2355,11 +2016,11 @@ export default function HadiyadReveal({
         .hadiyad-moment {
           margin:
             0 0 1rem;
+          color: #364d44;
           font-family:
             Georgia,
             serif;
           font-size: 1.35rem;
-          color: #364d44;
         }
 
         .hadiyad-save-button {
@@ -2369,14 +2030,14 @@ export default function HadiyadReveal({
           align-items: center;
           justify-content: center;
           border-radius: 1.15rem;
+          padding:
+            0.9rem 1.4rem;
           background:
             linear-gradient(
               135deg,
               #315f51,
               #1f4439
             );
-          padding:
-            0.9rem 1.4rem;
           box-shadow:
             0 16px 40px
             rgba(40, 83, 71, 0.23);
@@ -2384,25 +2045,14 @@ export default function HadiyadReveal({
           font-size: 0.88rem;
           font-weight: 800;
           text-decoration: none;
-          transition:
-            transform 180ms ease,
-            box-shadow 180ms ease;
-        }
-
-        .hadiyad-save-button:hover {
-          transform:
-            translateY(-2px);
-          box-shadow:
-            0 21px 46px
-            rgba(40, 83, 71, 0.28);
         }
 
         .hadiyad-save-hint {
           margin:
             0.8rem 0 0;
+          color: #747f79;
           font-size: 0.82rem;
           line-height: 1.6;
-          color: #747f79;
         }
 
         .hadiyad-footer {
@@ -2410,11 +2060,151 @@ export default function HadiyadReveal({
           z-index: 12;
           padding:
             0 1rem 1.4rem;
-          text-align: center;
+          color: #918778;
           font-size: 0.68rem;
           font-weight: 700;
           letter-spacing: 0.08em;
-          color: #918778;
+          text-align: center;
+        }
+
+        .hadiyad-special-reveal {
+          position: fixed;
+          inset: 0;
+          z-index: 100;
+          overflow: hidden;
+          pointer-events: none;
+        }
+
+        .hadiyad-special-wash {
+          position: absolute;
+          inset: 0;
+          opacity: 0;
+          background:
+            radial-gradient(
+              circle at 50% 48%,
+              rgba(207, 172, 107, 0.32),
+              rgba(121, 66, 73, 0.14) 34%,
+              transparent 70%
+            );
+          transition:
+            opacity 850ms ease;
+        }
+
+        .hadiyad-special-reveal.is-active
+          .hadiyad-special-wash {
+          opacity: 1;
+        }
+
+        .hadiyad-special-ring {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          border-radius: 999px;
+          opacity: 0.72;
+          transform:
+            translate(-50%, -50%)
+            scale(0.35);
+          transition:
+            transform 1800ms ease-out,
+            opacity 1800ms ease;
+        }
+
+        .hadiyad-special-ring-one {
+          width: 22rem;
+          height: 22rem;
+          border:
+            1px solid
+            rgba(194, 154, 88, 0.46);
+        }
+
+        .hadiyad-special-ring-two {
+          width: 15rem;
+          height: 15rem;
+          border:
+            1px solid
+            rgba(127, 75, 85, 0.38);
+        }
+
+        .hadiyad-special-reveal.is-active
+          .hadiyad-special-ring {
+          opacity: 0;
+          transform:
+            translate(-50%, -50%)
+            scale(2.4);
+        }
+
+        .hadiyad-special-bloom {
+          position: absolute;
+          bottom: -10rem;
+          width: 25rem;
+          height: 25rem;
+          border-radius: 999px;
+          opacity: 0;
+          filter: blur(55px);
+          transition:
+            opacity 1700ms ease,
+            transform 2200ms ease;
+        }
+
+        .hadiyad-special-bloom-left {
+          left: -11rem;
+          background:
+            radial-gradient(
+              circle,
+              rgba(128, 72, 79, 0.74),
+              transparent 68%
+            );
+        }
+
+        .hadiyad-special-bloom-right {
+          right: -11rem;
+          background:
+            radial-gradient(
+              circle,
+              rgba(194, 150, 83, 0.72),
+              transparent 68%
+            );
+        }
+
+        .hadiyad-special-reveal.is-active
+          .hadiyad-special-bloom {
+          opacity: 0.3;
+          transform:
+            translateY(-8rem)
+            scale(1.25);
+        }
+
+        .hadiyad-special-particle {
+          position: absolute;
+          left:
+            var(--particle-left);
+          top:
+            var(--particle-top);
+          width:
+            var(--particle-size);
+          height:
+            var(--particle-size);
+          border-radius:
+            999px 999px 999px 0;
+          opacity: 0.74;
+          background:
+            var(--particle-color);
+          transform:
+            rotate(45deg);
+          transition:
+            transform 1700ms ease-out,
+            opacity 1700ms ease;
+          transition-delay:
+            var(--particle-delay);
+        }
+
+        .hadiyad-special-reveal.is-active
+          .hadiyad-special-particle {
+          opacity: 0;
+          transform:
+            translateY(-11rem)
+            rotate(165deg)
+            scale(0.2);
         }
 
         @keyframes intro-arrive {
@@ -2446,28 +2236,18 @@ export default function HadiyadReveal({
         }
 
         @keyframes card-book-arrive {
-          0% {
+          from {
             opacity: 0;
             transform:
-              translateY(65px)
-              scale(0.82);
-            filter: blur(8px);
+              translateY(45px)
+              scale(0.88);
           }
 
-          65% {
-            opacity: 1;
-            transform:
-              translateY(-7px)
-              scale(1.015);
-            filter: blur(0);
-          }
-
-          100% {
+          to {
             opacity: 1;
             transform:
               translateY(0)
               scale(1);
-            filter: blur(0);
           }
         }
 
@@ -2475,28 +2255,12 @@ export default function HadiyadReveal({
           0%,
           100% {
             transform:
-              translateY(0)
-              scale(1);
+              translateY(0);
           }
 
           50% {
             transform:
-              translateY(-3px)
-              scale(1.004);
-          }
-        }
-
-        @keyframes instruction-arrive {
-          from {
-            opacity: 0;
-            transform:
-              translateY(8px);
-          }
-
-          to {
-            opacity: 1;
-            transform:
-              translateY(0);
+              translateY(-3px);
           }
         }
 
@@ -2528,13 +2292,13 @@ export default function HadiyadReveal({
         }
 
         @keyframes opening-dot {
-          0% {
+          from {
             box-shadow:
               0 0 0 0
               rgba(180, 130, 61, 0.42);
           }
 
-          100% {
+          to {
             box-shadow:
               0 0 0 12px
               rgba(180, 130, 61, 0);
@@ -2542,22 +2306,16 @@ export default function HadiyadReveal({
         }
 
         @keyframes preparing-pulse {
-          0% {
+          from {
             opacity: 0.85;
             transform:
               scale(0.68);
-            box-shadow:
-              0 0 0 0
-              rgba(192, 151, 83, 0.32);
           }
 
-          100% {
+          to {
             opacity: 0;
             transform:
-              scale(1.32);
-            box-shadow:
-              0 0 0 18px
-              rgba(192, 151, 83, 0);
+              scale(1.4);
           }
         }
 
@@ -2584,7 +2342,7 @@ export default function HadiyadReveal({
 
           .hadiyad-content {
             padding:
-              1.6rem 0.65rem
+              1.6rem 0.5rem
               2rem;
           }
 
@@ -2592,137 +2350,13 @@ export default function HadiyadReveal({
             margin-top: -1rem;
           }
 
-          .hadiyad-message {
-            font-size: 0.94rem;
-          }
-
           .hadiyad-result {
             padding-top: 0.5rem;
           }
 
-          .hadiyad-card-stage {
-            margin-top: 1.35rem;
-            transition: none;
-            perspective: 1700px;
-          }
-
-          .is-showing-cover
-            .hadiyad-card-book,
-          .is-preparing
-            .hadiyad-card-book {
-            width:
-              min(
-                86vw,
-                25rem
-              );
-          }
-
-          .is-opening
-            .hadiyad-card-stage.is-portrait,
-          .is-open
-            .hadiyad-card-stage.is-portrait {
-            width:
-              min(
-                96vw,
-                44rem
-              );
-          }
-
-          .is-opening
-            .hadiyad-card-stage.is-landscape,
-          .is-open
-            .hadiyad-card-stage.is-landscape {
-            width:
-              min(
-                96vw,
-                52rem
-              );
-          }
-
-          .hadiyad-card-book {
-            filter:
-              drop-shadow(
-                0 18px 28px
-                rgba(38, 62, 54, 0.2)
-              );
-            transition: none;
-          }
-
-          .hadiyad-card-book.is-interactive:hover,
-          .hadiyad-card-book.is-interactive:active {
-            transform: none;
-          }
-
-          .hadiyad-card-glow {
-            filter: blur(24px);
-            animation: none;
-            opacity: 0.55;
-          }
-
-          .hadiyad-special-bloom {
-            display: none;
-          }
-
-          .hadiyad-special-ornament {
-            display: none;
-          }
-
-          .hadiyad-special-ring {
-            transition-duration:
-              1500ms;
-          }
-
-          .hadiyad-special-particle:nth-of-type(n + 7) {
-            display: none;
-          }
-
-          .hadiyad-special-particle {
-            box-shadow: none;
-            transition-duration:
-              1400ms;
-          }
-
-          .hadiyad-card-book,
-          .hadiyad-inside-right,
-          .hadiyad-cover-panel,
-          .hadiyad-cover-front,
-          .hadiyad-cover-back {
-            border-radius: 1.15rem;
-          }
-
-          .hadiyad-inside-right,
-          .hadiyad-cover-front,
-          .hadiyad-cover-back {
-            border-width: 0.25rem;
-          }
-
-          .hadiyad-inside-image,
-          .hadiyad-cover-image,
-          .hadiyad-inside-photo-image,
-          .hadiyad-inside-photo-finish {
-            border-radius: 0.9rem;
-          }
-
-          .hadiyad-cover-panel {
-            transition:
-              transform 1050ms
-              cubic-bezier(
-                0.65,
-                0,
-                0.22,
-                1
-              );
-          }
-
-          .hadiyad-tap-instruction {
-            width: 100%;
-            margin-top: 1.25rem;
+          .hadiyad-result-heading {
             padding:
-              0 1rem;
-          }
-
-          .hadiyad-actions {
-            margin-top: 1.6rem;
+              0 0.75rem;
           }
 
           .hadiyad-card-title {
@@ -2734,14 +2368,173 @@ export default function HadiyadReveal({
               );
           }
 
-          .hadiyad-special-ring-one {
-            width: 16rem;
-            height: 16rem;
+          /*
+           * Mobiele stabiele layout:
+           *
+           * preparing, opening en open
+           * gebruiken exact dezelfde stage.
+           */
+          .hadiyad-card-stage {
+            width:
+              min(
+                96vw,
+                44rem
+              );
+            max-width: none;
+            margin-top: 1.35rem;
+            perspective: 1600px;
+            transition: none;
           }
 
-          .hadiyad-special-ring-two {
-            width: 11rem;
-            height: 11rem;
+          .hadiyad-card-stage.is-landscape {
+            width:
+              min(
+                96vw,
+                52rem
+              );
+            max-width: none;
+          }
+
+          .is-showing-cover
+            .hadiyad-card-stage {
+            width:
+              min(
+                86vw,
+                25rem
+              );
+          }
+
+          .is-preparing
+            .hadiyad-card-stage,
+          .is-opening
+            .hadiyad-card-stage,
+          .is-open
+            .hadiyad-card-stage {
+            width:
+              min(
+                96vw,
+                44rem
+              );
+          }
+
+          .is-preparing
+            .hadiyad-card-stage.is-landscape,
+          .is-opening
+            .hadiyad-card-stage.is-landscape,
+          .is-open
+            .hadiyad-card-stage.is-landscape {
+            width:
+              min(
+                96vw,
+                52rem
+              );
+          }
+
+          .is-preparing
+            .hadiyad-card-book,
+          .is-opening
+            .hadiyad-card-book,
+          .is-open
+            .hadiyad-card-book {
+            width: 50%;
+            margin-left: 50%;
+            aspect-ratio: auto;
+            animation: none;
+            transition: none;
+          }
+
+          .is-showing-cover
+            .hadiyad-card-book {
+            width: 100%;
+            margin: 0;
+          }
+
+          .hadiyad-card-book {
+            border-radius: 1.15rem;
+            filter:
+              drop-shadow(
+                0 18px 28px
+                rgba(38, 62, 54, 0.2)
+              );
+          }
+
+          .hadiyad-card-book.is-interactive:hover,
+          .hadiyad-card-book.is-interactive:active {
+            transform: none;
+          }
+
+          .hadiyad-card-glow {
+            opacity: 0.5;
+            filter: blur(20px);
+            animation: none;
+          }
+
+          .hadiyad-inside-right,
+          .hadiyad-cover-panel,
+          .hadiyad-cover-front,
+          .hadiyad-cover-back {
+            border-radius: 1.15rem;
+          }
+
+          .hadiyad-inside-right,
+          .hadiyad-cover-front,
+          .hadiyad-cover-back {
+            border-width: 0.22rem;
+          }
+
+          .hadiyad-inside-image,
+          .hadiyad-cover-image,
+          .hadiyad-inside-photo-image,
+          .hadiyad-inside-photo-finish {
+            border-radius: 0.9rem;
+          }
+
+          /*
+           * Alleen de cover transformeren.
+           * Geen breedte- of marginovergang
+           * tijdens de eigenlijke draai.
+           */
+          .hadiyad-cover-panel {
+            transition:
+              transform 1050ms
+              cubic-bezier(
+                0.65,
+                0,
+                0.22,
+                1
+              );
+          }
+
+          .hadiyad-special-bloom {
+            display: none;
+          }
+
+          .hadiyad-special-ring {
+            transition-duration:
+              1300ms;
+          }
+
+          .hadiyad-special-particle {
+            box-shadow: none;
+            transition-duration:
+              1200ms;
+          }
+
+          .hadiyad-tap-instruction {
+            width: 100%;
+            margin-top: 1.25rem;
+            padding:
+              0 1rem;
+          }
+
+          .hadiyad-opening-status {
+            margin-top: 1rem;
+          }
+
+          .hadiyad-actions {
+            margin-top: 1.6rem;
+            padding:
+              0 0.75rem;
           }
         }
 
@@ -2749,22 +2542,12 @@ export default function HadiyadReveal({
           max-width: 420px
         ) {
           .hadiyad-content {
-            padding-left: 0.35rem;
-            padding-right: 0.35rem;
-          }
-
-          .hadiyad-result-heading {
-            padding:
-              0 0.75rem;
+            padding-left: 0.25rem;
+            padding-right: 0.25rem;
           }
 
           .hadiyad-opening-status {
             font-size: 0.72rem;
-          }
-
-          .hadiyad-actions {
-            padding:
-              0 0.75rem;
           }
         }
 
@@ -2775,8 +2558,6 @@ export default function HadiyadReveal({
           .hadiyad-stage *,
           .hadiyad-stage *::before,
           .hadiyad-stage *::after {
-            scroll-behavior:
-              auto !important;
             animation-duration:
               0.01ms !important;
             animation-iteration-count:
