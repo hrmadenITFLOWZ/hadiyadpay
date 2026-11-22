@@ -47,8 +47,7 @@ type CardSide =
   | 'complete';
 
 function getArtworkMimeType(
-  source:
-    CardArtworkSource,
+  source: CardArtworkSource,
 ): string {
   if (
     source.endsWith(
@@ -89,8 +88,7 @@ function getArtworkMimeType(
 }
 
 function getArtworkExtension(
-  source:
-    CardArtworkSource,
+  source: CardArtworkSource,
 ): string {
   if (
     source.endsWith(
@@ -176,8 +174,7 @@ function escapeXml(
 }
 
 function getRequestedSide(
-  request:
-    NextRequest,
+  request: NextRequest,
 ): CardSide {
   const requestedSide =
     request.nextUrl.searchParams.get(
@@ -708,6 +705,12 @@ function renderCompleteCardSvg({
 
     '/>',
 
+    /*
+     * Use meet instead of slice.
+     *
+     * This preserves the complete original cover
+     * without cropping the bottom ornament or text.
+     */
     '<image',
 
     ` href="${escapeXml(
@@ -722,7 +725,7 @@ function renderCompleteCardSvg({
 
     ` height="${panelHeight}"`,
 
-    ' preserveAspectRatio="xMidYMid slice"',
+    ' preserveAspectRatio="xMidYMid meet"',
 
     '/>',
 
@@ -852,8 +855,7 @@ function renderCompleteCardSvg({
 }
 
 export async function GET(
-  request:
-    NextRequest,
+  request: NextRequest,
   context: {
     params: Promise<{
       token: string;
