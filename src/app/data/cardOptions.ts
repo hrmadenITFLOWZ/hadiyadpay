@@ -1,4 +1,4 @@
-import {
+﻿import {
   type CardOption,
 } from '../../lib/card-types';
 
@@ -59,13 +59,13 @@ export const cardOptions: CardOption[] = [
 
     badge: {
       so:
-        'DHALASHO 🎂',
+        'DHALASHO ðŸŽ‚',
 
       en:
-        'BIRTHDAY 🎂',
+        'BIRTHDAY ðŸŽ‚',
 
       nl:
-        'VERJAARDAG 🎂',
+        'VERJAARDAG ðŸŽ‚',
     },
 
     title: {
@@ -84,7 +84,7 @@ export const cardOptions: CardOption[] = [
         'Kaar farxad leh oo loogu dabaaldego maalinta dhalashada.',
 
       en:
-        'A joyful card to celebrate someone’s birthday.',
+        'A joyful card to celebrate someoneâ€™s birthday.',
 
       nl:
         'Een vrolijke kaart om een verjaardag te vieren.',
@@ -139,13 +139,13 @@ export const cardOptions: CardOption[] = [
 
     defaultMessage: {
       so:
-        'Waxaan kuu rajeynayaa caafimaad, barako, iyo sannad kale oo ay ka buuxaan farxad, qosol, iyo guul weyn. 🎂✨',
+        'Waxaan kuu rajeynayaa caafimaad, barako, iyo sannad kale oo ay ka buuxaan farxad, qosol, iyo guul weyn. ðŸŽ‚âœ¨',
 
       en:
-        'Wishing you health, blessings, and another year filled with immense joy and success! 🎂✨',
+        'Wishing you health, blessings, and another year filled with immense joy and success! ðŸŽ‚âœ¨',
 
       nl:
-        'Ik wens je gezondheid, zegeningen en een jaar vol plezier en mooie momenten! 🎂✨',
+        'Ik wens je gezondheid, zegeningen en een jaar vol plezier en mooie momenten! ðŸŽ‚âœ¨',
     },
   },
 
@@ -198,13 +198,13 @@ export const cardOptions: CardOption[] = [
 
     badge: {
       so:
-        'AROOS & DHAQAN 🏺',
+        'AROOS & DHAQAN ðŸº',
 
       en:
-        'WEDDING & HERITAGE 🏺',
+        'WEDDING & HERITAGE ðŸº',
 
       nl:
-        'BRUILOFT & ERFGOED 🏺',
+        'BRUILOFT & ERFGOED ðŸº',
     },
 
     title: {
@@ -226,7 +226,7 @@ export const cardOptions: CardOption[] = [
         'A wedding greeting with a heritage-inspired design.',
 
       nl:
-        'Een huwelijksgroet met een ontwerp geïnspireerd op erfgoed.',
+        'Een huwelijksgroet met een ontwerp geÃ¯nspireerd op erfgoed.',
     },
 
     artwork: {
@@ -278,13 +278,13 @@ export const cardOptions: CardOption[] = [
 
     defaultMessage: {
       so:
-        'Hambalyo! Illahay ha idinka dhigo kuwii isku waara ee isu naxariista, gurigooduna noqdo mid barako leh. 🏺💍',
+        'Hambalyo! Illahay ha idinka dhigo kuwii isku waara ee isu naxariista, gurigooduna noqdo mid barako leh. ðŸºðŸ’',
 
       en:
-        'Congratulations! May Allah bless your union and fill your home with everlasting peace and happiness. 🏺💍',
+        'Congratulations! May Allah bless your union and fill your home with everlasting peace and happiness. ðŸºðŸ’',
 
       nl:
-        'Van harte gefeliciteerd! Moge jullie huis gevuld zijn met vrede, liefde en geluk. 🏺💍',
+        'Van harte gefeliciteerd! Moge jullie huis gevuld zijn met vrede, liefde en geluk. ðŸºðŸ’',
     },
   },
 
@@ -334,13 +334,13 @@ export const cardOptions: CardOption[] = [
 
     badge: {
       so:
-        'XAFXAD & HENNA ✨',
+        'XAFXAD & HENNA âœ¨',
 
       en:
-        'HENNA NIGHT ✨',
+        'HENNA NIGHT âœ¨',
 
       nl:
-        'HENNAFEEST ✨',
+        'HENNAFEEST âœ¨',
     },
 
     title: {
@@ -414,13 +414,13 @@ export const cardOptions: CardOption[] = [
 
     defaultMessage: {
       so:
-        'Habeen qurux badan oo ay ka buuxaan heeso dhaqameed, farxad, iyo henna cajiib ah! ✨ Handasaad wacan! 🤎',
+        'Habeen qurux badan oo ay ka buuxaan heeso dhaqameed, farxad, iyo henna cajiib ah! âœ¨ Handasaad wacan! ðŸ¤Ž',
 
       en:
-        'A beautiful night filled with traditional songs, joy, and stunning henna patterns! ✨ Wishing you the best! 🤎',
+        'A beautiful night filled with traditional songs, joy, and stunning henna patterns! âœ¨ Wishing you the best! ðŸ¤Ž',
 
       nl:
-        'Een mooie avond vol vreugde, muziek en prachtige hennapatronen! ✨ Geniet ervan! 🤎',
+        'Een mooie avond vol vreugde, muziek en prachtige hennapatronen! âœ¨ Geniet ervan! ðŸ¤Ž',
     },
   },
 
@@ -470,13 +470,13 @@ export const cardOptions: CardOption[] = [
 
     badge: {
       so:
-        'CIID WACAN 🌙',
+        'CIID WACAN ðŸŒ™',
 
       en:
-        'EID MUBARAK 🌙',
+        'EID MUBARAK ðŸŒ™',
 
       nl:
-        'EID MUBARAK 🌙',
+        'EID MUBARAK ðŸŒ™',
     },
 
     title: {
@@ -550,13 +550,13 @@ export const cardOptions: CardOption[] = [
 
     defaultMessage: {
       so:
-        'Ciid Mubaarak! Illahay ha aqbalo amalkeenna suubban, idinkuna ciidda nabad iyo caafimaad ku gaadha. 🌙✨',
+        'Ciid Mubaarak! Illahay ha aqbalo amalkeenna suubban, idinkuna ciidda nabad iyo caafimaad ku gaadha. ðŸŒ™âœ¨',
 
       en:
-        'Eid Mubarak! May Allah accept our good deeds and bring peace and prosperity to your household. 🌙✨',
+        'Eid Mubarak! May Allah accept our good deeds and bring peace and prosperity to your household. ðŸŒ™âœ¨',
 
       nl:
-        'Eid Mubarak! Moge deze dag vrede en voorspoed brengen voor jullie allemaal. 🌙✨',
+        'Eid Mubarak! Moge deze dag vrede en voorspoed brengen voor jullie allemaal. ðŸŒ™âœ¨',
     },
   },
 
@@ -606,13 +606,13 @@ export const cardOptions: CardOption[] = [
 
     badge: {
       so:
-        'HIDDHA & DHAQAN 🧺',
+        'HIDDHA & DHAQAN ðŸ§º',
 
       en:
-        'HERITAGE ART 🧺',
+        'HERITAGE ART ðŸ§º',
 
       nl:
-        'ERFGOED 🧺',
+        'ERFGOED ðŸ§º',
     },
 
     title: {
@@ -686,13 +686,13 @@ export const cardOptions: CardOption[] = [
 
     defaultMessage: {
       so:
-        'Qiimaha hiddaha iyo dhaqanka iyo xusuusta dalkeenna hooyo oo qalbiga ku weyn. 🧺🤎',
+        'Qiimaha hiddaha iyo dhaqanka iyo xusuusta dalkeenna hooyo oo qalbiga ku weyn. ðŸ§ºðŸ¤Ž',
 
       en:
-        'Celebrating our rich heritage, traditions, and timeless cultural craftsmanship. 🧺🤎',
+        'Celebrating our rich heritage, traditions, and timeless cultural craftsmanship. ðŸ§ºðŸ¤Ž',
 
       nl:
-        'Een groet die ons erfgoed, onze tradities en vakmanschap viert. 🧺🤎',
+        'Een groet die ons erfgoed, onze tradities en vakmanschap viert. ðŸ§ºðŸ¤Ž',
     },
   },
 
@@ -742,13 +742,13 @@ export const cardOptions: CardOption[] = [
 
     badge: {
       so:
-        'TAAGEERO 🤝',
+        'TAAGEERO ðŸ¤',
 
       en:
-        'SUPPORT 🤝',
+        'SUPPORT ðŸ¤',
 
       nl:
-        'STEUN 🤝',
+        'STEUN ðŸ¤',
     },
 
     title: {
@@ -822,13 +822,13 @@ export const cardOptions: CardOption[] = [
 
     defaultMessage: {
       so:
-        'Mar walba garabkaaga ayaan taaganahay. Guul iyo gobanimo ayaan kuu rajeynayaa hawlahaaga cusub! 🤝🌟',
+        'Mar walba garabkaaga ayaan taaganahay. Guul iyo gobanimo ayaan kuu rajeynayaa hawlahaaga cusub! ðŸ¤ðŸŒŸ',
 
       en:
-        'Always standing by your side. Wishing you strength, success, and prosperity in all your endeavors! 🤝🌟',
+        'Always standing by your side. Wishing you strength, success, and prosperity in all your endeavors! ðŸ¤ðŸŒŸ',
 
       nl:
-        'Ik sta achter je. Ik wens je kracht, succes en vertrouwen bij alles wat je doet! 🤝🌟',
+        'Ik sta achter je. Ik wens je kracht, succes en vertrouwen bij alles wat je doet! ðŸ¤ðŸŒŸ',
     },
   },
 
@@ -878,13 +878,13 @@ export const cardOptions: CardOption[] = [
 
     badge: {
       so:
-        'GUUL 🎓',
+        'GUUL ðŸŽ“',
 
       en:
-        'SUCCESS 🎓',
+        'SUCCESS ðŸŽ“',
 
       nl:
-        'SUCCES 🎓',
+        'SUCCES ðŸŽ“',
     },
 
     title: {
@@ -958,13 +958,13 @@ export const cardOptions: CardOption[] = [
 
     defaultMessage: {
       so:
-        'Hambalyo qalinjabinta! Tani waa bilowga safar dheer oo ay ka buuxaan guulo waaweyn iyo mustaqbal dhalaalaya. 🎓🎉',
+        'Hambalyo qalinjabinta! Tani waa bilowga safar dheer oo ay ka buuxaan guulo waaweyn iyo mustaqbal dhalaalaya. ðŸŽ“ðŸŽ‰',
 
       en:
-        'Congratulations on your graduation! This is just the beginning of an amazing journey of success. 🎓🎉',
+        'Congratulations on your graduation! This is just the beginning of an amazing journey of success. ðŸŽ“ðŸŽ‰',
 
       nl:
-        'Gefeliciteerd met je diploma! Dit is het begin van een mooie reis vol nieuwe kansen. 🎓🎉',
+        'Gefeliciteerd met je diploma! Dit is het begin van een mooie reis vol nieuwe kansen. ðŸŽ“ðŸŽ‰',
     },
   },
 
@@ -1014,13 +1014,13 @@ export const cardOptions: CardOption[] = [
 
     badge: {
       so:
-        'BARAKO 🐪',
+        'BARAKO ðŸª',
 
       en:
-        'BLESSINGS 🐪',
+        'BLESSINGS ðŸª',
 
       nl:
-        'ZEGENINGEN 🐪',
+        'ZEGENINGEN ðŸª',
     },
 
     title: {
@@ -1094,13 +1094,13 @@ export const cardOptions: CardOption[] = [
 
     defaultMessage: {
       so:
-        'Nabad, barako, iyo caafimaad ha dego gurigiinna. Waxaan idinkoo nabad qaba idiin rajeynayaa maalin wacan. 🐪🌿',
+        'Nabad, barako, iyo caafimaad ha dego gurigiinna. Waxaan idinkoo nabad qaba idiin rajeynayaa maalin wacan. ðŸªðŸŒ¿',
 
       en:
-        'May peace, blessings, and good health dwell in your home. Wishing you a wonderful day ahead. 🐪🌿',
+        'May peace, blessings, and good health dwell in your home. Wishing you a wonderful day ahead. ðŸªðŸŒ¿',
 
       nl:
-        'Moge vrede, zegeningen en gezondheid bij jullie thuis zijn. Ik wens jullie een mooie dag. 🐪🌿',
+        'Moge vrede, zegeningen en gezondheid bij jullie thuis zijn. Ik wens jullie een mooie dag. ðŸªðŸŒ¿',
     },
   },
 
@@ -1157,13 +1157,13 @@ export const cardOptions: CardOption[] = [
 
     badge: {
       so:
-        'HADIYAD YAR 🎁',
+        'HADIYAD YAR ðŸŽ',
 
       en:
-        'JUST BECAUSE 🎁',
+        'JUST BECAUSE ðŸŽ',
 
       nl:
-        'ZOMAAR 🎁',
+        'ZOMAAR ðŸŽ',
     },
 
     title: {
@@ -1282,13 +1282,13 @@ export const cardOptions: CardOption[] = [
 
     badge: {
       so:
-        'QOF GAAR AH ✨',
+        'QOF GAAR AH âœ¨',
 
       en:
-        'SOMEONE SPECIAL ✨',
+        'SOMEONE SPECIAL âœ¨',
 
       nl:
-        'VOOR IEMAND BIJZONDERS ✨',
+        'VOOR IEMAND BIJZONDERS âœ¨',
     },
 
     title: {
@@ -1411,13 +1411,13 @@ export const cardOptions: CardOption[] = [
 
     badge: {
       so:
-        'XASUUS YAR ☀️',
+        'XASUUS YAR â˜€ï¸',
 
       en:
-        'A LITTLE REMINDER ☀️',
+        'A LITTLE REMINDER â˜€ï¸',
 
       nl:
-        'EEN KLEINE HERINNERING ☀️',
+        'EEN KLEINE HERINNERING â˜€ï¸',
     },
 
     title: {
@@ -1542,13 +1542,13 @@ export const cardOptions: CardOption[] = [
 
     badge: {
       so:
-        'QALBIGAYGA ❤️',
+        'QALBIGAYGA â¤ï¸',
 
       en:
-        'MY WHOLE HEART ❤️',
+        'MY WHOLE HEART â¤ï¸',
 
       nl:
-        'MIJN HELE HART ❤️',
+        'MIJN HELE HART â¤ï¸',
     },
 
     title: {
@@ -1671,13 +1671,13 @@ export const cardOptions: CardOption[] = [
 
     badge: {
       so:
-        'JACAYL MEEL KASTA 💜',
+        'JACAYL MEEL KASTA ðŸ’œ',
 
       en:
-        'LOVE ACROSS EVERY MILE 💜',
+        'LOVE ACROSS EVERY MILE ðŸ’œ',
 
       nl:
-        'LIEFDE OP ELKE AFSTAND 💜',
+        'LIEFDE OP ELKE AFSTAND ðŸ’œ',
     },
 
     title: {
@@ -1799,13 +1799,13 @@ export const cardOptions: CardOption[] = [
 
     badge: {
       so:
-        'DHAWAAN AYAAN KU ARKI DOONAA 💕',
+        'DHAWAAN AYAAN KU ARKI DOONAA ðŸ’•',
 
       en:
-        'SEE YOU SOON 💕',
+        'SEE YOU SOON ðŸ’•',
 
       nl:
-        'TOT SNEL 💕',
+        'TOT SNEL ðŸ’•',
     },
 
     title: {
@@ -1933,13 +1933,13 @@ export const cardOptions: CardOption[] = [
 
     badge: {
       so:
-        'DABAALDEGGA AROOSKA 💍',
+        'DABAALDEGGA AROOSKA ðŸ’',
 
       en:
-        'WEDDING CELEBRATION 💍',
+        'WEDDING CELEBRATION ðŸ’',
 
       nl:
-        'BRUILOFTSVIERING 💍',
+        'BRUILOFTSVIERING ðŸ’',
     },
 
     title: {
@@ -1979,7 +1979,7 @@ export const cardOptions: CardOption[] = [
           'Illustrated wedding celebration with the couple and guests',
 
         nl:
-          'Geïllustreerde huwelijksviering met het bruidspaar en gasten',
+          'GeÃ¯llustreerde huwelijksviering met het bruidspaar en gasten',
       },
 
       focalPoint:
@@ -2058,13 +2058,13 @@ export const cardOptions: CardOption[] = [
 
     badge: {
       so:
-        'HABEENKA HENNA ✨',
+        'HABEENKA HENNA âœ¨',
 
       en:
-        'HENNA CELEBRATION ✨',
+        'HENNA CELEBRATION âœ¨',
 
       nl:
-        'HENNAFEEST ✨',
+        'HENNAFEEST âœ¨',
     },
 
     title: {
@@ -2183,13 +2183,13 @@ export const cardOptions: CardOption[] = [
 
     badge: {
       so:
-        'DHAQAN & UBAX 🌺',
+        'DHAQAN & UBAX ðŸŒº',
 
       en:
-        'HERITAGE & FLOWERS 🌺',
+        'HERITAGE & FLOWERS ðŸŒº',
 
       nl:
-        'ERFGOED & BLOEMEN 🌺',
+        'ERFGOED & BLOEMEN ðŸŒº',
     },
 
     title: {
@@ -2211,7 +2211,7 @@ export const cardOptions: CardOption[] = [
         'A handcrafted floral design inspired by heritage patterns.',
 
       nl:
-        'Een handgeschilderd bloemontwerp geïnspireerd op erfgoedpatronen.',
+        'Een handgeschilderd bloemontwerp geÃ¯nspireerd op erfgoedpatronen.',
     },
 
     artwork: {
@@ -2229,7 +2229,7 @@ export const cardOptions: CardOption[] = [
           'Floral vase artwork with heritage-inspired geometric patterns',
 
         nl:
-          'Bloemenvaas met geometrische patronen geïnspireerd op erfgoed',
+          'Bloemenvaas met geometrische patronen geÃ¯nspireerd op erfgoed',
       },
 
       focalPoint:
@@ -2257,4 +2257,751 @@ export const cardOptions: CardOption[] = [
       nl: '',
     },
   },
+
+  {
+    id: 'henna-bridal-moment',
+    slug: 'bridal-henna-moment',
+    category: 'celebrations',
+    occasion: 'henna',
+
+    searchTerms: [
+      'henna',
+      'bridal henna',
+      'henna bride',
+      'aroos',
+      'wedding',
+      'traditional',
+      'celebration',
+    ],
+
+    recipientTypes: [
+      'friend',
+      'family',
+      'partner',
+    ],
+
+    styles: [
+      'illustrated',
+      'traditional',
+      'ornamental',
+    ],
+
+    colors: [
+      'green',
+      'gold',
+      'neutral',
+    ],
+
+    languages: [
+      'so',
+      'en',
+      'nl',
+    ],
+
+    orientation: 'portrait',
+    featured: true,
+
+    badge: {
+      so: 'HENNA AROOSKA',
+      en: 'BRIDAL HENNA',
+      nl: 'BRUIDSHENNA',
+    },
+
+    title: {
+      so: 'Xafladda Henna Arooska',
+      en: 'A Bridal Henna Moment',
+      nl: 'Een bijzonder hennamoment',
+    },
+
+    description: {
+      so: 'Farshaxan xarrago leh oo loogu talagalay munaasabadda henna arooska.',
+      en: 'An elegant illustrated card for a meaningful bridal henna moment.',
+      nl: 'Een elegante illustratie voor een bijzonder hennamoment van de bruid.',
+    },
+
+    artwork: {
+      type: 'local-image',
+      src: '/images/cards/wedding-henna/bridal-henna-moment.png',
+
+      alt: {
+        so: 'Farshaxan aroosad leh henna iyo dhar aroos qurux badan',
+        en: 'Illustrated bridal henna moment with intricate henna and wedding clothing',
+        nl: 'Geïllustreerd hennamoment met verfijnde henna en bruidskleding',
+      },
+
+      focalPoint: 'center',
+      owner: 'hadiyadpay',
+    },
+
+    defaultRecipient: {
+      so: 'Aroosadda Qaaliga ah',
+      en: 'Dear Bride',
+      nl: 'Lieve bruid',
+    },
+
+    defaultSender: {
+      so: 'Qoyska iyo Asxaabta',
+      en: 'Family and Friends',
+      nl: 'Familie en vrienden',
+    },
+
+    defaultMessage: {
+      so: 'Habeenkaaga henna ha noqdo mid ay ka buuxaan farxad, jacayl iyo xusuus qurux badan.',
+      en: 'May your henna celebration be filled with love, joy, and beautiful memories.',
+      nl: 'Moge je hennaviering gevuld zijn met liefde, vreugde en mooie herinneringen.',
+    },
+  },
+
+  {
+    id: 'henna-hands-gathering',
+    slug: 'henna-hands-celebration',
+    category: 'celebrations',
+    occasion: 'henna',
+
+    searchTerms: [
+      'henna',
+      'henna hands',
+      'henna night',
+      'friends',
+      'family',
+      'celebration',
+      'traditional',
+    ],
+
+    recipientTypes: [
+      'friend',
+      'family',
+    ],
+
+    styles: [
+      'illustrated',
+      'floral',
+      'ornamental',
+    ],
+
+    colors: [
+      'terracotta',
+      'gold',
+      'neutral',
+    ],
+
+    languages: [
+      'so',
+      'en',
+      'nl',
+    ],
+
+    orientation: 'landscape',
+    featured: true,
+
+    badge: {
+      so: 'GACMAHA HENNA',
+      en: 'HENNA TOGETHER',
+      nl: 'SAMEN HENNA VIEREN',
+    },
+
+    title: {
+      so: 'Henna, Farxad iyo Wadajir',
+      en: 'Henna, Joy and Togetherness',
+      nl: 'Henna, vreugde en samenzijn',
+    },
+
+    description: {
+      so: 'Farshaxan muujinaya gacmo henna qurux badan iyo munaasabad wadajir ah.',
+      en: 'A richly illustrated celebration of henna, friendship, and togetherness.',
+      nl: 'Een rijke illustratie van henna, vriendschap en samenzijn.',
+    },
+
+    artwork: {
+      type: 'local-image',
+      src: '/images/cards/wedding-henna/henna-hands-celebration.png',
+
+      alt: {
+        so: 'Gacmo badan oo lagu qurxiyey henna dhaqameed',
+        en: 'Gathering of hands decorated with intricate traditional henna',
+        nl: 'Verzameling handen met verfijnde traditionele hennapatronen',
+      },
+
+      focalPoint: 'center',
+      owner: 'hadiyadpay',
+    },
+
+    defaultRecipient: {
+      so: 'Saxiibadda Qaaliga ah',
+      en: 'Dear Friends',
+      nl: 'Lieve vriendinnen',
+    },
+
+    defaultSender: {
+      so: 'Asxaabtaada',
+      en: 'Your Friends',
+      nl: 'Je vrienden',
+    },
+
+    defaultMessage: {
+      so: 'Habeen henna oo lagu xasuusto farxad, heeso, qurux iyo wadajir.',
+      en: 'Here is to a henna night filled with beauty, laughter, and togetherness.',
+      nl: 'Op een henna-avond vol schoonheid, plezier en samenzijn.',
+    },
+  },
+
+  {
+    id: 'wedding-elegance-03',
+    slug: 'elegant-wedding-celebration',
+    category: 'celebrations',
+    occasion: 'wedding',
+
+    searchTerms: [
+      'wedding',
+      'aroos',
+      'bride',
+      'celebration',
+      'traditional',
+      'elegant',
+      'nikah',
+    ],
+
+    recipientTypes: [
+      'partner',
+      'family',
+      'friend',
+    ],
+
+    styles: [
+      'illustrated',
+      'traditional',
+      'ornamental',
+    ],
+
+    colors: [
+      'green',
+      'gold',
+      'neutral',
+    ],
+
+    languages: [
+      'so',
+      'en',
+      'nl',
+    ],
+
+    orientation: 'portrait',
+    featured: true,
+
+    badge: {
+      so: 'AROOS XARRAGO LEH',
+      en: 'WEDDING ELEGANCE',
+      nl: 'ELEGANTE BRUILOFT',
+    },
+
+    title: {
+      so: 'Maalin Aroos oo Xarrago Leh',
+      en: 'An Elegant Wedding Celebration',
+      nl: 'Een elegante huwelijksviering',
+    },
+
+    description: {
+      so: 'Kaar aroos oo xarrago, dhaqan iyo farxad isku daraya.',
+      en: 'An elegant wedding card combining celebration, culture, and refined detail.',
+      nl: 'Een elegante huwelijkskaart waarin viering, cultuur en verfijning samenkomen.',
+    },
+
+    artwork: {
+      type: 'local-image',
+      src: '/images/cards/wedding-henna/wedding-celebration-03.png',
+
+      alt: {
+        so: 'Farshaxan aroos oo leh dhar cagaar iyo dahab ah',
+        en: 'Elegant wedding artwork with rich green and gold details',
+        nl: 'Elegante huwelijksillustratie met rijke groene en gouden details',
+      },
+
+      focalPoint: 'center',
+      owner: 'hadiyadpay',
+    },
+
+    defaultRecipient: {
+      so: 'Lammaanaha Qaaliga ah',
+      en: 'Dear Couple',
+      nl: 'Lieve bruid en bruidegom',
+    },
+
+    defaultSender: {
+      so: 'Qoyska iyo Asxaabta',
+      en: 'Family and Friends',
+      nl: 'Familie en vrienden',
+    },
+
+    defaultMessage: {
+      so: 'Hambalyo arooskiinna. Alle ha idiinka dhigo lammaane ku wada noolaada jacayl, naxariis iyo barako.',
+      en: 'Congratulations on your wedding. May your life together be filled with love, compassion, and blessings.',
+      nl: 'Van harte gefeliciteerd met jullie huwelijk. Moge jullie leven samen vol liefde, warmte en zegeningen zijn.',
+    },
+  },
+
+  {
+    id: 'wedding-ivory-heels',
+    slug: 'ivory-bridal-heels',
+    category: 'celebrations',
+    occasion: 'wedding',
+
+    searchTerms: [
+      'wedding',
+      'bride',
+      'bridal heels',
+      'shoes',
+      'lace',
+      'elegant',
+      'nikah',
+    ],
+
+    recipientTypes: [
+      'partner',
+      'friend',
+      'family',
+    ],
+
+    styles: [
+      'floral',
+      'ornamental',
+      'minimal',
+    ],
+
+    colors: [
+      'neutral',
+      'gold',
+    ],
+
+    languages: [
+      'so',
+      'en',
+      'nl',
+    ],
+
+    orientation: 'portrait',
+
+    badge: {
+      so: 'TALLAABADA AROOSKA',
+      en: 'BRIDAL ELEGANCE',
+      nl: 'BRUIDSE ELEGANTIE',
+    },
+
+    title: {
+      so: 'Tallaabo Qurux Badan',
+      en: 'A Beautiful Step Forward',
+      nl: 'Een mooie stap vooruit',
+    },
+
+    description: {
+      so: 'Kaar aroos oo dhiirrigeliyay quruxda iyo bilowga safar cusub.',
+      en: 'A refined bridal card celebrating elegance and the beginning of a new journey.',
+      nl: 'Een verfijnde bruidskaart over elegantie en het begin van een nieuwe reis.',
+    },
+
+    artwork: {
+      type: 'local-image',
+      src: '/images/cards/wedding-henna/ivory-bridal-heels.png',
+
+      alt: {
+        so: 'Kabo aroos oo cad leh shalash iyo qaanso qurux badan',
+        en: 'Ivory bridal heels with lace, pearls, and a delicate bow',
+        nl: 'Ivoren bruidsschoenen met kant, parels en een verfijnde strik',
+      },
+
+      focalPoint: 'center',
+      owner: 'hadiyadpay',
+    },
+
+    defaultRecipient: {
+      so: 'Aroosadda Qaaliga ah',
+      en: 'Dear Bride',
+      nl: 'Lieve bruid',
+    },
+
+    defaultSender: {
+      so: 'Qof Ku Jecel',
+      en: 'With Love',
+      nl: 'Met liefde',
+    },
+
+    defaultMessage: {
+      so: 'Tallaabo kasta oo safarkiinna cusub ah ha noqoto mid ay ka buuxaan jacayl iyo barako.',
+      en: 'May every step of your new journey be filled with love, grace, and blessings.',
+      nl: 'Moge iedere stap van jullie nieuwe reis gevuld zijn met liefde, warmte en zegeningen.',
+    },
+  },
+
+  {
+    id: 'heritage-tradition-04',
+    slug: 'heritage-in-emerald',
+    category: 'celebrations',
+    occasion: 'heritage',
+
+    searchTerms: [
+      'heritage',
+      'dhaqan',
+      'traditional clothing',
+      'green',
+      'gold',
+      'culture',
+      'somali',
+    ],
+
+    recipientTypes: [
+      'family',
+      'friend',
+    ],
+
+    styles: [
+      'traditional',
+      'ornamental',
+      'illustrated',
+    ],
+
+    colors: [
+      'green',
+      'gold',
+      'neutral',
+    ],
+
+    languages: [
+      'so',
+      'en',
+      'nl',
+    ],
+
+    orientation: 'portrait',
+    featured: true,
+
+    badge: {
+      so: 'DHAQAN CAGAARAN',
+      en: 'EMERALD HERITAGE',
+      nl: 'ERFGOED IN SMARAGDGROEN',
+    },
+
+    title: {
+      so: 'Xarragada Dhaqanka',
+      en: 'Heritage in Emerald',
+      nl: 'Erfgoed in smaragdgroen',
+    },
+
+    description: {
+      so: 'Farshaxan xarrago leh oo muujinaya dhar dhaqameed cagaar iyo dahab ah.',
+      en: 'A refined illustration celebrating traditional clothing in emerald and gold.',
+      nl: 'Een verfijnde illustratie van traditionele kleding in smaragdgroen en goud.',
+    },
+
+    artwork: {
+      type: 'local-image',
+      src: '/images/cards/heritage/heritage-04.png',
+
+      alt: {
+        so: 'Dhar dhaqameed cagaar iyo dahab ah oo si farshaxan leh loo sawiray',
+        en: 'Illustrated traditional clothing in emerald green and gold',
+        nl: 'Geïllustreerde traditionele kleding in smaragdgroen en goud',
+      },
+
+      focalPoint: 'center',
+      owner: 'hadiyadpay',
+    },
+
+    defaultRecipient: {
+      so: 'Qof Qaali ah',
+      en: 'Someone Special',
+      nl: 'Voor iemand bijzonders',
+    },
+
+    defaultSender: {
+      so: 'HadiyadPay',
+      en: 'HadiyadPay',
+      nl: 'HadiyadPay',
+    },
+
+    defaultMessage: {
+      so: 'Dhaqankeennu waa qurux, sharaf iyo xusuus jiilal badan isku xirta.',
+      en: 'Our heritage carries beauty, dignity, and memories that connect generations.',
+      nl: 'Ons erfgoed draagt schoonheid, waardigheid en herinneringen die generaties verbinden.',
+    },
+  },
+
+  {
+    id: 'heritage-tradition-05',
+    slug: 'heritage-in-blue',
+    category: 'celebrations',
+    occasion: 'heritage',
+
+    searchTerms: [
+      'heritage',
+      'dhaqan',
+      'traditional clothing',
+      'blue',
+      'culture',
+      'macawiis',
+      'somali',
+    ],
+
+    recipientTypes: [
+      'family',
+      'friend',
+    ],
+
+    styles: [
+      'traditional',
+      'illustrated',
+      'geometric',
+    ],
+
+    colors: [
+      'blue',
+      'gold',
+      'neutral',
+    ],
+
+    languages: [
+      'so',
+      'en',
+      'nl',
+    ],
+
+    orientation: 'portrait',
+
+    badge: {
+      so: 'DHAQAN BULUUG AH',
+      en: 'HERITAGE IN BLUE',
+      nl: 'ERFGOED IN BLAUW',
+    },
+
+    title: {
+      so: 'Dhaxalka Buluugga ah',
+      en: 'Heritage in Blue',
+      nl: 'Erfgoed in blauw',
+    },
+
+    description: {
+      so: 'Farshaxan muujinaya dharka iyo qaababka hiddaha ee buluugga ah.',
+      en: 'A cultural illustration featuring traditional textiles in rich blue tones.',
+      nl: 'Een culturele illustratie met traditionele stoffen in rijke blauwtinten.',
+    },
+
+    artwork: {
+      type: 'local-image',
+      src: '/images/cards/heritage/heritage-05.png',
+
+      alt: {
+        so: 'Dhar dhaqameed buluug iyo caddaan ah oo farshaxan ahaan loo sawiray',
+        en: 'Illustrated traditional blue and ivory clothing with woven patterns',
+        nl: 'Geïllustreerde traditionele kleding in blauw en ivoor met geweven patronen',
+      },
+
+      focalPoint: 'center',
+      owner: 'hadiyadpay',
+    },
+
+    defaultRecipient: {
+      so: 'Qoyska iyo Asxaabta',
+      en: 'Family and Friends',
+      nl: 'Familie en vrienden',
+    },
+
+    defaultSender: {
+      so: 'HadiyadPay',
+      en: 'HadiyadPay',
+      nl: 'HadiyadPay',
+    },
+
+    defaultMessage: {
+      so: 'Hiddaha iyo dhaqanka aan wadaagno ha ahaadaan kuwo mar walba nala jira.',
+      en: 'May the heritage and traditions we share always remain close to us.',
+      nl: 'Moge het erfgoed en de tradities die we delen altijd dichtbij blijven.',
+    },
+  },
+
+  {
+    id: 'heritage-tradition-06',
+    slug: 'heritage-together',
+    category: 'celebrations',
+    occasion: 'heritage',
+
+    searchTerms: [
+      'heritage',
+      'dhaqan',
+      'traditional couple',
+      'culture',
+      'family',
+      'somali',
+      'together',
+    ],
+
+    recipientTypes: [
+      'family',
+      'friend',
+      'partner',
+    ],
+
+    styles: [
+      'traditional',
+      'illustrated',
+      'ornamental',
+    ],
+
+    colors: [
+      'terracotta',
+      'gold',
+      'neutral',
+    ],
+
+    languages: [
+      'so',
+      'en',
+      'nl',
+    ],
+
+    orientation: 'portrait',
+
+    badge: {
+      so: 'DHAQAN IYO WADAJIR',
+      en: 'HERITAGE TOGETHER',
+      nl: 'SAMEN IN ERFGOED',
+    },
+
+    title: {
+      so: 'Dhaqan, Xusuus iyo Wadajir',
+      en: 'Heritage, Memory and Togetherness',
+      nl: 'Erfgoed, herinnering en samenzijn',
+    },
+
+    description: {
+      so: 'Farshaxan xushmeynaaya dharka, wadajirka iyo xusuusta dhaqanka.',
+      en: 'An illustrated celebration of traditional clothing, connection, and shared heritage.',
+      nl: 'Een geïllustreerde viering van traditionele kleding, verbondenheid en gedeeld erfgoed.',
+    },
+
+    artwork: {
+      type: 'local-image',
+      src: '/images/cards/heritage/heritage-06.png',
+
+      alt: {
+        so: 'Laba qof oo xiran dhar dhaqameed oo midabbo diirran leh',
+        en: 'Two people wearing illustrated traditional clothing in warm earthy colors',
+        nl: 'Twee personen in geïllustreerde traditionele kleding met warme aardetinten',
+      },
+
+      focalPoint: 'center',
+      owner: 'hadiyadpay',
+    },
+
+    defaultRecipient: {
+      so: 'Qof Qaali ah',
+      en: 'Someone Dear',
+      nl: 'Voor een dierbaar persoon',
+    },
+
+    defaultSender: {
+      so: 'Qoyskaaga',
+      en: 'Your Family',
+      nl: 'Je familie',
+    },
+
+    defaultMessage: {
+      so: 'Xusuusta, dharka iyo dhaqanka aynu wadaagno waxay qalbiyadeenna isu keenaan.',
+      en: 'The memories, clothing, and traditions we share keep our hearts connected.',
+      nl: 'De herinneringen, kleding en tradities die we delen houden onze harten verbonden.',
+    },
+  },
+
+  {
+    id: 'just-because-04',
+    slug: 'a-moment-just-for-you',
+    category: 'milestones',
+    occasion: 'just-because',
+
+    searchTerms: [
+      'just because',
+      'zomaar',
+      'thinking of you',
+      'special',
+      'gift',
+      'friend',
+      'love',
+    ],
+
+    recipientTypes: [
+      'friend',
+      'family',
+      'partner',
+    ],
+
+    styles: [
+      'illustrated',
+      'floral',
+      'minimal',
+    ],
+
+    colors: [
+      'rose',
+      'terracotta',
+      'neutral',
+    ],
+
+    languages: [
+      'so',
+      'en',
+      'nl',
+    ],
+
+    orientation: 'portrait',
+    featured: true,
+
+    badge: {
+      so: 'ADIGA OO KELIYA',
+      en: 'JUST FOR YOU',
+      nl: 'SPECIAAL VOOR JOU',
+    },
+
+    title: {
+      so: 'Daqiiqad Adiga Kuu Gaar ah',
+      en: 'A Moment Just for You',
+      nl: 'Een moment speciaal voor jou',
+    },
+
+    description: {
+      so: 'Kaar diirran oo loogu talagalay qof aad xusuusatay, sabab gaar ah la’aan.',
+      en: 'A thoughtful card for someone special, simply because they crossed your mind.',
+      nl: 'Een warme kaart voor iemand aan wie je zomaar even moest denken.',
+    },
+
+    artwork: {
+      type: 'local-image',
+      src: '/images/cards/just-because/just-because-04.png',
+
+      alt: {
+        so: 'Farshaxan diirran oo qof gaar ah loogu talagalay',
+        en: 'Warm illustrated artwork created for someone special',
+        nl: 'Warme illustratie voor iemand die bijzonder is',
+      },
+
+      focalPoint: 'center',
+      owner: 'hadiyadpay',
+    },
+
+    defaultRecipient: {
+      so: 'Qof Qaali ah',
+      en: 'Someone Special',
+      nl: 'Voor jou',
+    },
+
+    defaultSender: {
+      so: 'Qof Ku Xusuustay',
+      en: 'Someone Thinking of You',
+      nl: 'Iemand die aan je denkt',
+    },
+
+    defaultMessage: {
+      so: 'Sabab gaar ah ma jirto. Waxaan rabay oo keliya inaan kuu sheego inaad qalbigayga ku jirto.',
+      en: 'No special reason. I simply wanted you to know that you were on my mind.',
+      nl: 'Geen bijzondere reden. Ik wilde je gewoon laten weten dat ik aan je dacht.',
+    },
+  },
 ];
+
+

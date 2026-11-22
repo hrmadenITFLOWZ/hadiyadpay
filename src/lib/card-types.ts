@@ -129,13 +129,13 @@ export const occasionLabels: Record<
 
   wedding: {
     so:
-      'Aroos',
+      'Aroos & Henna',
 
     en:
-      'Wedding',
+      'Wedding & Henna',
 
     nl:
-      'Bruiloft',
+      'Wedding & Henna',
   },
 
   graduation: {
@@ -209,10 +209,10 @@ export const occasionLabels: Record<
       'Henna',
 
     en:
-      'Henna night',
+      'Henna',
 
     nl:
-      'Hennafeest',
+      'Henna',
   },
 
   heritage: {
@@ -305,6 +305,21 @@ export type CardOrientation =
   | 'portrait'
   | 'landscape';
 
+/*
+ * Every local card image must live underneath:
+ *
+ * /public/images/cards/
+ *
+ * Examples:
+ *
+ * /images/cards/birthday.svg
+ * /images/cards/love-01-en.png
+ * /images/cards/wedding-henna/bridal-henna-moment.png
+ * /images/cards/heritage/heritage-04.png
+ *
+ * ${string} also allows subdirectories such as
+ * wedding-henna/, heritage/, and just-because/.
+ */
 export type CardArtworkSource =
   | `/images/cards/${string}.svg`
   | `/images/cards/${string}.png`
@@ -320,7 +335,7 @@ export type CardArtwork =
       /*
        * Default artwork.
        *
-       * For cards that contain embedded wording,
+       * For cards containing embedded wording,
        * this can be the English version.
        *
        * English and Dutch use this artwork unless
@@ -330,18 +345,17 @@ export type CardArtwork =
         CardArtworkSource;
 
       /*
-       * Optional language-specific versions of
-       * exactly the same card artwork.
+       * Optional language-specific artwork.
        *
        * Example:
        *
        * src:
-       *   /images/cards/love-03-en.png
+       *   '/images/cards/love-03-en.png'
        *
        * localizedSrc:
        *   {
        *     so:
-       *       /images/cards/love-03-so.png
+       *       '/images/cards/love-03-so.png'
        *   }
        *
        * Somali then receives the Somali artwork.
@@ -358,6 +372,16 @@ export type CardArtwork =
       alt:
         LocalizedText;
 
+      /*
+       * Controls which part of an image remains
+       * visually important when object-cover is used.
+       *
+       * Examples:
+       *
+       * 'center'
+       * 'center top'
+       * '50% 20%'
+       */
       focalPoint?:
         string;
 
@@ -381,13 +405,12 @@ export type CardArtwork =
 /*
  * Central artwork-language resolver.
  *
- * Every HadiyadPay component should eventually
- * use this helper rather than reading artwork.src
- * directly.
+ * Components should use this helper rather than
+ * reading artwork.src directly.
  *
  * This ensures that editor preview, download,
- * recipient view and physical production can all
- * select the same language-specific artwork.
+ * recipient reveal, and production output use
+ * the same language-specific artwork.
  */
 export function getCardArtworkSource(
   artwork: CardArtwork,
