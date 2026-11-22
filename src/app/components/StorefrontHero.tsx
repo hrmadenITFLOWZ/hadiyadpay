@@ -205,7 +205,7 @@ export default function StorefrontHero({
 
           <div
             aria-hidden="true"
-            className="absolute left-[2%] top-[19%] z-10 aspect-[0.78] w-[40%] -rotate-[6deg] overflow-hidden rounded-[1.6rem] border border-white/65 bg-[#f8f1e6] shadow-[0_24px_55px_rgba(53,62,54,0.20)] transition duration-500 hover:-translate-x-1 hover:-rotate-[8deg] sm:left-[4%] sm:top-[17%] sm:w-[40%]"
+            className="absolute left-[2%] top-[14%] z-10 aspect-[0.78] w-[42%] -rotate-[6deg] overflow-hidden rounded-[1.6rem] border border-white/65 bg-[#f8f1e6] shadow-[0_24px_55px_rgba(53,62,54,0.20)] transition duration-500 hover:-translate-x-1 hover:-rotate-[8deg] sm:left-[3%] sm:top-[13%] sm:w-[42%]"
           >
             <CardArtworkLayer
               artwork={
@@ -214,6 +214,11 @@ export default function StorefrontHero({
               language={
                 currentLanguage
               }
+              fit="contain"
+              overlay={
+                false
+              }
+              backgroundColor="#f8f1e6"
             />
 
             <div className="pointer-events-none absolute inset-0 rounded-[1.6rem] ring-1 ring-inset ring-white/30" />
@@ -230,6 +235,9 @@ export default function StorefrontHero({
               language={
                 currentLanguage
               }
+              overlay={
+                false
+              }
             />
 
             <div className="pointer-events-none absolute inset-0 rounded-[1.6rem] ring-1 ring-inset ring-white/30" />
@@ -242,6 +250,9 @@ export default function StorefrontHero({
               }
               language={
                 currentLanguage
+              }
+              overlay={
+                false
               }
             />
 
