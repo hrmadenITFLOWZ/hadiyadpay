@@ -1,25 +1,11 @@
 'use client';
 
-import {
-  usePathname,
-  useRouter,
-  useSearchParams,
-} from 'next/navigation';
-
-import CardCatalogControls from './CardCatalogControls';
 import CardProductCard from './CardProductCard';
 import OccasionNavigation from './OccasionNavigation';
 
 import {
   cardOptions,
 } from '../data/cardOptions';
-
-import {
-  defaultCatalogFilters,
-  filterAndSortCards,
-  parseCatalogFilters,
-  updateCatalogParams,
-} from '../../lib/catalog';
 
 import {
   occasionLabels,
@@ -62,154 +48,26 @@ export default function CardCatalog({
   showCategoryNavigation = false,
   headingLevel = 1,
 }: CardCatalogProps) {
-  const router =
-    useRouter();
-
-  const pathname =
-    usePathname();
-
-  const searchParams =
-    useSearchParams();
-
   const language =
     useStorefrontLanguage();
 
-  const isCombinedCollection =
-    Boolean(
-      includedOccasions &&
-      includedOccasions.length >
-        1,
-    );
-
-  /*
-   * A combined collection starts without
-   * one specific occasion filter.
-   *
-   * The actual available products are already
-   * limited through includedOccasions.
-   */
-  const filterDefaultOccasion =
-    isCombinedCollection
-      ? 'all'
-      : defaultOccasion;
-
-  const filters =
-    parseCatalogFilters(
-      new URLSearchParams(
-        searchParams.toString(),
-      ),
-      filterDefaultOccasion,
-    );
-
-  const availableCards =
+  const cards =
     includedOccasions &&
-    includedOccasions.length >
-      0
+    includedOccasions.length > 0
       ? cardOptions.filter(
-          (
-            card,
-          ) =>
+          (card) =>
             includedOccasions.includes(
               card.occasion,
             ),
         )
-      : cardOptions;
-
-  const cards =
-    filterAndSortCards(
-      availableCards,
-      filters,
-      language,
-    );
-
-  const hasFilters =
-    filters.query !==
-      '' ||
-    filters.category !==
-      'all' ||
-    filters.occasion !==
-      filterDefaultOccasion ||
-    filters.recipient !==
-      'all' ||
-    filters.style !==
-      'all' ||
-    filters.color !==
-      'all' ||
-    filters.language !==
-      'all' ||
-    filters.orientation !==
-      'all' ||
-    filters.sort !==
-      'featured';
-
-  const activeFilterCount = [
-    filters.category !==
-      'all',
-
-    filters.occasion !==
-      filterDefaultOccasion,
-
-    filters.recipient !==
-      'all',
-
-    filters.style !==
-      'all',
-
-    filters.color !==
-      'all',
-
-    filters.language !==
-      'all',
-
-    filters.orientation !==
-      'all',
-  ].filter(
-    Boolean,
-  ).length;
-
-  const updateFilters = (
-    nextFilters:
-      typeof filters,
-  ) => {
-    const params =
-      updateCatalogParams(
-        new URLSearchParams(
-          searchParams.toString(),
-        ),
-        nextFilters,
-        filterDefaultOccasion,
-      );
-
-    const query =
-      params.toString();
-
-    const href =
-      `${pathname}${
-        query
-          ? `?${query}`
-          : ''
-      }${window.location.hash}`;
-
-    router.replace(
-      href,
-      {
-        scroll:
-          false,
-      },
-    );
-  };
-
-  const clearFilters =
-    () => {
-      updateFilters(
-        {
-          ...defaultCatalogFilters,
-
-          occasion:
-            filterDefaultOccasion,
-        },
-      );
-    };
+      : defaultOccasion !==
+          'all'
+        ? cardOptions.filter(
+            (card) =>
+              card.occasion ===
+              defaultOccasion,
+          )
+        : cardOptions;
 
   const defaultTitle =
     defaultOccasion ===
@@ -223,9 +81,11 @@ export default function CardCatalog({
           : 'All digital cards'
       : language ===
           'nl'
-        ? `Kaarten voor ${occasionLabels[
-            defaultOccasion
-          ].nl.toLocaleLowerCase()}`
+        ? `Kaarten voor ${
+            occasionLabels[
+              defaultOccasion
+            ].nl.toLocaleLowerCase()
+          }`
         : language ===
             'so'
           ? `Kaararka: ${
@@ -262,23 +122,14 @@ export default function CardCatalog({
           currentLanguage={
             language
           }
-          activeCategory={
-            filters.category
-          }
-          onCategoryChange={(
-            category,
-          ) =>
-            updateFilters(
-              {
-                ...filters,
-                category,
-              },
-            )
+          activeCategory="all"
+          onCategoryChange={
+            () => {}
           }
         />
       )}
 
-      <div className="mb-5">
+      <div className="mb-8">
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#718078]">
           {language ===
           'nl'
@@ -299,37 +150,10 @@ export default function CardCatalog({
         </Heading>
       </div>
 
-      <CardCatalogControls
-        language={
-          language
-        }
-        filters={
-          filters
-        }
-        resultCount={
-          cards.length
-        }
-        activeFilterCount={
-          activeFilterCount
-        }
-        hasFilters={
-          hasFilters
-        }
-        onChange={
-          updateFilters
-        }
-        onClear={
-          clearFilters
-        }
-      />
-
-      {cards.length >
-      0 ? (
+      {cards.length > 0 ? (
         <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {cards.map(
-            (
-              card,
-            ) => (
+            (card) => (
               <CardProductCard
                 key={
                   card.id
@@ -354,28 +178,12 @@ export default function CardCatalog({
           <p className="font-semibold text-[#29443a]">
             {language ===
             'nl'
-              ? 'Geen kaarten gevonden. Pas je zoekopdracht of filters aan.'
+              ? 'Er zijn momenteel geen kaarten in deze collectie.'
               : language ===
                   'so'
-                ? 'Kaarka lama helin. Beddel raadinta ama shaandhooyinka.'
-                : 'No cards found. Try changing your search or filters.'}
+                ? 'Hadda wax kaarar ah kuma jiraan ururintan.'
+                : 'There are currently no cards in this collection.'}
           </p>
-
-          <button
-            type="button"
-            onClick={
-              clearFilters
-            }
-            className="mt-4 min-h-11 rounded-lg bg-[#285347] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1e4338] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
-          >
-            {language ===
-            'nl'
-              ? 'Wis filters'
-              : language ===
-                  'so'
-                ? 'Nadiifi shaandhooyinka'
-                : 'Clear filters'}
-          </button>
         </div>
       )}
     </section>
