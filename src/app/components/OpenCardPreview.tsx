@@ -1,7 +1,9 @@
 'use client';
 
 import {
+  useEffect,
   useRef,
+  useState,
   type PointerEvent,
 } from 'react';
 
@@ -66,6 +68,94 @@ interface PhotoDragState {
   moved: boolean;
 }
 
+const REVEAL_AUDIO_PATH =
+  '/audio/wedding-henna-reveal.m4a';
+
+const REVEAL_AUDIO_VOLUME =
+  0.35;
+
+const REVEAL_FADE_START_MS =
+  6300;
+
+const REVEAL_STOP_MS =
+  7000;
+
+const REVEAL_EFFECT_DURATION_MS =
+  3200;
+
+const revealParticles = [
+  {
+    left: '3%',
+    top: '78%',
+    size: 14,
+    delay: 0,
+    color: '#a8754f',
+  },
+  {
+    left: '8%',
+    top: '62%',
+    size: 9,
+    delay: 120,
+    color: '#8a4d55',
+  },
+  {
+    left: '14%',
+    top: '85%',
+    size: 11,
+    delay: 210,
+    color: '#c4a36a',
+  },
+  {
+    left: '20%',
+    top: '70%',
+    size: 7,
+    delay: 330,
+    color: '#6f7a64',
+  },
+  {
+    left: '27%',
+    top: '90%',
+    size: 10,
+    delay: 160,
+    color: '#9b644d',
+  },
+  {
+    left: '73%',
+    top: '88%',
+    size: 10,
+    delay: 140,
+    color: '#9b644d',
+  },
+  {
+    left: '80%',
+    top: '70%',
+    size: 7,
+    delay: 300,
+    color: '#6f7a64',
+  },
+  {
+    left: '86%',
+    top: '84%',
+    size: 11,
+    delay: 220,
+    color: '#c4a36a',
+  },
+  {
+    left: '92%',
+    top: '61%',
+    size: 9,
+    delay: 110,
+    color: '#8a4d55',
+  },
+  {
+    left: '97%',
+    top: '77%',
+    size: 14,
+    delay: 20,
+    color: '#a8754f',
+  },
+] as const;
+
 export default function OpenCardPreview({
   card,
   language,
@@ -87,6 +177,43 @@ export default function OpenCardPreview({
     useRef<PhotoDragState | null>(
       null,
     );
+
+  const audioRef =
+    useRef<HTMLAudioElement | null>(
+      null,
+    );
+
+  const fadeTimerRef =
+    useRef<number | null>(
+      null,
+    );
+
+  const stopTimerRef =
+    useRef<number | null>(
+      null,
+    );
+
+  const effectTimerRef =
+    useRef<number | null>(
+      null,
+    );
+
+  const fadeIntervalRef =
+    useRef<number | null>(
+      null,
+    );
+
+  const [
+    revealEffectActive,
+    setRevealEffectActive,
+  ] =
+    useState(false);
+
+  const [
+    revealEffectVisible,
+    setRevealEffectVisible,
+  ] =
+    useState(false);
 
   const text = {
     so: {
@@ -161,6 +288,12 @@ export default function OpenCardPreview({
     language
   ];
 
+  const isWeddingHennaCard =
+    card.occasion ===
+      'wedding' ||
+    card.occasion ===
+      'henna';
+
   const coverAspectRatio =
     card.orientation ===
     'portrait'
@@ -189,6 +322,325 @@ export default function OpenCardPreview({
       framePercent
     ) /
     2;
+
+  const clearRevealTimers =
+    () => {
+      if (
+        fadeTimerRef.current !==
+        null
+      ) {
+        window.clearTimeout(
+          fadeTimerRef.current,
+        );
+
+        fadeTimerRef.current =
+          null;
+      }
+
+      if (
+        stopTimerRef.current !==
+        null
+      ) {
+        window.clearTimeout(
+          stopTimerRef.current,
+        );
+
+        stopTimerRef.current =
+          null;
+      }
+
+      if (
+        effectTimerRef.current !==
+        null
+      ) {
+        window.clearTimeout(
+          effectTimerRef.current,
+        );
+
+        effectTimerRef.current =
+          null;
+      }
+
+      if (
+        fadeIntervalRef.current !==
+        null
+      ) {
+        window.clearInterval(
+          fadeIntervalRef.current,
+        );
+
+        fadeIntervalRef.current =
+          null;
+      }
+    };
+
+  const stopRevealAudio =
+    () => {
+      clearRevealTimers();
+
+      const audio =
+        audioRef.current;
+
+      if (audio) {
+        audio.pause();
+        audio.currentTime =
+          0;
+        audio.volume =
+          REVEAL_AUDIO_VOLUME;
+      }
+
+      setRevealEffectActive(
+        false,
+      );
+
+      setRevealEffectVisible(
+        false,
+      );
+    };
+
+  const startRevealAudio =
+    async () => {
+      if (
+        !isWeddingHennaCard
+      ) {
+        return;
+      }
+
+      clearRevealTimers();
+
+      let audio =
+        audioRef.current;
+
+      if (!audio) {
+        audio =
+          new Audio(
+            REVEAL_AUDIO_PATH,
+          );
+
+        audio.preload =
+          'auto';
+
+        audioRef.current =
+          audio;
+      }
+
+      audio.pause();
+      audio.currentTime =
+        0;
+      audio.volume =
+        REVEAL_AUDIO_VOLUME;
+
+      try {
+        await audio.play();
+      } catch {
+        return;
+      }
+
+      fadeTimerRef.current =
+        window.setTimeout(
+          () => {
+            const fadeDuration =
+              REVEAL_STOP_MS -
+              REVEAL_FADE_START_MS;
+
+            const fadeStepMs =
+              50;
+
+            const totalSteps =
+              Math.max(
+                1,
+                Math.ceil(
+                  fadeDuration /
+                    fadeStepMs,
+                ),
+              );
+
+            let currentStep =
+              0;
+
+            fadeIntervalRef.current =
+              window.setInterval(
+                () => {
+                  currentStep +=
+                    1;
+
+                  const progress =
+                    Math.min(
+                      1,
+                      currentStep /
+                        totalSteps,
+                    );
+
+                  if (
+                    audioRef.current
+                  ) {
+                    audioRef.current.volume =
+                      Math.max(
+                        0,
+                        REVEAL_AUDIO_VOLUME *
+                          (
+                            1 -
+                            progress
+                          ),
+                      );
+                  }
+
+                  if (
+                    progress >=
+                    1
+                  ) {
+                    if (
+                      fadeIntervalRef.current !==
+                      null
+                    ) {
+                      window.clearInterval(
+                        fadeIntervalRef.current,
+                      );
+
+                      fadeIntervalRef.current =
+                        null;
+                    }
+                  }
+                },
+                fadeStepMs,
+              );
+          },
+          REVEAL_FADE_START_MS,
+        );
+
+      stopTimerRef.current =
+        window.setTimeout(
+          () => {
+            const currentAudio =
+              audioRef.current;
+
+            if (
+              currentAudio
+            ) {
+              currentAudio.pause();
+              currentAudio.currentTime =
+                0;
+              currentAudio.volume =
+                REVEAL_AUDIO_VOLUME;
+            }
+
+            if (
+              fadeIntervalRef.current !==
+              null
+            ) {
+              window.clearInterval(
+                fadeIntervalRef.current,
+              );
+
+              fadeIntervalRef.current =
+                null;
+            }
+          },
+          REVEAL_STOP_MS,
+        );
+    };
+
+  const startRevealEffect =
+    () => {
+      if (
+        !isWeddingHennaCard
+      ) {
+        return;
+      }
+
+      if (
+        effectTimerRef.current !==
+        null
+      ) {
+        window.clearTimeout(
+          effectTimerRef.current,
+        );
+      }
+
+      setRevealEffectVisible(
+        true,
+      );
+
+      window.requestAnimationFrame(
+        () => {
+          window.requestAnimationFrame(
+            () => {
+              setRevealEffectActive(
+                true,
+              );
+            },
+          );
+        },
+      );
+
+      effectTimerRef.current =
+        window.setTimeout(
+          () => {
+            setRevealEffectActive(
+              false,
+            );
+
+            window.setTimeout(
+              () => {
+                setRevealEffectVisible(
+                  false,
+                );
+              },
+              700,
+            );
+          },
+          REVEAL_EFFECT_DURATION_MS,
+        );
+    };
+
+  const handleOpen =
+    () => {
+      if (
+        isWeddingHennaCard
+      ) {
+        startRevealEffect();
+
+        void startRevealAudio();
+      }
+
+      onOpen?.();
+    };
+
+  const handleClose =
+    () => {
+      stopRevealAudio();
+      onClose?.();
+    };
+
+  useEffect(
+    () => {
+      return () => {
+        clearRevealTimers();
+
+        const audio =
+          audioRef.current;
+
+        if (audio) {
+          audio.pause();
+          audio.currentTime =
+            0;
+        }
+
+        audioRef.current =
+          null;
+      };
+    },
+    [],
+  );
+
+  useEffect(
+    () => {
+      if (!isOpen) {
+        stopRevealAudio();
+      }
+    },
+    [isOpen],
+  );
 
   const clampPercentage = (
     value: number,
@@ -270,8 +722,10 @@ export default function OpenCardPreview({
         .getBoundingClientRect();
 
     if (
-      bounds.width <= 0 ||
-      bounds.height <= 0
+      bounds.width <=
+        0 ||
+      bounds.height <=
+        0
     ) {
       return;
     }
@@ -394,11 +848,11 @@ export default function OpenCardPreview({
 
   if (!isOpen) {
     return (
-      <div className="mx-auto w-full max-w-[34rem]">
+      <div className="relative mx-auto w-full max-w-[34rem]">
         <button
           type="button"
           onClick={
-            onOpen
+            handleOpen
           }
           aria-label={
             text.open
@@ -435,13 +889,126 @@ export default function OpenCardPreview({
   }
 
   return (
-    <div className="w-full">
+    <div className="relative w-full">
+      {revealEffectVisible &&
+        isWeddingHennaCard && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none fixed inset-0 z-40 overflow-hidden"
+          >
+            <div
+              className={`absolute inset-0 transition-opacity duration-1000 ${
+                revealEffectActive
+                  ? 'opacity-100'
+                  : 'opacity-0'
+              }`}
+              style={{
+                background:
+                  'radial-gradient(circle at 50% 48%, rgba(181,139,79,0.24), rgba(118,61,66,0.10) 36%, transparent 68%)',
+              }}
+            />
+
+            <div
+              className={`absolute left-1/2 top-1/2 h-[28rem] w-[28rem] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#c7a368]/30 transition-all duration-[1800ms] ease-out ${
+                revealEffectActive
+                  ? 'scale-150 opacity-0'
+                  : 'scale-75 opacity-70'
+              }`}
+            />
+
+            <div
+              className={`absolute left-1/2 top-1/2 h-[20rem] w-[20rem] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#884e57]/25 transition-all delay-150 duration-[1900ms] ease-out ${
+                revealEffectActive
+                  ? 'scale-[1.8] opacity-0'
+                  : 'scale-50 opacity-60'
+              }`}
+            />
+
+            <div
+              className={`absolute -bottom-24 -left-20 h-72 w-72 rounded-full opacity-0 blur-3xl transition-all duration-[2200ms] ${
+                revealEffectActive
+                  ? 'translate-x-24 -translate-y-32 scale-125 opacity-30'
+                  : ''
+              }`}
+              style={{
+                background:
+                  'radial-gradient(circle, rgba(137,75,82,0.72), transparent 68%)',
+              }}
+            />
+
+            <div
+              className={`absolute -bottom-24 -right-20 h-72 w-72 rounded-full opacity-0 blur-3xl transition-all duration-[2200ms] ${
+                revealEffectActive
+                  ? '-translate-x-24 -translate-y-32 scale-125 opacity-30'
+                  : ''
+              }`}
+              style={{
+                background:
+                  'radial-gradient(circle, rgba(187,143,78,0.68), transparent 68%)',
+              }}
+            />
+
+            {revealParticles.map(
+              (
+                particle,
+                index,
+              ) => (
+                <span
+                  key={
+                    `${particle.left}-${particle.top}-${index}`
+                  }
+                  className={`absolute rounded-full shadow-[0_0_14px_rgba(184,140,84,0.38)] transition-all duration-[1800ms] ease-out ${
+                    revealEffectActive
+                      ? '-translate-y-48 scale-0 opacity-0'
+                      : 'translate-y-0 scale-100 opacity-70'
+                  }`}
+                  style={{
+                    left:
+                      particle.left,
+
+                    top:
+                      particle.top,
+
+                    width:
+                      `${particle.size}px`,
+
+                    height:
+                      `${particle.size}px`,
+
+                    backgroundColor:
+                      particle.color,
+
+                    transitionDelay:
+                      `${particle.delay}ms`,
+                  }}
+                />
+              ),
+            )}
+
+            <div
+              className={`absolute left-[6%] top-[54%] h-28 w-28 rotate-[-25deg] rounded-[55%_45%_60%_40%] border border-[#b78b52]/30 transition-all duration-[2000ms] ${
+                revealEffectActive
+                  ? '-translate-x-16 -translate-y-28 rotate-[-55deg] scale-150 opacity-0'
+                  : 'opacity-60'
+              }`}
+            />
+
+            <div
+              className={`absolute right-[6%] top-[54%] h-28 w-28 rotate-[25deg] rounded-[45%_55%_40%_60%] border border-[#8b4f58]/30 transition-all duration-[2000ms] ${
+                revealEffectActive
+                  ? 'translate-x-16 -translate-y-28 rotate-[55deg] scale-150 opacity-0'
+                  : 'opacity-60'
+              }`}
+            />
+          </div>
+        )}
+
       {onClose && (
         <div className="mb-4 flex justify-end">
           <button
             type="button"
             onClick={
-              onClose
+              handleClose
             }
             className="inline-flex min-h-10 items-center justify-center rounded-full border border-stone-200 bg-white px-4 py-2 text-xs font-semibold text-stone-600 transition hover:border-stone-300 hover:bg-stone-50 hover:text-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
           >
@@ -459,7 +1026,14 @@ export default function OpenCardPreview({
         </div>
       )}
 
-      <div className="relative mx-auto grid w-full max-w-5xl grid-cols-1 overflow-hidden rounded-[1.6rem] border border-[#d9d0c2] bg-[#fffaf0] shadow-2xl md:grid-cols-2">
+      <div
+        className={`relative z-50 mx-auto grid w-full max-w-5xl grid-cols-1 overflow-hidden rounded-[1.6rem] border bg-[#fffaf0] shadow-2xl transition-all duration-1000 md:grid-cols-2 ${
+          revealEffectActive &&
+          isWeddingHennaCard
+            ? 'border-[#c7a368] shadow-[0_32px_90px_rgba(111,63,59,0.32)]'
+            : 'border-[#d9d0c2]'
+        }`}
+      >
         <section
           aria-label={
             text.insideLeft
