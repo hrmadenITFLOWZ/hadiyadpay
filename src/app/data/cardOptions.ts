@@ -10,7 +10,10 @@ export {
   type CardOption,
 } from '../../lib/card-types';
 
-export const cardOptions: CardOption[] = [      'just-because-01',
+export const cardOptions: CardOption[] = [
+  {
+    id:
+      'just-because-01',
 
     slug:
       'a-little-hadiyad',
