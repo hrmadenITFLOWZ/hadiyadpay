@@ -290,8 +290,9 @@ export default async function OccasionPage({
         />
 
         {isCombinedCollection && (
-          <div className="mx-auto w-full max-w-7xl px-5 pb-12 pt-8 sm:px-8 sm:pb-16 sm:pt-10 lg:px-12 lg:pb-20">
+          <div className="mx-auto w-full max-w-7xl px-5 pb-7 pt-6 sm:px-8 sm:pb-9 sm:pt-8 lg:px-12 lg:pb-10">
             <WeddingHennaSpotlight
+              variant="compact"
               showAllCardsButton={
                 false
               }
