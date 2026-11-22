@@ -155,7 +155,7 @@ export default function HadiyadReveal({
     `${baseCardUrl}?side=inside`;
 
   const downloadUrl =
-  `${baseCardUrl}?side=complete&download=1`;
+    `${baseCardUrl}?side=complete&download=1`;
 
   const isClosed =
     revealState ===
@@ -972,7 +972,7 @@ export default function HadiyadReveal({
 
         .hadiyad-cover-front {
           z-index: 2;
-          background: #f7efe0;
+          background: #fffaf0;
           box-shadow:
             inset 0 0 0 1px
             rgba(181, 139, 75, 0.22);
@@ -988,12 +988,22 @@ export default function HadiyadReveal({
             rgba(136, 95, 40, 0.12);
         }
 
-        .hadiyad-cover-image,
+        .hadiyad-cover-image {
+          display: block;
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          object-position: center;
+          border-radius: 1.5rem;
+          background: #fffaf0;
+        }
+
         .hadiyad-inside-photo-image {
           display: block;
           width: 100%;
           height: 100%;
           object-fit: cover;
+          object-position: center;
           border-radius: 1.5rem;
         }
 
