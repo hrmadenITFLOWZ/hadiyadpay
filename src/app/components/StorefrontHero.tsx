@@ -214,7 +214,8 @@ export default function StorefrontHero({
               language={
                 currentLanguage
               }
-              fit="contain"
+              fit="cover"
+              objectPosition="center top"
               overlay={
                 false
               }
@@ -235,6 +236,7 @@ export default function StorefrontHero({
               language={
                 currentLanguage
               }
+              fit="cover"
               overlay={
                 false
               }
@@ -251,6 +253,7 @@ export default function StorefrontHero({
               language={
                 currentLanguage
               }
+              fit="cover"
               overlay={
                 false
               }

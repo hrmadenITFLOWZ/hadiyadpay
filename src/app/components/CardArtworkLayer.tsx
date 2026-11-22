@@ -14,12 +14,27 @@ interface CardArtworkLayerProps {
 
   /*
    * cover:
-   * Fills the complete container and may crop artwork.
+   * Fills the complete container.
    *
    * contain:
-   * Shows the complete artwork without cropping.
+   * Shows the complete artwork without cropping,
+   * but can leave empty space.
    */
   fit?: 'cover' | 'contain';
+
+  /*
+   * Optional display-specific image position.
+   *
+   * This allows individual card presentations
+   * to override their normal focal point without
+   * changing the card artwork globally.
+   *
+   * Examples:
+   * 'center'
+   * 'center top'
+   * '50% 15%'
+   */
+  objectPosition?: string;
 
   backgroundColor?: string;
 }
@@ -30,6 +45,7 @@ export default function CardArtworkLayer({
   decorative = true,
   overlay = true,
   fit = 'cover',
+  objectPosition,
   backgroundColor = '#f7f1e8',
 }: CardArtworkLayerProps) {
   const alt =
@@ -44,6 +60,23 @@ export default function CardArtworkLayer({
       artwork,
       language,
     );
+
+  const objectFitClass =
+    fit ===
+      'contain'
+      ? 'object-contain'
+      : 'object-cover';
+
+  const artworkFocalPoint =
+    artwork.type ===
+      'local-image'
+      ? artwork.focalPoint
+      : undefined;
+
+  const resolvedObjectPosition =
+    objectPosition ??
+    artworkFocalPoint ??
+    'center';
 
   return (
     <div
@@ -74,9 +107,7 @@ export default function CardArtworkLayer({
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className={
-            fit === 'contain'
-              ? 'object-contain'
-              : 'object-cover'
+            objectFitClass
           }
           unoptimized={
             artworkSource.endsWith(
@@ -85,8 +116,7 @@ export default function CardArtworkLayer({
           }
           style={{
             objectPosition:
-              artwork.focalPoint ??
-              'center',
+              resolvedObjectPosition,
           }}
         />
       ) : artwork.type ===
