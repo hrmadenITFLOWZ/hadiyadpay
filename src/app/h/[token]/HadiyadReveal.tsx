@@ -37,10 +37,10 @@ const AUDIO_START_VOLUME =
   0.35;
 
 const AUDIO_FADE_START_MS =
-  5900;
+  5600;
 
 const AUDIO_STOP_MS =
-  6500;
+  6200;
 
 const AUDIO_FADE_STEP_MS =
   50;
@@ -54,32 +54,47 @@ const CARD_OPEN_DELAY_MS =
 const CARD_OPEN_ANIMATION_MS =
   1250;
 
+const COVER_INTERACTION_DELAY_MS =
+  150;
+
 const copy = {
   so: {
     brandLabel:
       'Kaar dijitaal ah',
+
     eyebrow:
       'Gaar ahaan adiga',
+
     closedTitle:
       'Wax gaar ah ayaa kuu yimid',
+
     closedMessage:
       'Qof ayaa si gaar ah kuugu sameeyey Hadiyad.',
+
     openButton:
       'Fur Hadiyaddayda',
+
     opening:
       'Hadiyaddaada ayaa furmaysa…',
+
     tapToOpen:
       'Taabo Hadiyaddaada si aad u furto',
+
     tapHint:
       'Fur oo arag fariinta laguu reebay',
+
     revealed:
       'Hadiyaddaada',
+
     moment:
       'Xusuustan hayso',
+
     save:
       'Kaydi kaarka',
+
     saveHint:
       'Ku kaydi qalabkaaga si aad mar walba dib ugu daawato.',
+
     footer:
       'Waxaa lagu sameeyey HadiyadPay',
   },
@@ -87,28 +102,40 @@ const copy = {
   en: {
     brandLabel:
       'Digital card',
+
     eyebrow:
       'Especially for you',
+
     closedTitle:
       'Something special has arrived',
+
     closedMessage:
       'Someone created a personal Hadiyad especially for you.',
+
     openButton:
       'Open my Hadiyad',
+
     opening:
       'Opening your Hadiyad…',
+
     tapToOpen:
       'Tap your Hadiyad to open',
+
     tapHint:
       'Open the card to reveal your personal message',
+
     revealed:
       'Your Hadiyad',
+
     moment:
       'Keep this moment',
+
     save:
       'Save card',
+
     saveHint:
       'Save the card to your device so you can revisit this moment anytime.',
+
     footer:
       'Created with HadiyadPay',
   },
@@ -116,28 +143,40 @@ const copy = {
   nl: {
     brandLabel:
       'Digitale kaart',
+
     eyebrow:
       'Speciaal voor jou',
+
     closedTitle:
       'Er is iets bijzonders voor je gekomen',
+
     closedMessage:
       'Iemand heeft speciaal voor jou een persoonlijke Hadiyad gemaakt.',
+
     openButton:
       'Open mijn Hadiyad',
+
     opening:
       'Je Hadiyad wordt geopend…',
+
     tapToOpen:
       'Tik op je Hadiyad om te openen',
+
     tapHint:
       'Open de kaart en bekijk je persoonlijke boodschap',
+
     revealed:
       'Jouw Hadiyad',
+
     moment:
       'Bewaar dit moment',
+
     save:
       'Kaart bewaren',
+
     saveHint:
       'Bewaar de kaart op je apparaat, zodat je dit moment altijd terug kunt kijken.',
+
     footer:
       'Gemaakt met HadiyadPay',
   },
@@ -428,122 +467,9 @@ export default function HadiyadReveal({
       }
     };
 
-  const stopRevealAudio =
+  const scheduleRevealAudioStop =
     () => {
       clearAudioTimers();
-
-      const audio =
-        audioRef.current;
-
-      if (!audio) {
-        return;
-      }
-
-      audio.pause();
-      audio.currentTime =
-        0;
-      audio.volume =
-        AUDIO_START_VOLUME;
-    };
-
-  const startRevealEffect =
-    () => {
-      if (
-        !hasWeddingHennaReveal
-      ) {
-        return;
-      }
-
-      clearEffectTimers();
-
-      setSpecialEffectVisible(
-        true,
-      );
-
-      setSpecialEffectActive(
-        false,
-      );
-
-      window.requestAnimationFrame(
-        () => {
-          window.requestAnimationFrame(
-            () => {
-              setSpecialEffectActive(
-                true,
-              );
-            },
-          );
-        },
-      );
-
-      effectTimerRef.current =
-        window.setTimeout(
-          () => {
-            setSpecialEffectActive(
-              false,
-            );
-
-            effectRemoveTimerRef.current =
-              window.setTimeout(
-                () => {
-                  setSpecialEffectVisible(
-                    false,
-                  );
-                },
-                900,
-              );
-          },
-          EFFECT_END_MS,
-        );
-    };
-
-  const startRevealAudio =
-    async () => {
-      if (
-        !hasWeddingHennaReveal
-      ) {
-        return;
-      }
-
-      clearAudioTimers();
-
-      let audio =
-        audioRef.current;
-
-      if (!audio) {
-        audio =
-          new Audio(
-            WEDDING_HENNA_AUDIO,
-          );
-
-        audio.preload =
-          'auto';
-
-        audioRef.current =
-          audio;
-      }
-
-      audio.pause();
-      audio.currentTime =
-        0;
-      audio.volume =
-        AUDIO_START_VOLUME;
-
-      try {
-        await audio.play();
-      } catch (error) {
-        console.warn(
-          'Wedding and Henna reveal audio could not start',
-          {
-            errorType:
-              error instanceof Error
-                ? error.name
-                : 'unknown',
-          },
-        );
-
-        return;
-      }
 
       fadeStartTimerRef.current =
         window.setTimeout(
@@ -573,6 +499,18 @@ export default function HadiyadReveal({
                   if (
                     !currentAudio
                   ) {
+                    if (
+                      fadeIntervalRef.current !==
+                      null
+                    ) {
+                      window.clearInterval(
+                        fadeIntervalRef.current,
+                      );
+
+                      fadeIntervalRef.current =
+                        null;
+                    }
+
                     return;
                   }
 
@@ -650,6 +588,128 @@ export default function HadiyadReveal({
         );
     };
 
+  const playRevealAudioFromUserGesture =
+    () => {
+      if (
+        !hasWeddingHennaReveal
+      ) {
+        return;
+      }
+
+      clearAudioTimers();
+
+      let audio =
+        audioRef.current;
+
+      if (!audio) {
+        audio =
+          new Audio(
+            WEDDING_HENNA_AUDIO,
+          );
+
+        audio.preload =
+          'auto';
+
+        audioRef.current =
+          audio;
+      }
+
+      audio.pause();
+
+      audio.currentTime =
+        0;
+
+      audio.volume =
+        AUDIO_START_VOLUME;
+
+      /*
+       * Belangrijk voor mobiele browsers:
+       *
+       * play() wordt rechtstreeks vanuit
+       * de click/tap-handler aangeroepen.
+       *
+       * Er vindt geen await, timeout of
+       * andere async-stap plaats vóór play().
+       */
+      const playPromise =
+        audio.play();
+
+      scheduleRevealAudioStop();
+
+      if (
+        playPromise &&
+        typeof playPromise.catch ===
+          'function'
+      ) {
+        void playPromise.catch(
+          (error) => {
+            clearAudioTimers();
+
+            console.warn(
+              'Wedding and Henna reveal audio could not start',
+              {
+                errorType:
+                  error instanceof Error
+                    ? error.name
+                    : 'unknown',
+              },
+            );
+          },
+        );
+      }
+    };
+
+  const startRevealEffect =
+    () => {
+      if (
+        !hasWeddingHennaReveal
+      ) {
+        return;
+      }
+
+      clearEffectTimers();
+
+      setSpecialEffectVisible(
+        true,
+      );
+
+      setSpecialEffectActive(
+        false,
+      );
+
+      window.requestAnimationFrame(
+        () => {
+          window.requestAnimationFrame(
+            () => {
+              setSpecialEffectActive(
+                true,
+              );
+            },
+          );
+        },
+      );
+
+      effectTimerRef.current =
+        window.setTimeout(
+          () => {
+            setSpecialEffectActive(
+              false,
+            );
+
+            effectRemoveTimerRef.current =
+              window.setTimeout(
+                () => {
+                  setSpecialEffectVisible(
+                    false,
+                  );
+                },
+                900,
+              );
+          },
+          EFFECT_END_MS,
+        );
+    };
+
   useEffect(
     () => {
       if (
@@ -679,6 +739,7 @@ export default function HadiyadReveal({
         clearEffectTimers();
 
         audio.pause();
+
         audio.currentTime =
           0;
 
@@ -726,7 +787,7 @@ export default function HadiyadReveal({
 
       coverInteractiveAtRef.current =
         Date.now() +
-        900;
+        COVER_INTERACTION_DELAY_MS;
 
       setRevealState(
         'showing-cover',
@@ -765,9 +826,13 @@ export default function HadiyadReveal({
       if (
         hasWeddingHennaReveal
       ) {
-        startRevealEffect();
+        /*
+         * Dit moet vóór elke await blijven
+         * voor correcte mobiele playback.
+         */
+        playRevealAudioFromUserGesture();
 
-        void startRevealAudio();
+        startRevealEffect();
 
         await sleep(
           CARD_OPEN_DELAY_MS,
@@ -1651,6 +1716,10 @@ export default function HadiyadReveal({
           transition:
             transform 180ms ease,
             box-shadow 180ms ease;
+          touch-action:
+            manipulation;
+          -webkit-tap-highlight-color:
+            transparent;
         }
 
         .hadiyad-open-button:hover {
@@ -1797,6 +1866,14 @@ export default function HadiyadReveal({
 
         .hadiyad-card-book.is-interactive {
           cursor: pointer;
+          touch-action:
+            manipulation;
+          -webkit-tap-highlight-color:
+            transparent;
+          user-select:
+            none;
+          -webkit-user-select:
+            none;
           animation:
             card-book-arrive
               850ms
@@ -1944,6 +2021,9 @@ export default function HadiyadReveal({
           height: 100%;
           object-fit: fill;
           border-radius: 1.5rem;
+          pointer-events: none;
+          user-select: none;
+          -webkit-user-drag: none;
         }
 
         .hadiyad-inside-photo-image {
@@ -1953,6 +2033,9 @@ export default function HadiyadReveal({
           object-fit: cover;
           object-position: center;
           border-radius: 1.5rem;
+          pointer-events: none;
+          user-select: none;
+          -webkit-user-drag: none;
         }
 
         .hadiyad-cover-shine {
