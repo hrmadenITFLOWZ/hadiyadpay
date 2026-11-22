@@ -289,7 +289,7 @@ export default function HomeStorefront() {
       'henna-celebration',
     ) ??
     getCardById(
-      'henna',
+      'henna-bridal-moment',
     ) ??
     cardOptions[0];
 
@@ -298,13 +298,13 @@ export default function HomeStorefront() {
       'wedding-celebration',
     ) ??
     getCardById(
-      'aroos',
+      'wedding-elegance-03',
     ) ??
     cardOptions[0];
 
   const aroosCard =
     getCardById(
-      'aroos',
+      'wedding-elegance-03',
     ) ??
     weddingCard;
 

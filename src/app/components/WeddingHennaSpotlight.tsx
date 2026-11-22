@@ -163,7 +163,7 @@ export default function WeddingHennaSpotlight({
       'henna-celebration',
     ) ??
     getCardById(
-      'henna',
+      'henna-bridal-moment',
     ) ??
     cardOptions[0];
 
@@ -172,13 +172,13 @@ export default function WeddingHennaSpotlight({
       'wedding-celebration',
     ) ??
     getCardById(
-      'aroos',
+      'wedding-elegance-03',
     ) ??
     cardOptions[0];
 
   const aroosCard =
     getCardById(
-      'aroos',
+      'wedding-elegance-03',
     ) ??
     weddingCard;
 
