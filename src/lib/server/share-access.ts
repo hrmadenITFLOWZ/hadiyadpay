@@ -25,15 +25,17 @@ export interface SharedCardOrder
     | 'nl';
 
   status: string;
-  customization: unknown;
+
+  customization:
+    unknown;
 
   /*
-   * The database currently stores the uploaded
-   * inside photo in the legacy photo_front columns.
+   * The current card editor stores the uploaded
+   * inside photo in photo_inside.
    *
-   * The SQL query aliases those database columns
-   * to photo_inside so the reveal and rendering
-   * code can use the correct product terminology.
+   * The reveal/download flow reads these columns
+   * directly so the left inside page can render
+   * the customer's uploaded photo.
    */
   photo_inside:
     Buffer | null;
@@ -85,11 +87,8 @@ export async function getOrderForShareToken(
            orders.status,
            orders.customization,
 
-           orders.photo_front
-             AS photo_inside,
-
-           orders.photo_front_mime
-             AS photo_inside_mime,
+           orders.photo_inside,
+           orders.photo_inside_mime,
 
            shares.opened_at,
            shares.open_count
