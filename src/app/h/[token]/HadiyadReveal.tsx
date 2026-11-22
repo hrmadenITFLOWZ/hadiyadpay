@@ -37,10 +37,10 @@ const AUDIO_START_VOLUME =
   0.35;
 
 const AUDIO_FADE_START_MS =
-  6300;
+  5900;
 
 const AUDIO_STOP_MS =
-  7000;
+  6500;
 
 const AUDIO_FADE_STEP_MS =
   50;
@@ -48,44 +48,38 @@ const AUDIO_FADE_STEP_MS =
 const EFFECT_END_MS =
   3400;
 
+const CARD_OPEN_DELAY_MS =
+  2200;
+
+const CARD_OPEN_ANIMATION_MS =
+  1250;
+
 const copy = {
   so: {
     brandLabel:
       'Kaar dijitaal ah',
-
     eyebrow:
       'Gaar ahaan adiga',
-
     closedTitle:
       'Wax gaar ah ayaa kuu yimid',
-
     closedMessage:
       'Qof ayaa si gaar ah kuugu sameeyey Hadiyad.',
-
     openButton:
       'Fur Hadiyaddayda',
-
     opening:
       'Hadiyaddaada ayaa furmaysa…',
-
     tapToOpen:
       'Taabo Hadiyaddaada si aad u furto',
-
     tapHint:
       'Fur oo arag fariinta laguu reebay',
-
     revealed:
       'Hadiyaddaada',
-
     moment:
       'Xusuustan hayso',
-
     save:
       'Kaydi kaarka',
-
     saveHint:
       'Ku kaydi qalabkaaga si aad mar walba dib ugu daawato.',
-
     footer:
       'Waxaa lagu sameeyey HadiyadPay',
   },
@@ -93,40 +87,28 @@ const copy = {
   en: {
     brandLabel:
       'Digital card',
-
     eyebrow:
       'Especially for you',
-
     closedTitle:
       'Something special has arrived',
-
     closedMessage:
       'Someone created a personal Hadiyad especially for you.',
-
     openButton:
       'Open my Hadiyad',
-
     opening:
       'Opening your Hadiyad…',
-
     tapToOpen:
       'Tap your Hadiyad to open',
-
     tapHint:
       'Open the card to reveal your personal message',
-
     revealed:
       'Your Hadiyad',
-
     moment:
       'Keep this moment',
-
     save:
       'Save card',
-
     saveHint:
       'Save the card to your device so you can revisit this moment anytime.',
-
     footer:
       'Created with HadiyadPay',
   },
@@ -134,40 +116,28 @@ const copy = {
   nl: {
     brandLabel:
       'Digitale kaart',
-
     eyebrow:
       'Speciaal voor jou',
-
     closedTitle:
       'Er is iets bijzonders voor je gekomen',
-
     closedMessage:
       'Iemand heeft speciaal voor jou een persoonlijke Hadiyad gemaakt.',
-
     openButton:
       'Open mijn Hadiyad',
-
     opening:
       'Je Hadiyad wordt geopend…',
-
     tapToOpen:
       'Tik op je Hadiyad om te openen',
-
     tapHint:
       'Open de kaart en bekijk je persoonlijke boodschap',
-
     revealed:
       'Jouw Hadiyad',
-
     moment:
       'Bewaar dit moment',
-
     save:
       'Kaart bewaren',
-
     saveHint:
       'Bewaar de kaart op je apparaat, zodat je dit moment altijd terug kunt kijken.',
-
     footer:
       'Gemaakt met HadiyadPay',
   },
@@ -476,19 +446,6 @@ export default function HadiyadReveal({
         AUDIO_START_VOLUME;
     };
 
-  const removeRevealEffect =
-    () => {
-      clearEffectTimers();
-
-      setSpecialEffectActive(
-        false,
-      );
-
-      setSpecialEffectVisible(
-        false,
-      );
-    };
-
   const startRevealEffect =
     () => {
       if (
@@ -641,7 +598,7 @@ export default function HadiyadReveal({
 
                   if (
                     progress >=
-                    1 &&
+                      1 &&
                     fadeIntervalRef.current !==
                       null
                   ) {
@@ -669,8 +626,10 @@ export default function HadiyadReveal({
               currentAudio
             ) {
               currentAudio.pause();
+
               currentAudio.currentTime =
                 0;
+
               currentAudio.volume =
                 AUDIO_START_VOLUME;
             }
@@ -803,16 +762,24 @@ export default function HadiyadReveal({
       isOpeningRef.current =
         true;
 
-      startRevealEffect();
+      if (
+        hasWeddingHennaReveal
+      ) {
+        startRevealEffect();
 
-      void startRevealAudio();
+        void startRevealAudio();
+
+        await sleep(
+          CARD_OPEN_DELAY_MS,
+        );
+      }
 
       setRevealState(
         'opening',
       );
 
       await sleep(
-        1250,
+        CARD_OPEN_ANIMATION_MS,
       );
 
       setRevealState(
