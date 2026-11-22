@@ -205,7 +205,7 @@ export default function HadiyadReveal({
       );
 
       await sleep(
-        2800,
+        4500,
       );
 
       setRevealState(

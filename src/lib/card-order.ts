@@ -105,6 +105,35 @@ function parsePhotoFrameSize(
   return 'large';
 }
 
+function createFallbackPhotoLayer():
+  EditorPhotoLayer {
+  return {
+    width:
+      1200,
+
+    height:
+      1200,
+
+    scale:
+      1,
+
+    x:
+      50,
+
+    y:
+      50,
+
+    rotation:
+      0,
+
+    frameSize:
+      'large',
+
+    requiresReselection:
+      false,
+  };
+}
+
 function parseStyle(
   value: unknown,
   fallback: EditorTextStyle,
@@ -272,7 +301,11 @@ function parseSide(
           styles[
             layer
           ],
-          legacyStyle,
+          fallback
+            .textStyles[
+            layer
+          ] ??
+            legacyStyle,
         );
 
       return result;
@@ -348,6 +381,9 @@ function parseSide(
           'Reselect the card photo before checkout',
         );
       }
+
+      photo =
+        createFallbackPhotoLayer();
     } else {
       photo = {
         width:
@@ -356,7 +392,7 @@ function parseSide(
               .width,
             1,
             12000,
-            768,
+            1200,
           ),
 
         height:
@@ -365,7 +401,7 @@ function parseSide(
               .height,
             1,
             12000,
-            768,
+            1200,
           ),
 
         scale:
@@ -416,16 +452,6 @@ function parseSide(
     hasSerializedPhoto &&
     !hasPhotoFile
   ) {
-    /*
-     * Checkout/order validation remains strict:
-     * serialized photo metadata without an actual
-     * uploaded photo is rejected.
-     *
-     * Share/reveal rendering can explicitly disable
-     * strict validation. In that situation stale
-     * photo metadata is ignored and the card renders
-     * without a photo.
-     */
     if (
       strictPhotoValidation
     ) {
@@ -440,6 +466,16 @@ function parseSide(
     !hasSerializedPhoto &&
     hasPhotoFile
   ) {
+    /*
+     * Legacy/bestaande bestellingen kunnen een
+     * daadwerkelijk opgeslagen fotobestand hebben
+     * zonder photo-metadata in customization.
+     *
+     * Tijdens checkout blijft deze situatie ongeldig.
+     * Tijdens share/reveal rendering gebruiken we
+     * veilige standaardwaarden zodat het opgeslagen
+     * fotobestand wel getoond kan worden.
+     */
     if (
       strictPhotoValidation
     ) {
@@ -449,7 +485,7 @@ function parseSide(
     }
 
     photo =
-      null;
+      createFallbackPhotoLayer();
   }
 
   return {
