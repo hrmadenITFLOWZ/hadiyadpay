@@ -2,10 +2,18 @@
 
 import Link from 'next/link';
 
+import {
+  cardOptions,
+} from '../data/cardOptions';
+
 import AnimatedCardShowcase from './AnimatedCardShowcase';
+import CardArtworkLayer from './CardArtworkLayer';
 import EditorialSections from './EditorialSections';
 import StorefrontHero from './StorefrontHero';
-import { useStorefrontLanguage } from './StorefrontShell';
+
+import {
+  useStorefrontLanguage,
+} from './StorefrontShell';
 
 const copy = {
   nl: {
@@ -258,6 +266,15 @@ const copy = {
   },
 };
 
+function getCardById(
+  id: string,
+) {
+  return cardOptions.find(
+    (card) =>
+      card.id === id,
+  );
+}
+
 export default function HomeStorefront() {
   const language =
     useStorefrontLanguage();
@@ -266,6 +283,30 @@ export default function HomeStorefront() {
     copy[
       language
     ];
+
+  const hennaCard =
+    getCardById(
+      'henna-celebration',
+    ) ??
+    getCardById(
+      'henna',
+    ) ??
+    cardOptions[0];
+
+  const weddingCard =
+    getCardById(
+      'wedding-celebration',
+    ) ??
+    getCardById(
+      'aroos',
+    ) ??
+    cardOptions[0];
+
+  const aroosCard =
+    getCardById(
+      'aroos',
+    ) ??
+    weddingCard;
 
   const occasions = [
     {
@@ -536,38 +577,61 @@ export default function HomeStorefront() {
           </div>
 
           <div
-            className="relative min-h-[330px]"
-            aria-hidden="true"
+            className="relative min-h-[350px] sm:min-h-[390px]"
+            aria-label={`${text.hennaWedding}, ${text.nikah}, ${text.walima}`}
           >
-            <div className="absolute left-[7%] top-[12%] h-[240px] w-[170px] rotate-[-6deg] rounded-[1.6rem] border border-white/15 bg-[#c58c70] shadow-2xl sm:h-[280px] sm:w-[195px]" />
+            <div
+              aria-hidden="true"
+              className="absolute left-[5%] top-[14%] z-10 aspect-[0.72] w-[39%] -rotate-[7deg] overflow-hidden rounded-[1.6rem] border border-white/20 bg-[#f3e3cf] shadow-[0_28px_55px_rgba(0,0,0,0.28)]"
+            >
+              <CardArtworkLayer
+                artwork={
+                  hennaCard.artwork
+                }
+                language={
+                  language
+                }
+              />
 
-            <div className="absolute right-[8%] top-0 h-[250px] w-[180px] rotate-[6deg] rounded-[1.6rem] border border-white/15 bg-[#ead9bc] shadow-2xl sm:h-[300px] sm:w-[210px]" />
-
-            <div className="absolute bottom-0 left-1/2 h-[245px] w-[175px] -translate-x-1/2 rounded-[1.6rem] border border-white/20 bg-[#9c594f] shadow-2xl sm:h-[290px] sm:w-[205px]">
-              <div className="flex h-full items-center justify-center px-6 text-center">
-                <div>
-                  <p className="text-[0.6rem] font-bold uppercase tracking-[0.24em] text-[#f0d8b4]">
-                    HADIYADPAY
-                  </p>
-
-                  <p className="mt-4 font-serif text-2xl leading-tight text-white">
-                    {
-                      text.wedding
-                    }
-                  </p>
-
-                  <p className="mt-3 text-xs leading-5 text-white/70">
-                    {
-                      text.hennaWedding
-                    } · {
-                      text.nikah
-                    } · {
-                      text.walima
-                    }
-                  </p>
-                </div>
-              </div>
+              <div className="pointer-events-none absolute inset-0 rounded-[1.6rem] ring-1 ring-inset ring-white/20" />
             </div>
+
+            <div
+              aria-hidden="true"
+              className="absolute right-[4%] top-[5%] z-20 aspect-[0.72] w-[39%] rotate-[7deg] overflow-hidden rounded-[1.6rem] border border-white/20 bg-[#f4e8d3] shadow-[0_28px_55px_rgba(0,0,0,0.28)]"
+            >
+              <CardArtworkLayer
+                artwork={
+                  aroosCard.artwork
+                }
+                language={
+                  language
+                }
+              />
+
+              <div className="pointer-events-none absolute inset-0 rounded-[1.6rem] ring-1 ring-inset ring-white/20" />
+            </div>
+
+            <div
+              aria-hidden="true"
+              className="absolute bottom-[1%] left-1/2 z-30 aspect-[0.72] w-[43%] -translate-x-1/2 overflow-hidden rounded-[1.7rem] border border-white/25 bg-[#fff8ed] shadow-[0_36px_70px_rgba(0,0,0,0.34)]"
+            >
+              <CardArtworkLayer
+                artwork={
+                  weddingCard.artwork
+                }
+                language={
+                  language
+                }
+              />
+
+              <div className="pointer-events-none absolute inset-0 rounded-[1.7rem] ring-1 ring-inset ring-white/25" />
+            </div>
+
+            <div
+              aria-hidden="true"
+              className="absolute bottom-[-1rem] left-1/2 z-0 h-16 w-[70%] -translate-x-1/2 rounded-full bg-black/20 blur-2xl"
+            />
           </div>
         </div>
       </section>
