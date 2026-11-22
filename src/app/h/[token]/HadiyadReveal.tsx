@@ -155,7 +155,7 @@ export default function HadiyadReveal({
     `${baseCardUrl}?side=inside`;
 
   const downloadUrl =
-    `${baseCardUrl}?side=inside&download=1`;
+  `${baseCardUrl}?side=complete&download=1`;
 
   const isClosed =
     revealState ===

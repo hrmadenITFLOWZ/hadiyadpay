@@ -30,6 +30,10 @@ import {
 } from '../../../../../lib/card-composition';
 
 import {
+  getCardProductionProfile,
+} from '../../../../../lib/card-production';
+
+import {
   getOrderForShareToken,
 } from '../../../../../lib/server/share-access';
 
@@ -39,7 +43,8 @@ export const runtime =
 type CardSide =
   | 'cover'
   | 'inside'
-  | 'inside-photo';
+  | 'inside-photo'
+  | 'complete';
 
 function getArtworkMimeType(
   source:
@@ -127,11 +132,47 @@ function getArtworkExtension(
 
 function createDataUrl(
   mimeType: string,
-  content: Buffer,
+  content:
+    Buffer | string,
 ): string {
-  return `data:${mimeType};base64,${content.toString(
+  const buffer =
+    typeof content ===
+      'string'
+      ? Buffer.from(
+          content,
+          'utf8',
+        )
+      : content;
+
+  return `data:${mimeType};base64,${buffer.toString(
     'base64',
   )}`;
+}
+
+function escapeXml(
+  value: string,
+): string {
+  return value
+    .replace(
+      /&/g,
+      '&amp;',
+    )
+    .replace(
+      /</g,
+      '&lt;',
+    )
+    .replace(
+      />/g,
+      '&gt;',
+    )
+    .replace(
+      /"/g,
+      '&quot;',
+    )
+    .replace(
+      /'/g,
+      '&apos;',
+    );
 }
 
 function getRequestedSide(
@@ -155,6 +196,13 @@ function getRequestedSide(
     'inside-photo'
   ) {
     return 'inside-photo';
+  }
+
+  if (
+    requestedSide ===
+    'complete'
+  ) {
+    return 'complete';
   }
 
   return 'inside';
@@ -194,6 +242,613 @@ function createSvgResponse(
       },
     },
   );
+}
+
+function getCardDimensions(
+  card:
+    (typeof cardOptions)[number],
+): {
+  width: number;
+  height: number;
+} {
+  const productionProfile =
+    getCardProductionProfile(
+      card.id,
+    );
+
+  return {
+    width:
+      productionProfile
+        ?.digital.width ??
+      1200,
+
+    height:
+      productionProfile
+        ?.digital.height ??
+      (
+        card.orientation ===
+          'portrait'
+          ? 1464
+          : 968
+      ),
+  };
+}
+
+function renderCompleteCardSvg({
+  cardTitle,
+  width,
+  height,
+  coverDataUrl,
+  insidePhotoDataUrl,
+  insideMessageDataUrl,
+}: {
+  cardTitle: string;
+  width: number;
+  height: number;
+  coverDataUrl: string;
+  insidePhotoDataUrl: string;
+  insideMessageDataUrl: string;
+}): string {
+  const outerPadding =
+    Math.max(
+      60,
+      Math.round(
+        width *
+          0.06,
+      ),
+    );
+
+  const panelGap =
+    Math.max(
+      36,
+      Math.round(
+        width *
+          0.035,
+      ),
+    );
+
+  const headingHeight =
+    Math.max(
+      150,
+      Math.round(
+        height *
+          0.12,
+      ),
+    );
+
+  const footerHeight =
+    Math.max(
+      95,
+      Math.round(
+        height *
+          0.075,
+      ),
+    );
+
+  const panelWidth =
+    width;
+
+  const panelHeight =
+    height;
+
+  const totalWidth =
+    outerPadding *
+      2 +
+    panelWidth *
+      3 +
+    panelGap *
+      2;
+
+  const totalHeight =
+    outerPadding *
+      2 +
+    headingHeight +
+    panelHeight +
+    footerHeight;
+
+  const panelY =
+    outerPadding +
+    headingHeight;
+
+  const coverX =
+    outerPadding;
+
+  const insidePhotoX =
+    coverX +
+    panelWidth +
+    panelGap;
+
+  const insideMessageX =
+    insidePhotoX +
+    panelWidth +
+    panelGap;
+
+  const headingY =
+    outerPadding +
+    headingHeight *
+      0.53;
+
+  const footerY =
+    panelY +
+    panelHeight +
+    footerHeight *
+      0.7;
+
+  const headingFontSize =
+    Math.max(
+      48,
+      Math.round(
+        width *
+          0.06,
+      ),
+    );
+
+  const labelFontSize =
+    Math.max(
+      25,
+      Math.round(
+        width *
+          0.024,
+      ),
+    );
+
+  const footerFontSize =
+    Math.max(
+      22,
+      Math.round(
+        width *
+          0.021,
+      ),
+    );
+
+  const panelRadius =
+    Math.max(
+      24,
+      Math.round(
+        width *
+          0.028,
+      ),
+    );
+
+  const safeTitle =
+    escapeXml(
+      cardTitle,
+    );
+
+  return [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+
+    '<svg',
+
+    ' xmlns="http://www.w3.org/2000/svg"',
+
+    ` width="${totalWidth}"`,
+
+    ` height="${totalHeight}"`,
+
+    ` viewBox="0 0 ${totalWidth} ${totalHeight}"`,
+
+    ' role="img"',
+
+    ' aria-labelledby="complete-card-title"',
+
+    '>',
+
+    '<title id="complete-card-title">',
+
+    safeTitle,
+
+    '</title>',
+
+    '<defs>',
+
+    '<filter',
+
+    ' id="complete-panel-shadow"',
+
+    ' x="-20%"',
+
+    ' y="-20%"',
+
+    ' width="140%"',
+
+    ' height="150%"',
+
+    '>',
+
+    '<feDropShadow',
+
+    ' dx="0"',
+
+    ' dy="22"',
+
+    ' stdDeviation="24"',
+
+    ' flood-color="#263e36"',
+
+    ' flood-opacity=".18"',
+
+    '/>',
+
+    '</filter>',
+
+    '<linearGradient',
+
+    ' id="complete-background"',
+
+    ' x1="0"',
+
+    ' y1="0"',
+
+    ' x2="1"',
+
+    ' y2="1"',
+
+    '>',
+
+    '<stop',
+
+    ' offset="0%"',
+
+    ' stop-color="#fffaf0"',
+
+    '/>',
+
+    '<stop',
+
+    ' offset="52%"',
+
+    ' stop-color="#f4eddf"',
+
+    '/>',
+
+    '<stop',
+
+    ' offset="100%"',
+
+    ' stop-color="#e6d8bd"',
+
+    '/>',
+
+    '</linearGradient>',
+
+    '<pattern',
+
+    ' id="complete-background-pattern"',
+
+    ' width="110"',
+
+    ' height="110"',
+
+    ' patternUnits="userSpaceOnUse"',
+
+    ' patternTransform="rotate(30)"',
+
+    '>',
+
+    '<path',
+
+    ' d="M0 55h110M55 0v110"',
+
+    ' stroke="#b88c55"',
+
+    ' stroke-opacity=".08"',
+
+    ' stroke-width="3"',
+
+    '/>',
+
+    '</pattern>',
+
+    '</defs>',
+
+    '<rect',
+
+    ` width="${totalWidth}"`,
+
+    ` height="${totalHeight}"`,
+
+    ' fill="url(#complete-background)"',
+
+    '/>',
+
+    '<rect',
+
+    ` width="${totalWidth}"`,
+
+    ` height="${totalHeight}"`,
+
+    ' fill="url(#complete-background-pattern)"',
+
+    '/>',
+
+    '<text',
+
+    ` x="${
+      totalWidth /
+      2
+    }"`,
+
+    ` y="${headingY}"`,
+
+    ' text-anchor="middle"',
+
+    ' dominant-baseline="middle"',
+
+    ' fill="#285347"',
+
+    ' font-family="Georgia, Times New Roman, serif"',
+
+    ` font-size="${headingFontSize}"`,
+
+    ' font-weight="400"',
+
+    '>',
+
+    safeTitle,
+
+    '</text>',
+
+    '<text',
+
+    ` x="${
+      coverX +
+      panelWidth /
+        2
+    }"`,
+
+    ` y="${
+      panelY -
+      labelFontSize
+    }"`,
+
+    ' text-anchor="middle"',
+
+    ' fill="#9a7441"',
+
+    ' font-family="Arial, Helvetica, sans-serif"',
+
+    ` font-size="${labelFontSize}"`,
+
+    ' font-weight="700"',
+
+    ' letter-spacing="4"',
+
+    '>',
+
+    'COVER',
+
+    '</text>',
+
+    '<text',
+
+    ` x="${
+      insidePhotoX +
+      panelWidth /
+        2
+    }"`,
+
+    ` y="${
+      panelY -
+      labelFontSize
+    }"`,
+
+    ' text-anchor="middle"',
+
+    ' fill="#9a7441"',
+
+    ' font-family="Arial, Helvetica, sans-serif"',
+
+    ` font-size="${labelFontSize}"`,
+
+    ' font-weight="700"',
+
+    ' letter-spacing="4"',
+
+    '>',
+
+    'INSIDE',
+
+    '</text>',
+
+    '<text',
+
+    ` x="${
+      insideMessageX +
+      panelWidth /
+        2
+    }"`,
+
+    ` y="${
+      panelY -
+      labelFontSize
+    }"`,
+
+    ' text-anchor="middle"',
+
+    ' fill="#9a7441"',
+
+    ' font-family="Arial, Helvetica, sans-serif"',
+
+    ` font-size="${labelFontSize}"`,
+
+    ' font-weight="700"',
+
+    ' letter-spacing="4"',
+
+    '>',
+
+    'MESSAGE',
+
+    '</text>',
+
+    '<g',
+
+    ' filter="url(#complete-panel-shadow)"',
+
+    '>',
+
+    '<rect',
+
+    ` x="${coverX}"`,
+
+    ` y="${panelY}"`,
+
+    ` width="${panelWidth}"`,
+
+    ` height="${panelHeight}"`,
+
+    ` rx="${panelRadius}"`,
+
+    ' fill="#fffdf8"',
+
+    ' stroke="#ffffff"',
+
+    ' stroke-width="14"',
+
+    '/>',
+
+    '<image',
+
+    ` href="${escapeXml(
+      coverDataUrl,
+    )}"`,
+
+    ` x="${coverX}"`,
+
+    ` y="${panelY}"`,
+
+    ` width="${panelWidth}"`,
+
+    ` height="${panelHeight}"`,
+
+    ' preserveAspectRatio="xMidYMid slice"',
+
+    '/>',
+
+    '</g>',
+
+    '<g',
+
+    ' filter="url(#complete-panel-shadow)"',
+
+    '>',
+
+    '<rect',
+
+    ` x="${insidePhotoX}"`,
+
+    ` y="${panelY}"`,
+
+    ` width="${panelWidth}"`,
+
+    ` height="${panelHeight}"`,
+
+    ` rx="${panelRadius}"`,
+
+    ' fill="#fffdf8"',
+
+    ' stroke="#ffffff"',
+
+    ' stroke-width="14"',
+
+    '/>',
+
+    '<image',
+
+    ` href="${escapeXml(
+      insidePhotoDataUrl,
+    )}"`,
+
+    ` x="${insidePhotoX}"`,
+
+    ` y="${panelY}"`,
+
+    ` width="${panelWidth}"`,
+
+    ` height="${panelHeight}"`,
+
+    ' preserveAspectRatio="xMidYMid meet"',
+
+    '/>',
+
+    '</g>',
+
+    '<g',
+
+    ' filter="url(#complete-panel-shadow)"',
+
+    '>',
+
+    '<rect',
+
+    ` x="${insideMessageX}"`,
+
+    ` y="${panelY}"`,
+
+    ` width="${panelWidth}"`,
+
+    ` height="${panelHeight}"`,
+
+    ` rx="${panelRadius}"`,
+
+    ' fill="#fffdf8"',
+
+    ' stroke="#ffffff"',
+
+    ' stroke-width="14"',
+
+    '/>',
+
+    '<image',
+
+    ` href="${escapeXml(
+      insideMessageDataUrl,
+    )}"`,
+
+    ` x="${insideMessageX}"`,
+
+    ` y="${panelY}"`,
+
+    ` width="${panelWidth}"`,
+
+    ` height="${panelHeight}"`,
+
+    ' preserveAspectRatio="xMidYMid meet"',
+
+    '/>',
+
+    '</g>',
+
+    '<text',
+
+    ` x="${
+      totalWidth /
+      2
+    }"`,
+
+    ` y="${footerY}"`,
+
+    ' text-anchor="middle"',
+
+    ' fill="#6f776f"',
+
+    ' font-family="Arial, Helvetica, sans-serif"',
+
+    ` font-size="${footerFontSize}"`,
+
+    ' font-weight="600"',
+
+    ' letter-spacing="2"',
+
+    '>',
+
+    'Created with HadiyadPay',
+
+    '</text>',
+
+    '</svg>',
+  ].join('');
 }
 
 export async function GET(
@@ -381,18 +1036,18 @@ export async function GET(
         artworkSource,
       );
 
+    const artworkDataUrl =
+      createDataUrl(
+        artworkMimeType,
+        artworkBuffer,
+      );
+
     const shouldDownload =
       request.nextUrl.searchParams.get(
         'download',
       ) ===
       '1';
 
-    /*
-     * COVER
-     *
-     * Return the actual selected/localized
-     * artwork directly.
-     */
     if (
       requestedSide ===
       'cover'
@@ -456,59 +1111,29 @@ export async function GET(
           )
         : undefined;
 
-    /*
-     * LEFT INSIDE PAGE
-     *
-     * This creates the separate left-hand
-     * inside page.
-     *
-     * If an inside photo exists, the
-     * renderInsidePhotoSvg function renders
-     * the saved photo using the saved editor
-     * state.
-     *
-     * If there is no photo, that function
-     * produces the HadiyadPay fallback.
-     */
+    const insidePhotoSvg =
+      renderInsidePhotoSvg(
+        card,
+        sharedOrder.language,
+        draft.inside,
+        insidePhotoDataUrl,
+      );
+
     if (
       requestedSide ===
       'inside-photo'
     ) {
-      const svg =
-        renderInsidePhotoSvg(
-          card,
-          sharedOrder.language,
-          draft.inside,
-          insidePhotoDataUrl,
-        );
-
       const filename =
         `${card.slug}-hadiyadpay-inside-photo.svg`;
 
       return createSvgResponse(
-        svg,
+        insidePhotoSvg,
         filename,
         shouldDownload,
       );
     }
 
-    /*
-     * RIGHT INSIDE PAGE
-     *
-     * Recipient + message + sender only.
-     *
-     * The photo is deliberately NOT passed
-     * to renderCardSvg here anymore because
-     * the photo belongs to the separate
-     * left-hand inside page.
-     */
-    const artworkDataUrl =
-      createDataUrl(
-        artworkMimeType,
-        artworkBuffer,
-      );
-
-    const svg =
+    const insideMessageSvg =
       renderCardSvg(
         card,
         sharedOrder.language,
@@ -518,11 +1143,62 @@ export async function GET(
         undefined,
       );
 
+    if (
+      requestedSide ===
+      'inside'
+    ) {
+      const filename =
+        `${card.slug}-hadiyadpay-inside.svg`;
+
+      return createSvgResponse(
+        insideMessageSvg,
+        filename,
+        shouldDownload,
+      );
+    }
+
+    const {
+      width,
+      height,
+    } =
+      getCardDimensions(
+        card,
+      );
+
+    const completeSvg =
+      renderCompleteCardSvg(
+        {
+          cardTitle:
+            card.title[
+              sharedOrder.language
+            ],
+
+          width,
+
+          height,
+
+          coverDataUrl:
+            artworkDataUrl,
+
+          insidePhotoDataUrl:
+            createDataUrl(
+              'image/svg+xml',
+              insidePhotoSvg,
+            ),
+
+          insideMessageDataUrl:
+            createDataUrl(
+              'image/svg+xml',
+              insideMessageSvg,
+            ),
+        },
+      );
+
     const filename =
-      `${card.slug}-hadiyadpay-kaart.svg`;
+      `${card.slug}-complete-hadiyadpay-card.svg`;
 
     return createSvgResponse(
-      svg,
+      completeSvg,
       filename,
       shouldDownload,
     );
