@@ -4,6 +4,7 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type KeyboardEvent,
   type SyntheticEvent,
 } from 'react';
 
@@ -40,6 +41,10 @@ const copy = {
       'Fur Hadiyaddayda',
     opening:
       'Hadiyaddaada ayaa furmaysa…',
+    tapToOpen:
+      'Taabo Hadiyaddaada si aad u furto',
+    tapHint:
+      'Fur oo arag fariinta laguu reebay',
     revealed:
       'Hadiyaddaada',
     moment:
@@ -65,6 +70,10 @@ const copy = {
       'Open my Hadiyad',
     opening:
       'Opening your Hadiyad…',
+    tapToOpen:
+      'Tap your Hadiyad to open',
+    tapHint:
+      'Open the card to reveal your personal message',
     revealed:
       'Your Hadiyad',
     moment:
@@ -90,6 +99,10 @@ const copy = {
       'Open mijn Hadiyad',
     opening:
       'Je Hadiyad wordt geopend…',
+    tapToOpen:
+      'Tik op je Hadiyad om te openen',
+    tapHint:
+      'Open de kaart en bekijk je persoonlijke boodschap',
     revealed:
       'Jouw Hadiyad',
     moment:
@@ -143,6 +156,12 @@ export default function HadiyadReveal({
 
   const hasStartedRef =
     useRef(false);
+
+  const isOpeningRef =
+    useRef(false);
+
+  const coverInteractiveAtRef =
+    useRef(0);
 
   const text =
     copy[language];
@@ -202,10 +221,8 @@ export default function HadiyadReveal({
       event.currentTarget;
 
     if (
-      image.naturalWidth <=
-        0 ||
-      image.naturalHeight <=
-        0
+      image.naturalWidth <= 0 ||
+      image.naturalHeight <= 0
     ) {
       return;
     }
@@ -216,8 +233,8 @@ export default function HadiyadReveal({
     );
   };
 
-  const handleOpen =
-    async () => {
+  const handleStartReveal =
+    () => {
       if (
         hasStartedRef.current
       ) {
@@ -226,6 +243,13 @@ export default function HadiyadReveal({
 
       hasStartedRef.current =
         true;
+
+      /*
+       * Prevent a delayed mobile click from the first
+       * button from immediately opening the cover.
+       */
+      coverInteractiveAtRef.current =
+        Date.now() + 900;
 
       setRevealState(
         'showing-cover',
@@ -243,10 +267,22 @@ export default function HadiyadReveal({
       ).catch(
         () => null,
       );
+    };
 
-      await sleep(
-        4500,
-      );
+  const handleOpenCard =
+    async () => {
+      if (
+        revealState !==
+          'showing-cover' ||
+        isOpeningRef.current ||
+        Date.now() <
+          coverInteractiveAtRef.current
+      ) {
+        return;
+      }
+
+      isOpeningRef.current =
+        true;
 
       setRevealState(
         'opening',
@@ -259,7 +295,33 @@ export default function HadiyadReveal({
       setRevealState(
         'open',
       );
+
+      isOpeningRef.current =
+        false;
     };
+
+  const handleCardKeyDown = (
+    event:
+      KeyboardEvent<HTMLDivElement>,
+  ) => {
+    if (
+      revealState !==
+      'showing-cover'
+    ) {
+      return;
+    }
+
+    if (
+      event.key ===
+        'Enter' ||
+      event.key ===
+        ' '
+    ) {
+      event.preventDefault();
+
+      void handleOpenCard();
+    }
+  };
 
   return (
     <main
@@ -296,18 +358,6 @@ export default function HadiyadReveal({
         className="hadiyad-pattern"
       />
 
-      <div
-        aria-hidden="true"
-        className="hadiyad-stars"
-      >
-        <span />
-        <span />
-        <span />
-        <span />
-        <span />
-        <span />
-      </div>
-
       <header className="hadiyad-brand">
         <div className="hadiyad-monogram">
           H
@@ -341,21 +391,12 @@ export default function HadiyadReveal({
 
             <button
               type="button"
-              onClick={() =>
-                void handleOpen()
+              onClick={
+                handleStartReveal
               }
               className="hadiyad-open-button"
             >
-              <span>
-                {text.openButton}
-              </span>
-
-              <span
-                aria-hidden="true"
-                className="hadiyad-button-star"
-              >
-                ✦
-              </span>
+              {text.openButton}
             </button>
           </div>
         )}
@@ -366,7 +407,9 @@ export default function HadiyadReveal({
               <p className="hadiyad-eyebrow">
                 {isOpen
                   ? text.revealed
-                  : text.opening}
+                  : isOpening
+                    ? text.opening
+                    : text.eyebrow}
               </p>
 
               <h1 className="hadiyad-card-title">
@@ -388,8 +431,37 @@ export default function HadiyadReveal({
               />
 
               <div
-                className="hadiyad-card-book"
+                className={`hadiyad-card-book ${
+                  isShowingCover
+                    ? 'is-interactive'
+                    : ''
+                }`}
                 style={cardBookStyle}
+                role={
+                  isShowingCover
+                    ? 'button'
+                    : undefined
+                }
+                tabIndex={
+                  isShowingCover
+                    ? 0
+                    : -1
+                }
+                aria-label={
+                  isShowingCover
+                    ? text.tapToOpen
+                    : undefined
+                }
+                onClick={() => {
+                  if (
+                    isShowingCover
+                  ) {
+                    void handleOpenCard();
+                  }
+                }}
+                onKeyDown={
+                  handleCardKeyDown
+                }
               >
                 <div className="hadiyad-inside-right">
                   <img
@@ -438,12 +510,32 @@ export default function HadiyadReveal({
                 />
               </div>
 
-              {!isOpen && (
+              {isShowingCover && (
+                <div className="hadiyad-tap-instruction">
+                  <span
+                    aria-hidden="true"
+                    className="hadiyad-instruction-line"
+                  />
+
+                  <p className="hadiyad-tap-title">
+                    {text.tapToOpen}
+                  </p>
+
+                  <p className="hadiyad-tap-hint">
+                    {text.tapHint}
+                  </p>
+                </div>
+              )}
+
+              {isOpening && (
                 <div
                   aria-live="polite"
                   className="hadiyad-opening-status"
                 >
-                  <span className="hadiyad-opening-dot" />
+                  <span
+                    aria-hidden="true"
+                    className="hadiyad-opening-dot"
+                  />
 
                   <span>
                     {text.opening}
@@ -462,13 +554,7 @@ export default function HadiyadReveal({
                   href={downloadUrl}
                   className="hadiyad-save-button"
                 >
-                  <span>
-                    {text.save}
-                  </span>
-
-                  <span aria-hidden="true">
-                    ↓
-                  </span>
+                  {text.save}
                 </a>
 
                 <p className="hadiyad-save-hint">
@@ -542,7 +628,8 @@ export default function HadiyadReveal({
           background: #e4c798;
         }
 
-        .has-card-started .hadiyad-ambient-left {
+        .has-card-started
+          .hadiyad-ambient-left {
           transform:
             translate3d(
               4rem,
@@ -552,7 +639,8 @@ export default function HadiyadReveal({
             scale(1.2);
         }
 
-        .has-card-started .hadiyad-ambient-right {
+        .has-card-started
+          .hadiyad-ambient-right {
           transform:
             translate3d(
               -4rem,
@@ -591,68 +679,6 @@ export default function HadiyadReveal({
               black,
               transparent 72%
             );
-        }
-
-        .hadiyad-stars span {
-          position: absolute;
-          display: block;
-          width: 7px;
-          height: 7px;
-          border-radius: 999px;
-          background: #b4823d;
-          box-shadow:
-            0 0 18px
-            rgba(180, 130, 61, 0.7);
-          animation:
-            hadiyad-float
-            4s ease-in-out
-            infinite;
-        }
-
-        .hadiyad-stars span:nth-child(1) {
-          left: 12%;
-          top: 19%;
-        }
-
-        .hadiyad-stars span:nth-child(2) {
-          right: 14%;
-          top: 24%;
-          animation-delay: 0.5s;
-        }
-
-        .hadiyad-stars span:nth-child(3) {
-          left: 20%;
-          bottom: 18%;
-          animation-delay: 1.1s;
-        }
-
-        .hadiyad-stars span:nth-child(4) {
-          right: 21%;
-          bottom: 23%;
-          animation-delay: 1.6s;
-        }
-
-        .hadiyad-stars span:nth-child(5) {
-          left: 8%;
-          top: 58%;
-          width: 4px;
-          height: 4px;
-          animation-delay: 2s;
-        }
-
-        .hadiyad-stars span:nth-child(6) {
-          right: 10%;
-          top: 56%;
-          width: 4px;
-          height: 4px;
-          animation-delay: 2.4s;
-        }
-
-        .is-opening .hadiyad-stars span {
-          animation:
-            hadiyad-burst
-            1250ms ease
-            forwards;
         }
 
         .hadiyad-brand {
@@ -783,7 +809,6 @@ export default function HadiyadReveal({
           margin-top: 2rem;
           align-items: center;
           justify-content: center;
-          gap: 0.8rem;
           border: 0;
           border-radius: 1.15rem;
           background:
@@ -817,18 +842,12 @@ export default function HadiyadReveal({
         }
 
         .hadiyad-open-button:focus-visible,
-        .hadiyad-save-button:focus-visible {
+        .hadiyad-save-button:focus-visible,
+        .hadiyad-card-book.is-interactive:
+          focus-visible {
           outline:
             3px solid #285347;
           outline-offset: 5px;
-        }
-
-        .hadiyad-button-star {
-          font-size: 1.1rem;
-          animation:
-            hadiyad-star-pulse
-            1.8s ease-in-out
-            infinite;
         }
 
         .hadiyad-result {
@@ -910,7 +929,7 @@ export default function HadiyadReveal({
           transform: scale(0.9);
           animation:
             card-glow
-            2.2s ease-in-out
+            2.8s ease-in-out
             infinite;
         }
 
@@ -936,6 +955,9 @@ export default function HadiyadReveal({
               1
             )
             both;
+          transition:
+            transform 220ms ease,
+            filter 220ms ease;
         }
 
         .is-showing-cover
@@ -954,6 +976,42 @@ export default function HadiyadReveal({
             );
         }
 
+        .hadiyad-card-book.is-interactive {
+          cursor: pointer;
+          animation:
+            card-book-arrive
+              850ms
+              cubic-bezier(
+                0.16,
+                1,
+                0.3,
+                1
+              )
+              both,
+            card-breathe
+              3.6s
+              1.2s
+              ease-in-out
+              infinite;
+        }
+
+        .hadiyad-card-book.is-interactive:hover {
+          transform:
+            translateY(-4px)
+            scale(1.008);
+          filter:
+            drop-shadow(
+              0 42px 62px
+              rgba(38, 62, 54, 0.3)
+            );
+        }
+
+        .hadiyad-card-book.is-interactive:active {
+          transform:
+            translateY(-1px)
+            scale(0.995);
+        }
+
         .is-showing-cover
           .hadiyad-inside-right {
           position: absolute;
@@ -969,6 +1027,8 @@ export default function HadiyadReveal({
           width: 50%;
           margin-left: 50%;
           aspect-ratio: auto;
+          cursor: default;
+          animation: none;
         }
 
         .hadiyad-inside-right {
@@ -1013,16 +1073,9 @@ export default function HadiyadReveal({
               0,
               0.22,
               1
-            ),
-            filter 1200ms ease;
+            );
           will-change:
             transform;
-        }
-
-        .is-showing-cover
-          .hadiyad-cover-panel {
-          transform:
-            rotateY(0deg);
         }
 
         .is-opening
@@ -1139,6 +1192,57 @@ export default function HadiyadReveal({
           opacity: 1;
         }
 
+        .hadiyad-tap-instruction {
+          width:
+            min(
+              100%,
+              28rem
+            );
+          margin:
+            1.35rem auto 0;
+          text-align: center;
+          animation:
+            instruction-arrive
+            600ms 300ms
+            ease both;
+        }
+
+        .hadiyad-instruction-line {
+          display: block;
+          width: 2.5rem;
+          height: 1px;
+          margin:
+            0 auto 0.85rem;
+          background:
+            linear-gradient(
+              90deg,
+              transparent,
+              #b4823d,
+              transparent
+            );
+        }
+
+        .hadiyad-tap-title {
+          margin: 0;
+          color: #8e6b3d;
+          font-size: 0.68rem;
+          font-weight: 900;
+          letter-spacing: 0.18em;
+          line-height: 1.5;
+          text-transform: uppercase;
+        }
+
+        .hadiyad-tap-hint {
+          margin:
+            0.5rem 0 0;
+          color: #69756f;
+          font-family:
+            Georgia,
+            serif;
+          font-size: 0.92rem;
+          line-height: 1.5;
+        }
+
         .hadiyad-opening-status {
           display: flex;
           min-height: 2rem;
@@ -1153,8 +1257,8 @@ export default function HadiyadReveal({
         }
 
         .hadiyad-opening-dot {
-          width: 0.55rem;
-          height: 0.55rem;
+          width: 0.5rem;
+          height: 0.5rem;
           border-radius: 999px;
           background: #b4823d;
           box-shadow:
@@ -1197,7 +1301,6 @@ export default function HadiyadReveal({
           min-height: 3.6rem;
           align-items: center;
           justify-content: center;
-          gap: 0.75rem;
           border-radius: 1.15rem;
           background:
             linear-gradient(
@@ -1301,6 +1404,35 @@ export default function HadiyadReveal({
           }
         }
 
+        @keyframes card-breathe {
+          0%,
+          100% {
+            transform:
+              translateY(0)
+              scale(1);
+          }
+
+          50% {
+            transform:
+              translateY(-3px)
+              scale(1.004);
+          }
+        }
+
+        @keyframes instruction-arrive {
+          from {
+            opacity: 0;
+            transform:
+              translateY(8px);
+          }
+
+          to {
+            opacity: 1;
+            transform:
+              translateY(0);
+          }
+        }
+
         @keyframes cover-shine {
           from {
             transform:
@@ -1339,53 +1471,6 @@ export default function HadiyadReveal({
             box-shadow:
               0 0 0 12px
               rgba(180, 130, 61, 0);
-          }
-        }
-
-        @keyframes hadiyad-float {
-          0%,
-          100% {
-            transform:
-              translateY(0)
-              scale(1);
-            opacity: 0.4;
-          }
-
-          50% {
-            transform:
-              translateY(-10px)
-              scale(1.35);
-            opacity: 0.9;
-          }
-        }
-
-        @keyframes hadiyad-burst {
-          0% {
-            transform:
-              scale(1);
-            opacity: 0.8;
-          }
-
-          100% {
-            transform:
-              translateY(-45px)
-              scale(2.6);
-            opacity: 0;
-          }
-        }
-
-        @keyframes hadiyad-star-pulse {
-          0%,
-          100% {
-            transform:
-              scale(0.9);
-            opacity: 0.65;
-          }
-
-          50% {
-            transform:
-              scale(1.25);
-            opacity: 1;
           }
         }
 
@@ -1482,6 +1567,20 @@ export default function HadiyadReveal({
           .hadiyad-inside-photo-image,
           .hadiyad-inside-photo-finish {
             border-radius: 0.9rem;
+          }
+
+          .hadiyad-tap-instruction {
+            padding:
+              0 0.75rem;
+          }
+
+          .hadiyad-tap-title {
+            font-size: 0.62rem;
+            letter-spacing: 0.14em;
+          }
+
+          .hadiyad-tap-hint {
+            font-size: 0.84rem;
           }
 
           .hadiyad-actions {
