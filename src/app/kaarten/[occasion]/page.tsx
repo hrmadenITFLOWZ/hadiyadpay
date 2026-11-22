@@ -13,6 +13,7 @@ import {
 import CardCatalog from '../../components/CardCatalog';
 import JsonLd from '../../components/JsonLd';
 import StorefrontShell from '../../components/StorefrontShell';
+import WeddingHennaSpotlight from '../../components/WeddingHennaSpotlight';
 
 import {
   getCardsByOccasion,
@@ -287,6 +288,16 @@ export default async function OccasionPage({
             )
           }
         />
+
+        {isCombinedCollection && (
+          <div className="mx-auto w-full max-w-7xl px-5 pb-12 pt-8 sm:px-8 sm:pb-16 sm:pt-10 lg:px-12 lg:pb-20">
+            <WeddingHennaSpotlight
+              showAllCardsButton={
+                false
+              }
+            />
+          </div>
+        )}
 
         <CardCatalog
           defaultOccasion={
