@@ -1,10 +1,23 @@
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { Suspense } from 'react';
+import type {
+  Metadata,
+} from 'next';
+
+import {
+  notFound,
+} from 'next/navigation';
+
+import {
+  Suspense,
+} from 'react';
+
 import CardCatalog from '../../components/CardCatalog';
 import JsonLd from '../../components/JsonLd';
 import StorefrontShell from '../../components/StorefrontShell';
-import { getCardsByOccasion } from '../../../lib/catalog';
+
+import {
+  getCardsByOccasion,
+} from '../../../lib/catalog';
+
 import {
   cardOccasions,
   getOccasionFromRouteSlug,
@@ -12,64 +25,296 @@ import {
   occasionLabels,
   type CardOccasion,
 } from '../../../lib/card-types';
-import { absoluteSiteUrl, toBreadcrumbListJsonLd, toItemListJsonLd } from '../../../lib/seo';
+
+import {
+  absoluteSiteUrl,
+  toBreadcrumbListJsonLd,
+  toItemListJsonLd,
+} from '../../../lib/seo';
 
 interface OccasionPageProps {
-  params: Promise<{ occasion: string }>;
+  params: Promise<{
+    occasion: string;
+  }>;
 }
 
-export const dynamicParams = false;
+export const dynamicParams =
+  false;
 
 export function generateStaticParams() {
-  return cardOccasions.map((occasion) => ({ occasion: getOccasionRouteSlug(occasion) }));
+  return cardOccasions.map(
+    (
+      occasion,
+    ) => ({
+      occasion:
+        getOccasionRouteSlug(
+          occasion,
+        ),
+    }),
+  );
 }
 
-function getOccasionOrNotFound(slug: string): CardOccasion {
-  const occasion = getOccasionFromRouteSlug(slug);
-  if (!occasion) notFound();
+function getOccasionOrNotFound(
+  slug: string,
+): CardOccasion {
+  const occasion =
+    getOccasionFromRouteSlug(
+      slug,
+    );
+
+  if (!occasion) {
+    notFound();
+  }
+
   return occasion;
 }
 
-export async function generateMetadata({ params }: OccasionPageProps): Promise<Metadata> {
-  const { occasion: slug } = await params;
-  const occasion = getOccasionOrNotFound(slug);
-  const canonicalPath = `/kaarten/${getOccasionRouteSlug(occasion)}`;
+function isWeddingHennaCollection(
+  occasion:
+    CardOccasion,
+): boolean {
+  return (
+    occasion ===
+    'wedding'
+  );
+}
 
-  const title = `${occasionLabels[occasion].nl} kaarten`;
-  const description = `Bekijk digitale kaarten voor ${occasionLabels[occasion].nl.toLocaleLowerCase()}.`;
+function getCollectionCards(
+  occasion:
+    CardOccasion,
+) {
+  if (
+    isWeddingHennaCollection(
+      occasion,
+    )
+  ) {
+    const weddingCards =
+      getCardsByOccasion(
+        'wedding',
+      );
+
+    const hennaCards =
+      getCardsByOccasion(
+        'henna',
+      );
+
+    return [
+      ...weddingCards,
+      ...hennaCards,
+    ];
+  }
+
+  return getCardsByOccasion(
+    occasion,
+  );
+}
+
+function getCollectionName(
+  occasion:
+    CardOccasion,
+): string {
+  if (
+    isWeddingHennaCollection(
+      occasion,
+    )
+  ) {
+    return 'Wedding & Henna';
+  }
+
+  return occasionLabels[
+    occasion
+  ].nl;
+}
+
+export async function generateMetadata({
+  params,
+}: OccasionPageProps): Promise<Metadata> {
+  const {
+    occasion:
+      slug,
+  } =
+    await params;
+
+  const occasion =
+    getOccasionOrNotFound(
+      slug,
+    );
+
+  const canonicalPath =
+    `/kaarten/${
+      getOccasionRouteSlug(
+        occasion,
+      )
+    }`;
+
+  const isCombinedCollection =
+    isWeddingHennaCollection(
+      occasion,
+    );
+
+  const title =
+    isCombinedCollection
+      ? 'Wedding & Henna kaarten'
+      : `${
+          occasionLabels[
+            occasion
+          ].nl
+        } kaarten`;
+
+  const description =
+    isCombinedCollection
+      ? 'Bekijk digitale kaarten voor Henna, Nikah, bruiloften, trouwfeesten en persoonlijke felicitaties.'
+      : `Bekijk digitale kaarten voor ${
+          occasionLabels[
+            occasion
+          ].nl.toLocaleLowerCase()
+        }.`;
 
   return {
     title,
+
     description,
-    alternates: { canonical: canonicalPath },
+
+    alternates: {
+      canonical:
+        canonicalPath,
+    },
+
     openGraph: {
-      title: `${title} | HadiyadPay`,
+      title:
+        `${title} | HadiyadPay`,
+
       description,
-      url: canonicalPath,
-      images: ['/images/logo.jpg'],
-      type: 'website',
+
+      url:
+        canonicalPath,
+
+      images: [
+        '/images/logo.jpg',
+      ],
+
+      type:
+        'website',
     },
   };
 }
 
-export default async function OccasionPage({ params }: OccasionPageProps) {
-  const { occasion: slug } = await params;
-  const occasion = getOccasionOrNotFound(slug);
-  const canonicalPath = `/kaarten/${getOccasionRouteSlug(occasion)}`;
+export default async function OccasionPage({
+  params,
+}: OccasionPageProps) {
+  const {
+    occasion:
+      slug,
+  } =
+    await params;
 
-  const cards = getCardsByOccasion(occasion);
-  const occasionName = occasionLabels[occasion].nl;
+  const occasion =
+    getOccasionOrNotFound(
+      slug,
+    );
+
+  const canonicalPath =
+    `/kaarten/${
+      getOccasionRouteSlug(
+        occasion,
+      )
+    }`;
+
+  const cards =
+    getCollectionCards(
+      occasion,
+    );
+
+  const occasionName =
+    getCollectionName(
+      occasion,
+    );
+
+  const isCombinedCollection =
+    isWeddingHennaCollection(
+      occasion,
+    );
 
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-background" />
+      }
+    >
       <StorefrontShell>
-        <JsonLd data={toBreadcrumbListJsonLd([
-          { name: 'HadiyadPay', url: absoluteSiteUrl('/') },
-          { name: 'Kaarten', url: absoluteSiteUrl('/kaarten') },
-          { name: occasionName, url: absoluteSiteUrl(canonicalPath) },
-        ])} />
-        <JsonLd data={toItemListJsonLd(cards)} />
-        <CardCatalog defaultOccasion={occasion} />
+        <JsonLd
+          data={
+            toBreadcrumbListJsonLd(
+              [
+                {
+                  name:
+                    'HadiyadPay',
+
+                  url:
+                    absoluteSiteUrl(
+                      '/',
+                    ),
+                },
+
+                {
+                  name:
+                    'Kaarten',
+
+                  url:
+                    absoluteSiteUrl(
+                      '/kaarten',
+                    ),
+                },
+
+                {
+                  name:
+                    occasionName,
+
+                  url:
+                    absoluteSiteUrl(
+                      canonicalPath,
+                    ),
+                },
+              ],
+            )
+          }
+        />
+
+        <JsonLd
+          data={
+            toItemListJsonLd(
+              cards,
+            )
+          }
+        />
+
+        <CardCatalog
+          defaultOccasion={
+            occasion
+          }
+          includedOccasions={
+            isCombinedCollection
+              ? [
+                  'wedding',
+                  'henna',
+                ]
+              : undefined
+          }
+          collectionTitle={
+            isCombinedCollection
+              ? {
+                  nl:
+                    'Wedding & Henna kaarten',
+
+                  en:
+                    'Wedding & Henna cards',
+
+                  so:
+                    'Kaararka Aroos & Henna',
+                }
+              : undefined
+          }
+        />
       </StorefrontShell>
     </Suspense>
   );

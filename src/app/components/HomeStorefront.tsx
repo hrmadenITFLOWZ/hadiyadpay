@@ -27,10 +27,10 @@ const copy = {
       'Begin bij het moment. Ontdek daarna een kaart die past bij de persoon, stijl en boodschap.',
 
     wedding:
-      'Bruiloft',
+      'Wedding & Henna',
 
     weddingCardDescription:
-      'Aroos, Nikah en felicitaties',
+      'Van Henna en Nikah tot trouwfeest en felicitatie',
 
     birthday:
       'Verjaardag',
@@ -63,13 +63,13 @@ const copy = {
       'Voor momenten die geen speciale reden nodig hebben',
 
     weddingEyebrow:
-      'BRUILOFT IN DE SPOTLIGHT',
+      'WEDDING & HENNA IN DE SPOTLIGHT',
 
     weddingTitle:
-      'Voor meer dan alleen de trouwdag.',
+      'Voor ieder bijzonder moment van de trouwreis.',
 
     weddingSpotlightDescription:
-      'Een bruiloft bestaat uit meerdere bijzondere momenten. HadiyadPay bouwt daarom een collectie voor de hele reis, van de eerste aankondiging tot een persoonlijke felicitatie.',
+      'Van de eerste aankondiging en de henna-avond tot Nikah, het trouwfeest en een persoonlijke felicitatie. Ontdek kaarten voor de volledige reis.',
 
     saveTheDate:
       'Save the Date',
@@ -90,7 +90,7 @@ const copy = {
       'Felicitatie',
 
     weddingCta:
-      'Ontdek bruiloftskaarten',
+      'Ontdek Wedding & Henna',
 
     allCards:
       'Bekijk alle kaarten',
@@ -110,10 +110,10 @@ const copy = {
       'Start with the moment. Then discover a card that fits the person, style and message.',
 
     wedding:
-      'Wedding',
+      'Wedding & Henna',
 
     weddingCardDescription:
-      'Wedding, Nikah and congratulations',
+      'From Henna and Nikah to Walima and congratulations',
 
     birthday:
       'Birthday',
@@ -146,13 +146,13 @@ const copy = {
       'For the moments that need no occasion',
 
     weddingEyebrow:
-      'WEDDING SPOTLIGHT',
+      'WEDDING & HENNA SPOTLIGHT',
 
     weddingTitle:
-      'For more than just the wedding day.',
+      'For every meaningful moment of the wedding journey.',
 
     weddingSpotlightDescription:
-      'A wedding journey contains many meaningful moments. HadiyadPay is building a collection for the whole journey, from the first announcement to a personal congratulation.',
+      'From the first announcement and henna night to Nikah, Walima and a personal congratulation. Discover cards for the full journey.',
 
     saveTheDate:
       'Save the Date',
@@ -173,7 +173,7 @@ const copy = {
       'Congratulations',
 
     weddingCta:
-      'Explore wedding cards',
+      'Explore Wedding & Henna',
 
     allCards:
       'View all cards',
@@ -193,10 +193,10 @@ const copy = {
       'Ka bilow munaasabadda, dabadeed dooro kaar ku habboon qofka, qaabka iyo fariinta.',
 
     wedding:
-      'Aroos',
+      'Aroos & Henna',
 
     weddingCardDescription:
-      'Aroos, Nikah iyo hambalyo',
+      'Laga bilaabo Henna iyo Nikah ilaa Walima iyo hambalyo',
 
     birthday:
       'Dhalasho',
@@ -229,13 +229,13 @@ const copy = {
       'Waqtiyada aan munaasabad gaar ah u baahnayn',
 
     weddingEyebrow:
-      'AROOSKA',
+      'AROOS & HENNA',
 
     weddingTitle:
-      'Wax ka badan maalinta arooska.',
+      'Waqti kasta oo gaar ah oo ka mid ah safarka arooska.',
 
     weddingSpotlightDescription:
-      'Safarka aroosku wuxuu leeyahay waqtiyo badan oo gaar ah. HadiyadPay waxay dhisaysaa ururin kaarar ah oo la socda safarka oo dhan.',
+      'Laga bilaabo ogeysiiska iyo habeenka Henna ilaa Nikah, Walima iyo hambalyo gaar ah. Soo hel kaarar la socda safarka oo dhan.',
 
     saveTheDate:
       'Save the Date',
@@ -256,7 +256,7 @@ const copy = {
       'Hambalyo',
 
     weddingCta:
-      'Eeg kaararka arooska',
+      'Eeg kaararka Aroos & Henna',
 
     allCards:
       'Eeg dhammaan kaararka',
@@ -338,23 +338,6 @@ export default function HomeStorefront() {
 
       symbol:
         '✦',
-
-      featured:
-        false,
-    },
-
-    {
-      label:
-        text.henna,
-
-      description:
-        text.hennaDescription,
-
-      href:
-        `/kaarten/hennafeest?lang=${language}`,
-
-      symbol:
-        '◌',
 
       featured:
         false,
@@ -591,6 +574,9 @@ export default function HomeStorefront() {
                 language={
                   language
                 }
+                overlay={
+                  false
+                }
               />
 
               <div className="pointer-events-none absolute inset-0 rounded-[1.6rem] ring-1 ring-inset ring-white/20" />
@@ -607,6 +593,9 @@ export default function HomeStorefront() {
                 language={
                   language
                 }
+                overlay={
+                  false
+                }
               />
 
               <div className="pointer-events-none absolute inset-0 rounded-[1.6rem] ring-1 ring-inset ring-white/20" />
@@ -622,6 +611,9 @@ export default function HomeStorefront() {
                 }
                 language={
                   language
+                }
+                overlay={
+                  false
                 }
               />
 
