@@ -1,6 +1,6 @@
 import {
-  editorColorOptions,
   createEditorRuntimeState,
+  editorColorOptions,
   MAX_STICKERS_PER_SIDE,
   PHOTO_SCALE_MAX,
   PHOTO_SCALE_MIN,
@@ -401,7 +401,7 @@ function parseStickers(
    * stickers. Een ontbrekend veld wordt
    * daarom veilig als lege array behandeld.
    */
-    if (
+  if (
     value ===
       undefined ||
     value ===
@@ -409,29 +409,31 @@ function parseStickers(
   ) {
     return [];
   }
-  
+
   if (
-   *!Array.isArray(
+    !Array.isArray(
       value,
-    )*  ) {
-    throw new Error(
-      '*nvalid card stickers',
-    );
-  }
-*  if (
-    value.length >
-    MAX_*TICKERS_PER_SIDE
+    )
   ) {
-    throw n*w Error(
-      `A maximum of ${MAX*STICKERS_PER_SIDE} stickers is all*wed per card side`,
+    throw new Error(
+      'Invalid card stickers',
     );
   }
 
-  *onst stickers:
-    EditorSticker[]*= [];
+  if (
+    value.length >
+    MAX_STICKERS_PER_SIDE
+  ) {
+    throw new Error(
+      `A maximum of ${MAX_STICKERS_PER_SIDE} stickers is allowed per card side`,
+    );
+  }
+
+  const stickers:
+    EditorSticker[] = [];
 
   const usedIds =
-    new S*t<string>();
+    new Set<string>();
 
   for (
     const rawSticker of
@@ -473,90 +475,88 @@ function parseStickers(
 
   /*
    * Houd de z-volgorde stabiel en compact.
-   *
-   * De opgeslagen volgorde wordt eerst op
-   * zIndex gesorteerd en daarna opnieuw
-   * genummerd vanaf 1.
    */
   return stickers
     .sort(
-   *  (
+      (
         first,
-        second,*      ) =>
+        second,
+      ) =>
         first.zIndex -
-*       second.zIndex,
+        second.zIndex,
     )
-    .m*p(
+    .map(
       (
         sticker,
-      * index,
+        index,
       ) => ({
-        ...s*icker,
+        ...sticker,
 
         zIndex:
-          *ndex +
+          index +
           1,
       }),
-    *;
+    );
 }
 
 function parseSide(
-  value: *nknown,
-  fallback: EditorSideStat*,
+  value: unknown,
+  fallback: EditorSideState,
   hasPhotoFile: boolean,
-  stric*PhotoValidation: boolean,
-): Edito*SideState {
+  strictPhotoValidation: boolean,
+): EditorSideState {
   if (
     !isRecord(
-*     value,
+      value,
     )
   ) {
-    throw *ew Error(
-      'Invalid card side*,
+    throw new Error(
+      'Invalid card side',
     );
   }
 
   const recipient =
-*   value.recipient;
+    value.recipient;
 
-  const sende* =
+  const sender =
     value.sender;
 
-  const mess*ge =
+  const message =
     value.message;
 
   if (
-  * typeof recipient !==
-      'strin*' ||
+    typeof recipient !==
+      'string' ||
     recipient.length >
-      *0 ||
+      80 ||
     typeof sender !==
-      '*tring' ||
+      'string' ||
     sender.length >
-    * 80 ||
+      80 ||
     typeof message !==
-    * 'string' ||
+      'string' ||
     message.length >
-*     800
+      800
   ) {
-    throw new Error*
+    throw new Error(
       'Invalid card text',
-    );*  }
+    );
+  }
 
   const styles =
-    isRecord*
+    isRecord(
       value.textStyles,
     )
-   *  ? value.textStyles
+      ? value.textStyles
       : {};
 
-* const legacyStyle =
-    parseStyl*(
+  const legacyStyle =
+    parseStyle(
       value.textStyle,
-      fal*back.textStyle,
+      fallback.textStyle,
     );
 
-  const te*tStyles = (
+  const textStyles = (
     [
       'recipient',
       'sender',
@@ -564,14 +564,14 @@ function parseSide(
     ] as const
   ).reduce(
     (
- *    result,
+      result,
       layer,
-    ) => *
+    ) => {
       result[
         layer
       ] =
         parseStyle(
-          *tyles[
+          styles[
             layer
           ],
 
@@ -746,12 +746,8 @@ function parseSide(
   ) {
     /*
      * Bestaande bestellingen kunnen een
-     * werkelijk opgeslagen fotobestand
-     * hebben zonder fotometadata.
-     *
-     * Tijdens checkout blijft dit ongeldig.
-     * Tijdens share- en downloadrendering
-     * gebruiken we veilige standaardwaarden.
+     * opgeslagen fotobestand hebben zonder
+     * photo-metadata in customization.
      */
     if (
       strictPhotoValidation
@@ -880,7 +876,10 @@ export function serializeEditorDraft(
       side.textPositions,
 
     stickers:
-      side.stickers
+      (
+        side.stickers ??
+        []
+      )
         .slice(
           0,
           MAX_STICKERS_PER_SIDE,
@@ -969,7 +968,7 @@ export function parseOrderDraft(
 
     /*
      * Opgeslagen bestellingen worden altijd
-     * schoon weergegeven, zonder editorguides.
+     * schoon weergegeven zonder editorguides.
      */
     previewMode:
       'clean',
