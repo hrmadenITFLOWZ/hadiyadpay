@@ -432,18 +432,6 @@ export default function CardBuilder({
       activeTextLayer
     ];
 
-  const selectedSticker =
-    selectedStickerId
-      ? activeSideData.stickers.find(
-          (
-            sticker,
-          ) =>
-            sticker.id ===
-            selectedStickerId,
-        ) ??
-        null
-      : null;
-
   const commitAction = (
     action: EditorAction,
   ) => {
@@ -459,40 +447,40 @@ export default function CardBuilder({
   const text = {
     so: {
       close:
-        'Xir tifaftiraha',
+        'Xir personalisation-ka',
 
       invalidImage:
         'Dooro sawir JPEG, PNG ama WebP oo aan ka weynayn 8 MB.',
 
       imageError:
-        'Sawirka lama akhrin karin.',
+        'Sawirkan lama furi karin.',
 
       undo:
-        'Dib u celin',
+        'Dib u noqo',
 
       redo:
         'Mar kale samee',
 
       resetCard:
-        'Dib u celi kaarka oo dhan',
+        'Dib uga bilow Hadiyaddan',
 
       resetSide:
-        'Dib u celi gudaha',
+        'Gudaha dib u hagaaji',
 
       resetConfirm:
-        'Ma hubtaa inaad dib u habeyneysid kaarka oo dhan?',
+        'Ma hubtaa inaad Hadiyaddan dib uga bilaabayso?',
 
       editing:
-        'Wax ka beddel',
+        'Shakhsiyee',
 
       preview:
-        'Tusaale',
+        'Eeg natiijada',
 
       full:
-        'Buuxa',
+        'Muuqaal buuxa',
 
       photoSize:
-        'Cabbirka sawirka',
+        'Qaabka',
 
       small:
         'Yar',
@@ -504,72 +492,72 @@ export default function CardBuilder({
         'Weyn',
 
       resetTransform:
-        'Dib u celi sawirka',
+        'Sawirka soo celi',
 
       reselectPhoto:
-        'Sawirka hore waa in dib loo doorataa.',
+        'Fadlan sawirkaaga mar kale dooro.',
 
       adjustPhoto:
-        'Hagaaji sawirka',
+        'Sawirkaaga',
 
       remove:
         'Ka saar',
 
       changePhoto:
-        'Sawir kale dooro',
+        'Dooro sawir kale',
 
       dragPhoto:
-        'Sawirka ku jiid bogga bidix si aad u doorato qaybta muuqata.',
+        'Sawirka ku jiid kaarka si aad u muujiso qaybta ugu quruxda badan.',
 
       closedPreview:
-        'Kaarkaaga',
-
-      openPreview:
         'Hadiyaddaada',
 
+      openPreview:
+        'Gudaha Hadiyaddaada',
+
       closedTitle:
-        'Ka dhig mid adiga kuu gaar ah',
+        'Ka dhig Hadiyaddan mid adiga kuu gaar ah',
 
       openTitle:
-        'Ka dhig mid gaar ah',
+        'Samee Hadiyad xusuus reebta',
 
       closedDescription:
-        'Fur kaarka oo fariintaada gaarka ah ku qor gudaha.',
+        'Fur Hadiyadda oo ku dar fariintaada, sawirkaaga iyo taabashadaada gaarka ah.',
 
       openDescription:
-        'Ku qor fariin gaar ah oo gudaha Hadiyadda ka muuqan doonta.',
+        'Ku dar ereyo, sawir iyo faahfaahin si gaar ah loogu sameeyey qofka helaya.',
 
       openCard:
-        'Fur kaarka',
+        'Bilow shakhsiyeeynta',
 
       giftSection:
-        'Ka dhig mid sii gaar ah',
+        'Ka dhig mid ka sii gaar ah',
 
       giftTitle:
         'Ku dar hadiyad',
 
       giftDescription:
-        'Mustaqbalka Hadiyadda ku dar daabacaad, jir ama hadiyad gaar ah.',
+        'Dhawaan waxaad Hadiyadda ku dari kartaa daabacaad, jir ama xusuus gaar ah.',
 
       comingSoon:
         'Dhawaan',
 
       moreOptions:
-        'Ikhtiyaarro kale',
+        'Wax badan ka beddel',
 
       continue:
-        'Sii wad',
+        'Eeg Hadiyaddayda',
     },
 
     en: {
       close:
-        'Close card editor',
+        'Close personalisation',
 
       invalidImage:
-        'Choose a JPEG, PNG, or WebP image no larger than 8 MB.',
+        'Choose a JPEG, PNG or WebP image no larger than 8 MB.',
 
       imageError:
-        'The image could not be read.',
+        'We could not open this image.',
 
       undo:
         'Undo',
@@ -578,25 +566,25 @@ export default function CardBuilder({
         'Redo',
 
       resetCard:
-        'Reset full card',
+        'Start this Hadiyad again',
 
       resetSide:
-        'Reset inside',
+        'Restore the inside',
 
       resetConfirm:
-        'Are you sure you want to reset the full card?',
+        'Are you sure you want to start this Hadiyad again?',
 
       editing:
-        'Editing',
+        'Personalise',
 
       preview:
-        'Preview',
+        'See the result',
 
       full:
-        'Full',
+        'Full view',
 
       photoSize:
-        'Photo size',
+        'Format',
 
       small:
         'Small',
@@ -608,13 +596,13 @@ export default function CardBuilder({
         'Large',
 
       resetTransform:
-        'Reset photo',
+        'Restore photo',
 
       reselectPhoto:
-        'The previous photo needs to be selected again.',
+        'Please choose your photo again.',
 
       adjustPhoto:
-        'Adjust photo',
+        'Your photo',
 
       remove:
         'Remove',
@@ -623,57 +611,57 @@ export default function CardBuilder({
         'Choose another photo',
 
       dragPhoto:
-        'Drag the photo on the left page to choose which part of the image is visible.',
+        'Drag your photo across the card to show its best part.',
 
       closedPreview:
-        'Your card',
-
-      openPreview:
         'Your Hadiyad',
 
+      openPreview:
+        'Inside your Hadiyad',
+
       closedTitle:
-        'Make it yours',
+        'Make this Hadiyad truly yours',
 
       openTitle:
-        'Make it personal',
+        'Create a Hadiyad they will remember',
 
       closedDescription:
-        'Open the card and add your personal message inside.',
+        'Open your Hadiyad and add your words, photo and personal finishing touches.',
 
       openDescription:
-        'Write something meaningful for the person receiving your Hadiyad.',
+        'Add meaningful words, a favourite photo and details chosen especially for them.',
 
       openCard:
-        'Open card',
+        'Start personalising',
 
       giftSection:
-        'Make it extra special',
+        'Make it even more special',
 
       giftTitle:
         'Add a gift',
 
       giftDescription:
-        'Pair your Hadiyad with a print, frame or special keepsake.',
+        'Soon you can pair your Hadiyad with a print, frame or meaningful keepsake.',
 
       comingSoon:
         'Coming soon',
 
       moreOptions:
-        'More options',
+        'More ways to personalise',
 
       continue:
-        'Continue',
+        'Review my Hadiyad',
     },
 
     nl: {
       close:
-        'Kaarteditor sluiten',
+        'Personaliseren sluiten',
 
       invalidImage:
         'Kies een JPEG-, PNG- of WebP-afbeelding van maximaal 8 MB.',
 
       imageError:
-        'De afbeelding kon niet worden gelezen.',
+        'We konden deze afbeelding niet openen.',
 
       undo:
         'Ongedaan maken',
@@ -682,25 +670,25 @@ export default function CardBuilder({
         'Opnieuw',
 
       resetCard:
-        'Kaart volledig resetten',
+        'Opnieuw beginnen',
 
       resetSide:
-        'Binnenkant resetten',
+        'Binnenkant herstellen',
 
       resetConfirm:
-        'Weet je zeker dat je de hele kaart wilt resetten?',
+        'Weet je zeker dat je opnieuw wilt beginnen met deze Hadiyad?',
 
       editing:
-        'Bewerken',
+        'Personaliseren',
 
       preview:
-        'Voorbeeld',
+        'Bekijk het resultaat',
 
       full:
-        'Volledig',
+        'Volledige weergave',
 
       photoSize:
-        'Fotoformaat',
+        'Formaat',
 
       small:
         'Klein',
@@ -712,61 +700,61 @@ export default function CardBuilder({
         'Groot',
 
       resetTransform:
-        'Foto resetten',
+        'Herstel foto',
 
       reselectPhoto:
-        'De vorige foto moet opnieuw worden geselecteerd.',
+        'Kies je foto opnieuw om verder te gaan.',
 
       adjustPhoto:
-        'Foto aanpassen',
+        'Jouw foto',
 
       remove:
-        'Verwijderen',
+        'Verwijder',
 
       changePhoto:
-        'Andere foto kiezen',
+        'Kies een andere foto',
 
       dragPhoto:
-        'Sleep de foto op de linkerpagina om te kiezen welk deel zichtbaar is.',
+        'Sleep je foto over de kaart om precies het mooiste deel te laten zien.',
 
       closedPreview:
-        'Jouw kaart',
-
-      openPreview:
         'Jouw Hadiyad',
 
+      openPreview:
+        'Binnenin jouw Hadiyad',
+
       closedTitle:
-        'Maak het van jou',
+        'Maak deze Hadiyad helemaal van jou',
 
       openTitle:
-        'Maak het persoonlijk',
+        'Maak een Hadiyad om te bewaren',
 
       closedDescription:
-        'Open de kaart en voeg binnenin je persoonlijke boodschap toe.',
+        'Open je Hadiyad en voeg jouw woorden, foto en persoonlijke details toe.',
 
       openDescription:
-        'Schrijf iets bijzonders voor degene die jouw Hadiyad ontvangt.',
+        'Voeg een mooie boodschap, favoriete foto en details toe die speciaal voor de ontvanger zijn gekozen.',
 
       openCard:
-        'Open kaart',
+        'Begin met personaliseren',
 
       giftSection:
-        'Maak het extra bijzonder',
+        'Maak het nog bijzonderder',
 
       giftTitle:
         'Voeg een cadeau toe',
 
       giftDescription:
-        'Combineer je Hadiyad later met een print, lijst of bijzonder cadeau.',
+        'Binnenkort combineer je jouw Hadiyad met een print, lijst of bijzonder aandenken.',
 
       comingSoon:
         'Binnenkort',
 
       moreOptions:
-        'Meer opties',
+        'Meer mogelijkheden',
 
       continue:
-        'Verder',
+        'Bekijk mijn Hadiyad',
     },
   }[
     currentLanguage
@@ -1256,7 +1244,8 @@ export default function CardBuilder({
   };
 
   const handleSelectSticker = (
-    stickerId: string,
+    stickerId:
+      string,
   ) => {
     setSelectedLayer(
       'sticker',
@@ -1271,7 +1260,8 @@ export default function CardBuilder({
     stickerId: string,
     changes:
       EditorStickerChanges,
-    recordHistory: boolean,
+    recordHistory:
+      boolean,
   ) => {
     dispatch({
       type:
@@ -1308,7 +1298,8 @@ export default function CardBuilder({
   };
 
   const handleRemoveSticker = (
-    stickerId: string,
+    stickerId:
+      string,
   ) => {
     commitAction({
       type:
@@ -1327,7 +1318,8 @@ export default function CardBuilder({
   };
 
   const handleDuplicateSticker = (
-    stickerId: string,
+    stickerId:
+      string,
   ) => {
     const randomPart =
       typeof crypto !==
@@ -1778,11 +1770,11 @@ export default function CardBuilder({
             aria-label={
               currentLanguage ===
               'nl'
-                ? 'Kaartvoorbeeld'
+                ? 'Voorbeeld van je Hadiyad'
                 : currentLanguage ===
                     'so'
-                  ? 'Tusaalaha kaarka'
-                  : 'Card preview'
+                  ? 'Muuqaalka Hadiyadda'
+                  : 'Your Hadiyad preview'
             }
             className="flex w-full flex-col gap-4 self-start lg:sticky lg:top-4 lg:w-[58%]"
           >

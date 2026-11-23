@@ -74,37 +74,37 @@ const labels = {
     },
 
     section:
-      'Ka dhig mid gaar ah',
+      'Fariintaada',
 
     style:
-      'Qaabka qoraalka',
+      'Ka dhig fariinta mid kuu gaar ah',
 
     reset:
-      'Dib u celi qaabka',
+      'Dib u celi muuqaalka',
 
     font:
-      'Habka qoraalka',
+      'Farta',
 
     size:
-      'Cabbirka',
+      'Cabbirka qoraalka',
 
     colors:
-      'Midabka',
+      'Midabka qoraalka',
 
     alignment:
-      'Isku hagaajin',
+      'Habka qoraalka',
 
     position:
-      'Meesha qoraalka',
+      'Meelaynta',
 
     moveUp:
-      'Kor u qaad',
+      'Kor',
 
     moveDown:
-      'Hoos u dhig',
+      'Hoos',
 
     resetPosition:
-      'Dib u celi meesha',
+      'Ku celi meesheedii',
 
     align: {
       left:
@@ -122,7 +122,7 @@ const labels = {
         'Tusaale: Ayaan',
 
       message:
-        'Qor fariin qalbigaaga ka timid...',
+        'Qor wax qalbigaaga ka yimid...',
 
       sender:
         'Tusaale: Mohamed',
@@ -130,17 +130,17 @@ const labels = {
 
     help: {
       recipient:
-        'Magaca qofka Hadiyadda loo dirayo.',
+        'Qofka Hadiyaddan loogu talagalay.',
 
       message:
-        'Ku qor fariintaada gaarka ah gudaha Hadiyadda.',
+        'Ku dar ereyada ka dhigaya Hadiyaddan mid gaar ah.',
 
       sender:
-        'Magaca aad rabto inuu ka muuqdo dhammaadka fariinta.',
+        'Magaca aad rabto inaad Hadiyadda ku saxiixdo.',
     },
 
     move:
-      'Qoraalka la doortay kor ama hoos u dhaqaaji.',
+      'Dooro meesha fariintu si fiican uga muuqanayso kaarka.',
 
     modern:
       'Casri',
@@ -149,7 +149,7 @@ const labels = {
       'Qurux badan',
 
     typewriter:
-      'Classic',
+      'Dhaqameed',
   },
 
   en: {
@@ -165,37 +165,37 @@ const labels = {
     },
 
     section:
-      'Make it personal',
+      'Your message',
 
     style:
-      'Text style',
+      'Make your message yours',
 
     reset:
-      'Reset style',
+      'Restore styling',
 
     font:
-      'Style',
+      'Lettering',
 
     size:
-      'Size',
+      'Text size',
 
     colors:
-      'Colour',
+      'Text colour',
 
     alignment:
-      'Alignment',
+      'Layout',
 
     position:
-      'Text position',
+      'Placement',
 
     moveUp:
-      'Move up',
+      'Up',
 
     moveDown:
-      'Move down',
+      'Down',
 
     resetPosition:
-      'Reset position',
+      'Back to original',
 
     align: {
       left:
@@ -221,17 +221,17 @@ const labels = {
 
     help: {
       recipient:
-        'Who is this Hadiyad for?',
+        'The person this Hadiyad is for.',
 
       message:
-        'Write the personal message they will see inside the card.',
+        'Add the words that make this Hadiyad personal.',
 
       sender:
-        'How would you like to sign your Hadiyad?',
+        'The name you would like to sign your Hadiyad with.',
     },
 
     move:
-      'Move the selected text up or down inside the card.',
+      'Choose where your words look best on the card.',
 
     modern:
       'Modern',
@@ -256,28 +256,28 @@ const labels = {
     },
 
     section:
-      'Maak het persoonlijk',
+      'Jouw boodschap',
 
     style:
-      'Tekststijl',
+      'Maak je boodschap eigen',
 
     reset:
-      'Stijl herstellen',
+      'Herstel opmaak',
 
     font:
-      'Stijl',
+      'Lettertype',
 
     size:
-      'Grootte',
+      'Tekstgrootte',
 
     colors:
-      'Kleur',
+      'Tekstkleur',
 
     alignment:
       'Uitlijning',
 
     position:
-      'Tekstpositie',
+      'Plaatsing',
 
     moveUp:
       'Omhoog',
@@ -286,7 +286,7 @@ const labels = {
       'Omlaag',
 
     resetPosition:
-      'Positie herstellen',
+      'Terug naar origineel',
 
     align: {
       left:
@@ -315,14 +315,14 @@ const labels = {
         'Voor wie is deze Hadiyad?',
 
       message:
-        'Schrijf de persoonlijke boodschap die binnenin de kaart verschijnt.',
+        'Voeg de woorden toe die deze Hadiyad echt persoonlijk maken.',
 
       sender:
-        'Met welke naam wil je de Hadiyad afsluiten?',
+        'Met welke naam wil je jouw Hadiyad ondertekenen?',
     },
 
     move:
-      'Verplaats de geselecteerde tekst omhoog of omlaag in de kaart.',
+      'Kies waar jouw woorden het mooist op de kaart staan.',
 
     modern:
       'Modern',
@@ -440,7 +440,7 @@ export default function TextControls({
 
   return (
     <section
-      className="space-y-4"
+      className="space-y-3"
       aria-label={
         copy.section
       }
@@ -472,7 +472,7 @@ export default function TextControls({
                   layer,
                 )
               }
-              className={`min-h-11 rounded-xl px-2 text-xs font-semibold transition ${
+              className={`min-h-10 rounded-xl px-2 text-xs font-semibold transition ${
                 activeLayer ===
                 layer
                   ? 'bg-white text-[#285347] shadow-sm'
@@ -490,7 +490,7 @@ export default function TextControls({
       </div>
 
       <div>
-        <label className="mb-2 block text-xs font-bold text-stone-700">
+        <label className="mb-1.5 block text-xs font-bold text-stone-700">
           {
             copy.layers[
               activeLayer
@@ -512,7 +512,7 @@ export default function TextControls({
               ]
             }
             rows={
-              4
+              3
             }
             maxLength={
               800
@@ -527,7 +527,7 @@ export default function TextControls({
                 event.target.value,
               )
             }
-            className="min-h-28 w-full resize-y rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm leading-6 text-stone-900 placeholder:text-stone-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
+            className="min-h-24 w-full resize-y rounded-xl border border-stone-200 bg-white px-3.5 py-3 text-sm leading-6 text-stone-900 placeholder:text-stone-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
           />
         ) : (
           <input
@@ -554,11 +554,11 @@ export default function TextControls({
                 event.target.value,
               )
             }
-            className="min-h-12 w-full rounded-2xl border border-stone-200 bg-white px-4 text-sm text-stone-900 placeholder:text-stone-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
+            className="min-h-11 w-full rounded-xl border border-stone-200 bg-white px-3.5 text-sm text-stone-900 placeholder:text-stone-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
           />
         )}
 
-        <p className="mt-2 text-xs leading-5 text-stone-500">
+        <p className="mt-1.5 text-[11px] leading-5 text-stone-500">
           {
             copy.help[
               activeLayer
@@ -568,7 +568,7 @@ export default function TextControls({
       </div>
 
       <details className="group rounded-2xl border border-stone-200 bg-white">
-        <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-stone-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-2.5 text-sm font-semibold text-stone-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]">
           <span>
             {
               copy.style
@@ -583,27 +583,30 @@ export default function TextControls({
           </span>
         </summary>
 
-        <div className="space-y-5 border-t border-stone-100 p-4">
+        <div className="space-y-4 border-t border-stone-100 p-3.5">
           <fieldset>
-            <legend className="mb-2 text-xs font-bold text-stone-600">
+            <legend className="mb-1.5 text-[11px] font-bold text-stone-600">
               {
                 copy.position
               }
             </legend>
 
-            <p className="mb-3 text-[11px] leading-5 text-stone-500">
+            <p className="mb-2 text-[11px] leading-4 text-stone-500">
               {
                 copy.move
               }
             </p>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
               <button
                 type="button"
                 onClick={
                   onMoveUp
                 }
-                className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white px-3 text-xs font-semibold text-stone-700 transition hover:border-[#285347]/30 hover:bg-[#eef4f1] hover:text-[#285347] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
+                aria-label={
+                  copy.moveUp
+                }
+                className="flex min-h-10 items-center justify-center gap-1.5 rounded-xl border border-stone-200 bg-white px-2.5 text-xs font-semibold text-stone-700 transition hover:border-[#285347]/30 hover:bg-[#eef4f1] hover:text-[#285347] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
               >
                 <span
                   aria-hidden="true"
@@ -612,11 +615,9 @@ export default function TextControls({
                   ↑
                 </span>
 
-                <span>
-                  {
-                    copy.moveUp
-                  }
-                </span>
+                {
+                  copy.moveUp
+                }
               </button>
 
               <button
@@ -624,7 +625,10 @@ export default function TextControls({
                 onClick={
                   onMoveDown
                 }
-                className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white px-3 text-xs font-semibold text-stone-700 transition hover:border-[#285347]/30 hover:bg-[#eef4f1] hover:text-[#285347] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
+                aria-label={
+                  copy.moveDown
+                }
+                className="flex min-h-10 items-center justify-center gap-1.5 rounded-xl border border-stone-200 bg-white px-2.5 text-xs font-semibold text-stone-700 transition hover:border-[#285347]/30 hover:bg-[#eef4f1] hover:text-[#285347] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
               >
                 <span
                   aria-hidden="true"
@@ -633,29 +637,31 @@ export default function TextControls({
                   ↓
                 </span>
 
-                <span>
-                  {
-                    copy.moveDown
-                  }
-                </span>
+                {
+                  copy.moveDown
+                }
+              </button>
+
+              <button
+                type="button"
+                onClick={
+                  onResetPosition
+                }
+                aria-label={
+                  copy.resetPosition
+                }
+                title={
+                  copy.resetPosition
+                }
+                className="flex min-h-10 min-w-10 items-center justify-center rounded-xl bg-stone-100 px-3 text-base text-stone-600 transition hover:bg-stone-200 hover:text-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
+              >
+                ↺
               </button>
             </div>
-
-            <button
-              type="button"
-              onClick={
-                onResetPosition
-              }
-              className="mt-2 min-h-10 w-full rounded-xl bg-stone-100 px-3 text-xs font-semibold text-stone-600 transition hover:bg-stone-200 hover:text-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
-            >
-              {
-                copy.resetPosition
-              }
-            </button>
           </fieldset>
 
           <fieldset>
-            <legend className="mb-2 text-xs font-bold text-stone-600">
+            <legend className="mb-1.5 text-[11px] font-bold text-stone-600">
               {
                 copy.font
               }
@@ -680,7 +686,7 @@ export default function TextControls({
                         font,
                       )
                     }
-                    className={`min-h-11 rounded-xl border px-2 text-xs transition ${
+                    className={`min-h-10 rounded-xl border px-2 text-xs transition ${
                       style.family ===
                       font
                         ? 'border-[#285347] bg-[#eef4f1] text-[#285347]'
@@ -708,13 +714,13 @@ export default function TextControls({
 
           <label className="block">
             <span className="flex items-center justify-between gap-3">
-              <span className="text-xs font-bold text-stone-600">
+              <span className="text-[11px] font-bold text-stone-600">
                 {
                   copy.size
                 }
               </span>
 
-              <output className="rounded-full bg-stone-100 px-2.5 py-1 text-[11px] font-semibold text-stone-600">
+              <output className="rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-semibold text-stone-600">
                 {
                   style.size
                 }
@@ -745,67 +751,157 @@ export default function TextControls({
                   ),
                 )
               }
-              className="mt-3 w-full accent-[#285347]"
+              className="mt-2 w-full accent-[#285347]"
             />
           </label>
 
-          <fieldset>
-            <legend className="mb-2 text-xs font-bold text-stone-600">
-              {
-                copy.alignment
-              }
-            </legend>
+          <div className="grid grid-cols-[1.2fr_1fr] gap-3">
+            <fieldset>
+              <legend className="mb-1.5 text-[11px] font-bold text-stone-600">
+                {
+                  copy.alignment
+                }
+              </legend>
 
-            <div className="grid grid-cols-3 gap-2">
-              {(
-                [
-                  'left',
-                  'center',
-                  'right',
-                ] as const
-              ).map(
-                (
-                  align,
-                ) => (
-                  <button
-                    key={
-                      align
-                    }
-                    type="button"
-                    aria-label={
-                      copy.align[
+              <div className="grid grid-cols-3 gap-1">
+                {(
+                  [
+                    'left',
+                    'center',
+                    'right',
+                  ] as const
+                ).map(
+                  (
+                    align,
+                  ) => (
+                    <button
+                      key={
                         align
-                      ]
-                    }
-                    aria-pressed={
-                      style.align ===
-                      align
-                    }
-                    onClick={() =>
-                      onAlignSelect(
-                        align,
-                      )
-                    }
-                    className={`min-h-11 rounded-xl border px-2 text-xs font-semibold transition ${
-                      style.align ===
-                      align
-                        ? 'border-[#285347] bg-[#eef4f1] text-[#285347]'
-                        : 'border-stone-200 bg-white text-stone-700'
-                    } focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]`}
-                  >
+                      }
+                      type="button"
+                      aria-label={
+                        copy.align[
+                          align
+                        ]
+                      }
+                      aria-pressed={
+                        style.align ===
+                        align
+                      }
+                      onClick={() =>
+                        onAlignSelect(
+                          align,
+                        )
+                      }
+                      className={`min-h-9 rounded-lg border px-1.5 text-[11px] font-semibold transition ${
+                        style.align ===
+                        align
+                          ? 'border-[#285347] bg-[#eef4f1] text-[#285347]'
+                          : 'border-stone-200 bg-white text-stone-700'
+                      } focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]`}
+                    >
+                      {
+                        copy.align[
+                          align
+                        ]
+                      }
+                    </button>
+                  ),
+                )}
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend className="mb-1.5 text-[11px] font-bold text-stone-600">
+                Opmaak
+              </legend>
+
+              <div className="grid grid-cols-3 gap-1">
+                {(
+                  [
                     {
-                      copy.align[
-                        align
-                      ]
-                    }
-                  </button>
-                ),
-              )}
-            </div>
-          </fieldset>
+                      key:
+                        'bold',
+
+                      label:
+                        'B',
+
+                      pressed:
+                        style.bold,
+                    },
+
+                    {
+                      key:
+                        'italic',
+
+                      label:
+                        'I',
+
+                      pressed:
+                        style.italic,
+                    },
+
+                    {
+                      key:
+                        'underline',
+
+                      label:
+                        'U',
+
+                      pressed:
+                        style.underline,
+                    },
+                  ] as const
+                ).map(
+                  (
+                    option,
+                  ) => (
+                    <button
+                      key={
+                        option.key
+                      }
+                      type="button"
+                      aria-label={
+                        option.key
+                      }
+                      aria-pressed={
+                        option.pressed
+                      }
+                      onClick={() =>
+                        onToggleStyle(
+                          option.key,
+                        )
+                      }
+                      className={`min-h-9 rounded-lg border text-xs font-bold transition ${
+                        option.pressed
+                          ? 'border-[#285347] bg-[#eef4f1] text-[#285347]'
+                          : 'border-stone-200 bg-white text-stone-700'
+                      } focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]`}
+                    >
+                      <span
+                        className={
+                          option.key ===
+                          'italic'
+                            ? 'italic'
+                            : option.key ===
+                                'underline'
+                              ? 'underline'
+                              : ''
+                        }
+                      >
+                        {
+                          option.label
+                        }
+                      </span>
+                    </button>
+                  ),
+                )}
+              </div>
+            </fieldset>
+          </div>
 
           <fieldset>
-            <legend className="mb-2 text-xs font-bold text-stone-600">
+            <legend className="mb-1.5 text-[11px] font-bold text-stone-600">
               {
                 copy.colors
               }
@@ -831,7 +927,7 @@ export default function TextControls({
                         color,
                       )
                     }
-                    className={`h-9 w-9 rounded-full border-2 shadow-sm transition ${
+                    className={`h-8 w-8 rounded-full border-2 shadow-sm transition ${
                       style.color ===
                       color
                         ? 'scale-110 border-[#285347]'
@@ -847,95 +943,13 @@ export default function TextControls({
             </div>
           </fieldset>
 
-          <div className="grid grid-cols-3 gap-2">
-            {(
-              [
-                {
-                  key:
-                    'bold',
-
-                  label:
-                    'B',
-
-                  pressed:
-                    style.bold,
-                },
-
-                {
-                  key:
-                    'italic',
-
-                  label:
-                    'I',
-
-                  pressed:
-                    style.italic,
-                },
-
-                {
-                  key:
-                    'underline',
-
-                  label:
-                    'U',
-
-                  pressed:
-                    style.underline,
-                },
-              ] as const
-            ).map(
-              (
-                option,
-              ) => (
-                <button
-                  key={
-                    option.key
-                  }
-                  type="button"
-                  aria-label={
-                    option.key
-                  }
-                  aria-pressed={
-                    option.pressed
-                  }
-                  onClick={() =>
-                    onToggleStyle(
-                      option.key,
-                    )
-                  }
-                  className={`min-h-11 rounded-xl border text-sm font-bold transition ${
-                    option.pressed
-                      ? 'border-[#285347] bg-[#eef4f1] text-[#285347]'
-                      : 'border-stone-200 bg-white text-stone-700'
-                  } focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]`}
-                >
-                  <span
-                    className={
-                      option.key ===
-                      'italic'
-                        ? 'italic'
-                        : option.key ===
-                            'underline'
-                          ? 'underline'
-                          : ''
-                    }
-                  >
-                    {
-                      option.label
-                    }
-                  </span>
-                </button>
-              ),
-            )}
-          </div>
-
-          <div className="flex justify-end border-t border-stone-100 pt-3">
+          <div className="flex justify-end border-t border-stone-100 pt-2.5">
             <button
               type="button"
               onClick={
                 onResetStyle
               }
-              className="text-xs font-semibold text-[#285347] underline decoration-[#285347]/30 underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
+              className="text-[11px] font-semibold text-[#285347] underline decoration-[#285347]/30 underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
             >
               {
                 copy.reset
