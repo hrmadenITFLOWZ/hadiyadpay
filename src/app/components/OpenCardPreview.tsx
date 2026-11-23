@@ -16,11 +16,17 @@ import {
   PHOTO_FRAME_SIZES,
   type EditorPosition,
   type EditorSideState,
+  type EditorStickerChanges,
   type EditorTextLayer,
 } from '../../lib/card-editor';
 
 import CardArtworkLayer from './CardArtworkLayer';
 import CardComposition from './CardComposition';
+
+type SelectedEditorLayer =
+  | 'photo'
+  | 'text'
+  | 'sticker';
 
 interface OpenCardPreviewProps {
   card: CardOption;
@@ -30,9 +36,13 @@ interface OpenCardPreviewProps {
   interactive?: boolean;
   showEditGuides?: boolean;
   activeTextLayer?: EditorTextLayer;
-  selectedLayer?: 'photo' | 'text';
+  selectedLayer?: SelectedEditorLayer;
+  selectedStickerId?: string | null;
+
   onOpen?: () => void;
+
   onClose?: () => void;
+
   onRequestPhoto?: () => void;
 
   onTextSelect?: (
@@ -50,6 +60,20 @@ interface OpenCardPreviewProps {
   onPhotoPositionChange?: (
     position: EditorPosition,
     recordHistory: boolean,
+  ) => void;
+
+  onStickerSelect?: (
+    stickerId: string,
+  ) => void;
+
+  onStickerChange?: (
+    stickerId: string,
+    changes: EditorStickerChanges,
+    recordHistory: boolean,
+  ) => void;
+
+  onStickerRemove?: (
+    stickerId: string,
   ) => void;
 }
 
@@ -75,10 +99,10 @@ const REVEAL_AUDIO_VOLUME =
   0.35;
 
 const REVEAL_FADE_START_MS =
-  6300;
+  5600;
 
 const REVEAL_STOP_MS =
-  7000;
+  6200;
 
 const REVEAL_EFFECT_DURATION_MS =
   3200;
@@ -165,6 +189,7 @@ export default function OpenCardPreview({
   showEditGuides = false,
   activeTextLayer = 'message',
   selectedLayer = 'text',
+  selectedStickerId = null,
   onOpen,
   onClose,
   onRequestPhoto,
@@ -172,6 +197,9 @@ export default function OpenCardPreview({
   onTextPositionChange,
   onPhotoSelect,
   onPhotoPositionChange,
+  onStickerSelect,
+  onStickerChange,
+  onStickerRemove,
 }: OpenCardPreviewProps) {
   const photoDragRef =
     useRef<PhotoDragState | null>(
@@ -194,6 +222,11 @@ export default function OpenCardPreview({
     );
 
   const effectTimerRef =
+    useRef<number | null>(
+      null,
+    );
+
+  const effectRemoveTimerRef =
     useRef<number | null>(
       null,
     );
@@ -362,6 +395,18 @@ export default function OpenCardPreview({
       }
 
       if (
+        effectRemoveTimerRef.current !==
+        null
+      ) {
+        window.clearTimeout(
+          effectRemoveTimerRef.current,
+        );
+
+        effectRemoveTimerRef.current =
+          null;
+      }
+
+      if (
         fadeIntervalRef.current !==
         null
       ) {
@@ -383,8 +428,10 @@ export default function OpenCardPreview({
 
       if (audio) {
         audio.pause();
+
         audio.currentTime =
           0;
+
         audio.volume =
           REVEAL_AUDIO_VOLUME;
       }
@@ -398,42 +445,36 @@ export default function OpenCardPreview({
       );
     };
 
-  const startRevealAudio =
-    async () => {
+  const scheduleRevealAudioStop =
+    () => {
       if (
-        !isWeddingHennaCard
+        fadeTimerRef.current !==
+        null
       ) {
-        return;
+        window.clearTimeout(
+          fadeTimerRef.current,
+        );
       }
 
-      clearRevealTimers();
-
-      let audio =
-        audioRef.current;
-
-      if (!audio) {
-        audio =
-          new Audio(
-            REVEAL_AUDIO_PATH,
-          );
-
-        audio.preload =
-          'auto';
-
-        audioRef.current =
-          audio;
+      if (
+        stopTimerRef.current !==
+        null
+      ) {
+        window.clearTimeout(
+          stopTimerRef.current,
+        );
       }
 
-      audio.pause();
-      audio.currentTime =
-        0;
-      audio.volume =
-        REVEAL_AUDIO_VOLUME;
+      if (
+        fadeIntervalRef.current !==
+        null
+      ) {
+        window.clearInterval(
+          fadeIntervalRef.current,
+        );
 
-      try {
-        await audio.play();
-      } catch {
-        return;
+        fadeIntervalRef.current =
+          null;
       }
 
       fadeTimerRef.current =
@@ -487,19 +528,16 @@ export default function OpenCardPreview({
 
                   if (
                     progress >=
-                    1
-                  ) {
-                    if (
-                      fadeIntervalRef.current !==
+                    1 &&
+                    fadeIntervalRef.current !==
                       null
-                    ) {
-                      window.clearInterval(
-                        fadeIntervalRef.current,
-                      );
+                  ) {
+                    window.clearInterval(
+                      fadeIntervalRef.current,
+                    );
 
-                      fadeIntervalRef.current =
-                        null;
-                    }
+                    fadeIntervalRef.current =
+                      null;
                   }
                 },
                 fadeStepMs,
@@ -518,8 +556,10 @@ export default function OpenCardPreview({
               currentAudio
             ) {
               currentAudio.pause();
+
               currentAudio.currentTime =
                 0;
+
               currentAudio.volume =
                 REVEAL_AUDIO_VOLUME;
             }
@@ -540,6 +580,78 @@ export default function OpenCardPreview({
         );
     };
 
+  const startRevealAudio =
+    () => {
+      if (
+        !isWeddingHennaCard
+      ) {
+        return;
+      }
+
+      let audio =
+        audioRef.current;
+
+      if (!audio) {
+        audio =
+          new Audio(
+            REVEAL_AUDIO_PATH,
+          );
+
+        audio.preload =
+          'auto';
+
+        audioRef.current =
+          audio;
+      }
+
+      audio.pause();
+
+      audio.currentTime =
+        0;
+
+      audio.volume =
+        REVEAL_AUDIO_VOLUME;
+
+      const playback =
+        audio.play();
+
+      scheduleRevealAudioStop();
+
+      if (
+        playback &&
+        typeof playback.catch ===
+          'function'
+      ) {
+        void playback.catch(
+          () => {
+            if (
+              fadeTimerRef.current !==
+              null
+            ) {
+              window.clearTimeout(
+                fadeTimerRef.current,
+              );
+
+              fadeTimerRef.current =
+                null;
+            }
+
+            if (
+              stopTimerRef.current !==
+              null
+            ) {
+              window.clearTimeout(
+                stopTimerRef.current,
+              );
+
+              stopTimerRef.current =
+                null;
+            }
+          },
+        );
+      }
+    };
+
   const startRevealEffect =
     () => {
       if (
@@ -557,8 +669,21 @@ export default function OpenCardPreview({
         );
       }
 
+      if (
+        effectRemoveTimerRef.current !==
+        null
+      ) {
+        window.clearTimeout(
+          effectRemoveTimerRef.current,
+        );
+      }
+
       setRevealEffectVisible(
         true,
+      );
+
+      setRevealEffectActive(
+        false,
       );
 
       window.requestAnimationFrame(
@@ -580,14 +705,15 @@ export default function OpenCardPreview({
               false,
             );
 
-            window.setTimeout(
-              () => {
-                setRevealEffectVisible(
-                  false,
-                );
-              },
-              700,
-            );
+            effectRemoveTimerRef.current =
+              window.setTimeout(
+                () => {
+                  setRevealEffectVisible(
+                    false,
+                  );
+                },
+                700,
+              );
           },
           REVEAL_EFFECT_DURATION_MS,
         );
@@ -598,9 +724,9 @@ export default function OpenCardPreview({
       if (
         isWeddingHennaCard
       ) {
-        startRevealEffect();
+        startRevealAudio();
 
-        void startRevealAudio();
+        startRevealEffect();
       }
 
       onOpen?.();
@@ -609,37 +735,67 @@ export default function OpenCardPreview({
   const handleClose =
     () => {
       stopRevealAudio();
+
       onClose?.();
     };
 
   useEffect(
     () => {
+      if (
+        !isWeddingHennaCard ||
+        typeof Audio ===
+          'undefined'
+      ) {
+        return;
+      }
+
+      const audio =
+        new Audio(
+          REVEAL_AUDIO_PATH,
+        );
+
+      audio.preload =
+        'auto';
+
+      audio.volume =
+        REVEAL_AUDIO_VOLUME;
+
+      audio.load();
+
+      audioRef.current =
+        audio;
+
       return () => {
         clearRevealTimers();
 
-        const audio =
-          audioRef.current;
+        audio.pause();
 
-        if (audio) {
-          audio.pause();
-          audio.currentTime =
-            0;
-        }
+        audio.removeAttribute(
+          'src',
+        );
+
+        audio.load();
 
         audioRef.current =
           null;
       };
     },
-    [],
+    [
+      isWeddingHennaCard,
+    ],
   );
 
   useEffect(
     () => {
-      if (!isOpen) {
+      if (
+        !isOpen
+      ) {
         stopRevealAudio();
       }
     },
-    [isOpen],
+    [
+      isOpen,
+    ],
   );
 
   const clampPercentage = (
@@ -770,7 +926,7 @@ export default function OpenCardPreview({
     drag.currentPhotoY =
       nextY;
 
-    const hasMoved =
+    if (
       Math.abs(
         event.clientX -
           drag.startClientX,
@@ -780,9 +936,8 @@ export default function OpenCardPreview({
         event.clientY -
           drag.startClientY,
       ) >
-        2;
-
-    if (hasMoved) {
+        2
+    ) {
       drag.moved =
         true;
     }
@@ -857,7 +1012,7 @@ export default function OpenCardPreview({
           aria-label={
             text.open
           }
-          className="group block w-full rounded-[1.7rem] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#285347]"
+          className="group block w-full touch-manipulation rounded-[1.7rem] [-webkit-tap-highlight-color:transparent] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#285347]"
         >
           <div
             className="relative w-full overflow-hidden rounded-[1.7rem] border border-[#ded7cc] bg-[#f7f1e8] shadow-xl transition duration-500 group-hover:-translate-y-1 group-hover:shadow-2xl"
@@ -925,7 +1080,7 @@ export default function OpenCardPreview({
             />
 
             <div
-              className={`absolute -bottom-24 -left-20 h-72 w-72 rounded-full opacity-0 blur-3xl transition-all duration-[2200ms] ${
+              className={`absolute -bottom-24 -left-20 hidden h-72 w-72 rounded-full opacity-0 blur-3xl transition-all duration-[2200ms] md:block ${
                 revealEffectActive
                   ? 'translate-x-24 -translate-y-32 scale-125 opacity-30'
                   : ''
@@ -937,7 +1092,7 @@ export default function OpenCardPreview({
             />
 
             <div
-              className={`absolute -bottom-24 -right-20 h-72 w-72 rounded-full opacity-0 blur-3xl transition-all duration-[2200ms] ${
+              className={`absolute -bottom-24 -right-20 hidden h-72 w-72 rounded-full opacity-0 blur-3xl transition-all duration-[2200ms] md:block ${
                 revealEffectActive
                   ? '-translate-x-24 -translate-y-32 scale-125 opacity-30'
                   : ''
@@ -957,7 +1112,7 @@ export default function OpenCardPreview({
                   key={
                     `${particle.left}-${particle.top}-${index}`
                   }
-                  className={`absolute rounded-full shadow-[0_0_14px_rgba(184,140,84,0.38)] transition-all duration-[1800ms] ease-out ${
+                  className={`absolute rounded-full transition-all duration-[1800ms] ease-out md:shadow-[0_0_14px_rgba(184,140,84,0.38)] ${
                     revealEffectActive
                       ? '-translate-y-48 scale-0 opacity-0'
                       : 'translate-y-0 scale-100 opacity-70'
@@ -984,22 +1139,6 @@ export default function OpenCardPreview({
                 />
               ),
             )}
-
-            <div
-              className={`absolute left-[6%] top-[54%] h-28 w-28 rotate-[-25deg] rounded-[55%_45%_60%_40%] border border-[#b78b52]/30 transition-all duration-[2000ms] ${
-                revealEffectActive
-                  ? '-translate-x-16 -translate-y-28 rotate-[-55deg] scale-150 opacity-0'
-                  : 'opacity-60'
-              }`}
-            />
-
-            <div
-              className={`absolute right-[6%] top-[54%] h-28 w-28 rotate-[25deg] rounded-[45%_55%_40%_60%] border border-[#8b4f58]/30 transition-all duration-[2000ms] ${
-                revealEffectActive
-                  ? 'translate-x-16 -translate-y-28 rotate-[55deg] scale-150 opacity-0'
-                  : 'opacity-60'
-              }`}
-            />
           </div>
         )}
 
@@ -1027,7 +1166,7 @@ export default function OpenCardPreview({
       )}
 
       <div
-        className={`relative z-50 mx-auto grid w-full max-w-5xl grid-cols-1 overflow-hidden rounded-[1.6rem] border bg-[#fffaf0] shadow-2xl transition-all duration-1000 md:grid-cols-2 ${
+        className={`relative z-50 mx-auto grid w-full max-w-5xl grid-cols-1 overflow-hidden rounded-[1.6rem] border bg-[#fffaf0] shadow-2xl transition-shadow duration-700 md:grid-cols-2 ${
           revealEffectActive &&
           isWeddingHennaCard
             ? 'border-[#c7a368] shadow-[0_32px_90px_rgba(111,63,59,0.32)]'
@@ -1217,6 +1356,10 @@ export default function OpenCardPreview({
 
               photo:
                 null,
+
+              stickers:
+                inside.stickers ??
+                [],
             }}
             interactive={
               interactive
@@ -1230,11 +1373,23 @@ export default function OpenCardPreview({
             selectedLayer={
               selectedLayer
             }
+            selectedStickerId={
+              selectedStickerId
+            }
             onTextSelect={
               onTextSelect
             }
             onTextPositionChange={
               onTextPositionChange
+            }
+            onStickerSelect={
+              onStickerSelect
+            }
+            onStickerChange={
+              onStickerChange
+            }
+            onStickerRemove={
+              onStickerRemove
             }
           />
         </section>

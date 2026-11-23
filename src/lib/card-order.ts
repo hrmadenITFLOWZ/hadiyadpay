@@ -1,13 +1,19 @@
 import {
   editorColorOptions,
   createEditorRuntimeState,
+  MAX_STICKERS_PER_SIDE,
   PHOTO_SCALE_MAX,
   PHOTO_SCALE_MIN,
+  STICKER_ROTATION_MAX,
+  STICKER_ROTATION_MIN,
+  STICKER_SCALE_MAX,
+  STICKER_SCALE_MIN,
   type EditorDraft,
   type EditorPhotoFrameSize,
   type EditorPhotoLayer,
   type EditorPosition,
   type EditorSideState,
+  type EditorSticker,
   type EditorTextFontFamily,
   type EditorTextLayer,
   type EditorTextStyle,
@@ -18,36 +24,32 @@ import type {
   CardOption,
 } from './card-types';
 
+type SerializableEditorPhoto =
+  Omit<
+    EditorPhotoLayer,
+    | 'src'
+    | 'requiresReselection'
+  >;
+
+type SerializableEditorSide =
+  Omit<
+    EditorSideState,
+    'photo'
+  > & {
+    photo:
+      SerializableEditorPhoto | null;
+  };
+
 export interface SerializableOrderDraft
   extends Omit<
     EditorDraft,
     'front' | 'inside'
   > {
   front:
-    Omit<
-      EditorSideState,
-      'photo'
-    > & {
-      photo:
-        Omit<
-          EditorPhotoLayer,
-          | 'src'
-          | 'requiresReselection'
-        > | null;
-    };
+    SerializableEditorSide;
 
   inside:
-    Omit<
-      EditorSideState,
-      'photo'
-    > & {
-      photo:
-        Omit<
-          EditorPhotoLayer,
-          | 'src'
-          | 'requiresReselection'
-        > | null;
-    };
+    SerializableEditorSide;
 }
 
 function isRecord(
@@ -59,7 +61,8 @@ function isRecord(
   return (
     typeof value ===
       'object' &&
-    value !== null &&
+    value !==
+      null &&
     !Array.isArray(
       value,
     )
@@ -88,6 +91,22 @@ function boundedNumber(
         max,
       )
     : fallback;
+}
+
+function boundedInteger(
+  value: unknown,
+  min: number,
+  max: number,
+  fallback: number,
+): number {
+  return Math.round(
+    boundedNumber(
+      value,
+      min,
+      max,
+      fallback,
+    ),
+  );
 }
 
 function parsePhotoFrameSize(
@@ -228,64 +247,316 @@ function parsePosition(
   };
 }
 
-function parseSide(
+function isValidStickerPath(
+  value: string,
+): boolean {
+  if (
+    !value.startsWith(
+      '/stickers/',
+    )
+  ) {
+    return false;
+  }
+
+  if (
+    value.includes(
+      '..',
+    ) ||
+    value.includes(
+      '\\',
+    ) ||
+    value.includes(
+      '?',
+    ) ||
+    value.includes(
+      '#',
+    )
+  ) {
+    return false;
+  }
+
+  return /^\/stickers\/[a-zA-Z0-9/_-]+\.(png|webp|svg)$/i.test(
+    value,
+  );
+}
+
+function parseSticker(
   value: unknown,
-  fallback: EditorSideState,
-  hasPhotoFile: boolean,
-  strictPhotoValidation: boolean,
-): EditorSideState {
+  fallbackZIndex: number,
+): EditorSticker | null {
   if (
     !isRecord(
       value,
     )
   ) {
+    return null;
+  }
+
+  const id =
+    value.id;
+
+  const assetId =
+    value.assetId;
+
+  const src =
+    value.src;
+
+  if (
+    typeof id !==
+      'string' ||
+    id.length ===
+      0 ||
+    id.length >
+      120 ||
+    typeof assetId !==
+      'string' ||
+    assetId.length ===
+      0 ||
+    assetId.length >
+      120 ||
+    typeof src !==
+      'string' ||
+    src.length ===
+      0 ||
+    src.length >
+      500 ||
+    !isValidStickerPath(
+      src,
+    )
+  ) {
+    return null;
+  }
+
+  return {
+    id,
+
+    assetId,
+
+    src,
+
+    x:
+      boundedNumber(
+        value.x,
+        0,
+        100,
+        50,
+      ),
+
+    y:
+      boundedNumber(
+        value.y,
+        0,
+        100,
+        50,
+      ),
+
+    width:
+      boundedNumber(
+        value.width,
+        4,
+        60,
+        20,
+      ),
+
+    scale:
+      boundedNumber(
+        value.scale,
+        STICKER_SCALE_MIN,
+        STICKER_SCALE_MAX,
+        1,
+      ),
+
+    rotation:
+      boundedNumber(
+        value.rotation,
+        STICKER_ROTATION_MIN,
+        STICKER_ROTATION_MAX,
+        0,
+      ),
+
+    zIndex:
+      boundedInteger(
+        value.zIndex,
+        1,
+        1000,
+        fallbackZIndex,
+      ),
+
+    label:
+      typeof value.label ===
+        'string'
+        ? value.label.slice(
+            0,
+            120,
+          )
+        : undefined,
+  };
+}
+
+function parseStickers(
+  value: unknown,
+): EditorSticker[] {
+  /*
+   * Bestaande orders bevatten nog geen
+   * stickers. Een ontbrekend veld wordt
+   * daarom veilig als lege array behandeld.
+   */
+  if (
+    value ===
+      unde*ined ||
+    value ===
+      null
+ *) {
+    return [];
+  }
+
+  if (
+   *!Array.isArray(
+      value,
+    )*  ) {
     throw new Error(
-      'Invalid card side',
+      '*nvalid card stickers',
+    );
+  }
+*  if (
+    value.length >
+    MAX_*TICKERS_PER_SIDE
+  ) {
+    throw n*w Error(
+      `A maximum of ${MAX*STICKERS_PER_SIDE} stickers is all*wed per card side`,
+    );
+  }
+
+  *onst stickers:
+    EditorSticker[]*= [];
+
+  const usedIds =
+    new S*t<string>();
+
+  for (
+    const rawSticker of
+    value
+  ) {
+    const sticker =
+      parseSticker(
+        rawSticker,
+        stickers.length +
+          1,
+      );
+
+    if (
+      !sticker
+    ) {
+      throw new Error(
+        'Invalid card sticker',
+      );
+    }
+
+    if (
+      usedIds.has(
+        sticker.id,
+      )
+    ) {
+      throw new Error(
+        'Duplicate card sticker',
+      );
+    }
+
+    usedIds.add(
+      sticker.id,
+    );
+
+    stickers.push(
+      sticker,
+    );
+  }
+
+  /*
+   * Houd de z-volgorde stabiel en compact.
+   *
+   * De opgeslagen volgorde wordt eerst op
+   * zIndex gesorteerd en daarna opnieuw
+   * genummerd vanaf 1.
+   */
+  return stickers
+    .sort(
+   *  (
+        first,
+        second,*      ) =>
+        first.zIndex -
+*       second.zIndex,
+    )
+    .m*p(
+      (
+        sticker,
+      * index,
+      ) => ({
+        ...s*icker,
+
+        zIndex:
+          *ndex +
+          1,
+      }),
+    *;
+}
+
+function parseSide(
+  value: *nknown,
+  fallback: EditorSideStat*,
+  hasPhotoFile: boolean,
+  stric*PhotoValidation: boolean,
+): Edito*SideState {
+  if (
+    !isRecord(
+*     value,
+    )
+  ) {
+    throw *ew Error(
+      'Invalid card side*,
     );
   }
 
   const recipient =
-    value.recipient;
+*   value.recipient;
 
-  const sender =
+  const sende* =
     value.sender;
 
-  const message =
+  const mess*ge =
     value.message;
 
   if (
-    typeof recipient !==
-      'string' ||
+  * typeof recipient !==
+      'strin*' ||
     recipient.length >
-      80 ||
+      *0 ||
     typeof sender !==
-      'string' ||
+      '*tring' ||
     sender.length >
-      80 ||
+    * 80 ||
     typeof message !==
-      'string' ||
+    * 'string' ||
     message.length >
-      800
+*     800
   ) {
-    throw new Error(
+    throw new Error*
       'Invalid card text',
-    );
-  }
+    );*  }
 
   const styles =
-    isRecord(
+    isRecord*
       value.textStyles,
     )
-      ? value.textStyles
+   *  ? value.textStyles
       : {};
 
-  const legacyStyle =
-    parseStyle(
+* const legacyStyle =
+    parseStyl*(
       value.textStyle,
-      fallback.textStyle,
+      fal*back.textStyle,
     );
 
-  const textStyles = (
+  const te*tStyles = (
     [
       'recipient',
       'sender',
@@ -293,14 +564,17 @@ function parseSide(
     ] as const
   ).reduce(
     (
-      result,
+ *    result,
       layer,
-    ) => {
-      result[layer] =
+    ) => *
+      result[
+        layer
+      ] =
         parseStyle(
-          styles[
+          *tyles[
             layer
           ],
+
           fallback
             .textStyles[
             layer
@@ -335,11 +609,14 @@ function parseSide(
       result,
       layer,
     ) => {
-      result[layer] =
+      result[
+        layer
+      ] =
         parsePosition(
           positions[
             layer
           ],
+
           fallback
             .textPositions[
             layer
@@ -354,6 +631,11 @@ function parseSide(
       EditorPosition
     >,
   );
+
+  const stickers =
+    parseStickers(
+      value.stickers,
+    );
 
   let photo:
     EditorPhotoLayer | null =
@@ -388,8 +670,7 @@ function parseSide(
       photo = {
         width:
           boundedNumber(
-            value.photo
-              .width,
+            value.photo.width,
             1,
             12000,
             1200,
@@ -397,8 +678,7 @@ function parseSide(
 
         height:
           boundedNumber(
-            value.photo
-              .height,
+            value.photo.height,
             1,
             12000,
             1200,
@@ -406,8 +686,7 @@ function parseSide(
 
         scale:
           boundedNumber(
-            value.photo
-              .scale,
+            value.photo.scale,
             PHOTO_SCALE_MIN,
             PHOTO_SCALE_MAX,
             1,
@@ -431,8 +710,7 @@ function parseSide(
 
         rotation:
           boundedNumber(
-            value.photo
-              .rotation,
+            value.photo.rotation,
             -30,
             30,
             0,
@@ -467,14 +745,13 @@ function parseSide(
     hasPhotoFile
   ) {
     /*
-     * Legacy/bestaande bestellingen kunnen een
-     * daadwerkelijk opgeslagen fotobestand hebben
-     * zonder photo-metadata in customization.
+     * Bestaande bestellingen kunnen een
+     * werkelijk opgeslagen fotobestand
+     * hebben zonder fotometadata.
      *
-     * Tijdens checkout blijft deze situatie ongeldig.
-     * Tijdens share/reveal rendering gebruiken we
-     * veilige standaardwaarden zodat het opgeslagen
-     * fotobestand wel getoond kan worden.
+     * Tijdens checkout blijft dit ongeldig.
+     * Tijdens share- en downloadrendering
+     * gebruiken we veilige standaardwaarden.
      */
     if (
       strictPhotoValidation
@@ -490,7 +767,9 @@ function parseSide(
 
   return {
     recipient,
+
     sender,
+
     message,
 
     textStyle:
@@ -501,32 +780,126 @@ function parseSide(
     textPositions,
 
     photo,
+
+    stickers,
   };
 }
 
 export function serializeEditorDraft(
   draft: EditorDraft,
 ): SerializableOrderDraft {
+  const serializeSticker = (
+    sticker: EditorSticker,
+  ): EditorSticker => ({
+    id:
+      sticker.id,
+
+    assetId:
+      sticker.assetId,
+
+    src:
+      sticker.src,
+
+    x:
+      boundedNumber(
+        sticker.x,
+        0,
+        100,
+        50,
+      ),
+
+    y:
+      boundedNumber(
+        sticker.y,
+        0,
+        100,
+        50,
+      ),
+
+    width:
+      boundedNumber(
+        sticker.width,
+        4,
+        60,
+        20,
+      ),
+
+    scale:
+      boundedNumber(
+        sticker.scale,
+        STICKER_SCALE_MIN,
+        STICKER_SCALE_MAX,
+        1,
+      ),
+
+    rotation:
+      boundedNumber(
+        sticker.rotation,
+        STICKER_ROTATION_MIN,
+        STICKER_ROTATION_MAX,
+        0,
+      ),
+
+    zIndex:
+      boundedInteger(
+        sticker.zIndex,
+        1,
+        1000,
+        1,
+      ),
+
+    label:
+      typeof sticker.label ===
+        'string'
+        ? sticker.label.slice(
+            0,
+            120,
+          )
+        : undefined,
+  });
+
   const serializeSide = (
-    side:
-      EditorSideState,
-  ): SerializableOrderDraft['front'] => ({
-    ...side,
+    side: EditorSideState,
+  ): SerializableEditorSide => ({
+    recipient:
+      side.recipient,
+
+    sender:
+      side.sender,
+
+    message:
+      side.message,
+
+    textStyle:
+      side.textStyle,
+
+    textStyles:
+      side.textStyles,
+
+    textPositions:
+      side.textPositions,
+
+    stickers:
+      side.stickers
+        .slice(
+          0,
+          MAX_STICKERS_PER_SIDE,
+        )
+        .map(
+          serializeSticker,
+        ),
 
     photo:
       side.photo
         ? {
             width:
-              side.photo
-                .width,
+              side.photo.width,
 
             height:
-              side.photo
-                .height,
+              side.photo.height,
 
             scale:
-              side.photo
-                .scale,
+              side.photo.scale,
 
             x:
               side.photo.x,
@@ -535,12 +908,10 @@ export function serializeEditorDraft(
               side.photo.y,
 
             rotation:
-              side.photo
-                .rotation,
+              side.photo.rotation,
 
             frameSize:
-              side.photo
-                .frameSize,
+              side.photo.frameSize,
           }
         : null,
   });
@@ -570,7 +941,8 @@ export function parseOrderDraft(
   language: CardLanguage,
   hasFrontPhoto: boolean,
   hasInsidePhoto: boolean,
-  strictPhotoValidation = true,
+  strictPhotoValidation =
+    true,
 ): EditorDraft {
   if (
     !isRecord(
@@ -595,6 +967,10 @@ export function parseOrderDraft(
         ? 'inside'
         : 'front',
 
+    /*
+     * Opgeslagen bestellingen worden altijd
+     * schoon weergegeven, zonder editorguides.
+     */
     previewMode:
       'clean',
 

@@ -7,12 +7,32 @@ import {
   getCardComposition,
 } from './card-composition';
 
-export const DRAFT_STORAGE_VERSION = 7;
+export const DRAFT_STORAGE_VERSION =
+  8;
+
 export const DRAFT_STORAGE_PREFIX =
   'hadiyadpay:editor-draft';
 
-export const PHOTO_SCALE_MIN = 1;
-export const PHOTO_SCALE_MAX = 3;
+export const PHOTO_SCALE_MIN =
+  1;
+
+export const PHOTO_SCALE_MAX =
+  3;
+
+export const STICKER_SCALE_MIN =
+  0.25;
+
+export const STICKER_SCALE_MAX =
+  3;
+
+export const STICKER_ROTATION_MIN =
+  -180;
+
+export const STICKER_ROTATION_MAX =
+  180;
+
+export const MAX_STICKERS_PER_SIDE =
+  20;
 
 export type EditorSide =
   | 'front'
@@ -47,9 +67,14 @@ export const PHOTO_FRAME_SIZES: Record<
   EditorPhotoFrameSize,
   number
 > = {
-  small: 58,
-  medium: 76,
-  large: 92,
+  small:
+    58,
+
+  medium:
+    76,
+
+  large:
+    92,
 };
 
 export interface EditorPosition {
@@ -79,10 +104,86 @@ export interface EditorPhotoLayer {
   frameSize: EditorPhotoFrameSize;
 }
 
+export interface EditorSticker {
+  /*
+   * Unieke ID voor deze stickerinstantie.
+   *
+   * Dezelfde asset kan meerdere keren op
+   * dezelfde kaart worden toegevoegd.
+   */
+  id: string;
+
+  /*
+   * Verwijst naar een gecontroleerde asset
+   * uit src/app/data/stickers.ts.
+   */
+  assetId: string;
+
+  /*
+   * Publiek pad naar de stickerafbeelding.
+   *
+   * Bijvoorbeeld:
+   * /stickers/wedding-henna/gold-rings-01.png
+   */
+  src: string;
+
+  /*
+   * Positie als percentage van het canvas.
+   *
+   * Hierdoor blijft de compositie bruikbaar
+   * voor browser-, download- en printformaten.
+   */
+  x: number;
+  y: number;
+
+  /*
+   * Basiskader als percentage van de
+   * canvasbreedte.
+   */
+  width: number;
+
+  /*
+   * Schaal en rotatie van de sticker.
+   */
+  scale: number;
+  rotation: number;
+
+  /*
+   * Bepaalt welke sticker voor of achter
+   * andere stickerlagen staat.
+   */
+  zIndex: number;
+
+  /*
+   * Toegankelijke naam van de asset.
+   */
+  label?: string;
+}
+
+export type EditorStickerChanges =
+  Partial<
+    Pick<
+      EditorSticker,
+      | 'x'
+      | 'y'
+      | 'width'
+      | 'scale'
+      | 'rotation'
+      | 'zIndex'
+    >
+  >;
+
 export interface EditorSideState {
   recipient: string;
   sender: string;
   message: string;
+
+  /*
+   * Legacy stijlveld.
+   *
+   * Dit blijft aanwezig voor bestaande
+   * drafts en opgeslagen bestellingen.
+   */
   textStyle: EditorTextStyle;
 
   textStyles: Record<
@@ -95,7 +196,11 @@ export interface EditorSideState {
     EditorPosition
   >;
 
-  photo: EditorPhotoLayer | null;
+  photo:
+    EditorPhotoLayer | null;
+
+  stickers:
+    EditorSticker[];
 }
 
 export interface EditorDraft {
@@ -119,7 +224,8 @@ interface StoredEditorSide
     EditorSideState,
     'photo'
   > {
-  photo: StoredEditorPhoto | null;
+  photo:
+    StoredEditorPhoto | null;
 }
 
 interface StoredEditorDraftData
@@ -145,93 +251,221 @@ export interface EditorRuntimeState {
 
 export type EditorAction =
   | {
-      type: 'SET_SIDE';
-      side: EditorSide;
+      type:
+        'SET_SIDE';
+
+      side:
+        EditorSide;
     }
   | {
-      type: 'SET_FIELD';
+      type:
+        'SET_FIELD';
+
       field:
         | 'recipient'
         | 'sender'
         | 'message';
-      value: string;
+
+      value:
+        string;
     }
   | {
-      type: 'SET_TEXT_STYLE';
-      layer: EditorTextLayer;
-      style: Partial<EditorTextStyle>;
+      type:
+        'SET_TEXT_STYLE';
+
+      layer:
+        EditorTextLayer;
+
+      style:
+        Partial<EditorTextStyle>;
     }
   | {
-      type: 'SET_TEXT_POSITION';
-      layer: EditorTextLayer;
-      position: EditorPosition;
-      recordHistory?: boolean;
+      type:
+        'SET_TEXT_POSITION';
+
+      layer:
+        EditorTextLayer;
+
+      position:
+        EditorPosition;
+
+      recordHistory?:
+        boolean;
     }
   | {
-      type: 'SET_TEXT_FORMAT';
-      layer: EditorTextLayer;
+      type:
+        'SET_TEXT_FORMAT';
+
+      layer:
+        EditorTextLayer;
+
       field:
         | 'family'
         | 'bold'
         | 'italic'
         | 'underline';
-      value: string | boolean;
+
+      value:
+        string | boolean;
     }
   | {
-      type: 'RESET_TEXT_STYLE';
-      layer: EditorTextLayer;
+      type:
+        'RESET_TEXT_STYLE';
+
+      layer:
+        EditorTextLayer;
     }
   | {
-      type: 'SET_PREVIEW_MODE';
-      mode: EditorPreviewMode;
+      type:
+        'SET_PREVIEW_MODE';
+
+      mode:
+        EditorPreviewMode;
     }
   | {
-      type: 'UPLOAD_PHOTO';
-      photo: EditorPhotoLayer;
+      type:
+        'UPLOAD_PHOTO';
+
+      photo:
+        EditorPhotoLayer;
     }
   | {
-      type: 'REMOVE_PHOTO';
+      type:
+        'REMOVE_PHOTO';
     }
   | {
-      type: 'ADJUST_PHOTO';
-      changes: Partial<
-        Pick<
-          EditorPhotoLayer,
-          | 'scale'
-          | 'x'
-          | 'y'
-          | 'rotation'
-          | 'frameSize'
-        >
-      >;
-      recordHistory?: boolean;
+      type:
+        'ADJUST_PHOTO';
+
+      changes:
+        Partial<
+          Pick<
+            EditorPhotoLayer,
+            | 'scale'
+            | 'x'
+            | 'y'
+            | 'rotation'
+            | 'frameSize'
+          >
+        >;
+
+      recordHistory?:
+        boolean;
     }
   | {
-      type: 'RESET_PHOTO_TRANSFORM';
-      position?: EditorPosition;
+      type:
+        'RESET_PHOTO_TRANSFORM';
+
+      position?:
+        EditorPosition;
     }
   | {
-      type: 'UNDO';
+      type:
+        'ADD_STICKER';
+
+      sticker:
+        EditorSticker;
     }
   | {
-      type: 'REDO';
+      type:
+        'UPDATE_STICKER';
+
+      stickerId:
+        string;
+
+      changes:
+        EditorStickerChanges;
+
+      recordHistory?:
+        boolean;
     }
   | {
-      type: 'COMMIT_DRAFT';
+      type:
+        'REMOVE_STICKER';
+
+      stickerId:
+        string;
     }
   | {
-      type: 'RESET_ACTIVE_SIDE';
-      card: CardOption;
-      currentLanguage: CardLanguage;
+      type:
+        'DUPLICATE_STICKER';
+
+      stickerId:
+        string;
+
+      newStickerId:
+        string;
     }
   | {
-      type: 'RESET_CARD';
-      card: CardOption;
-      currentLanguage: CardLanguage;
+      type:
+        'BRING_STICKER_FORWARD';
+
+      stickerId:
+        string;
     }
   | {
-      type: 'LOAD_DRAFT';
-      draft: EditorDraft;
+      type:
+        'SEND_STICKER_BACKWARD';
+
+      stickerId:
+        string;
+    }
+  | {
+      type:
+        'BRING_STICKER_TO_FRONT';
+
+      stickerId:
+        string;
+    }
+  | {
+      type:
+        'SEND_STICKER_TO_BACK';
+
+      stickerId:
+        string;
+    }
+  | {
+      type:
+        'CLEAR_STICKERS';
+    }
+  | {
+      type:
+        'UNDO';
+    }
+  | {
+      type:
+        'REDO';
+    }
+  | {
+      type:
+        'COMMIT_DRAFT';
+    }
+  | {
+      type:
+        'RESET_ACTIVE_SIDE';
+
+      card:
+        CardOption;
+
+      currentLanguage:
+        CardLanguage;
+    }
+  | {
+      type:
+        'RESET_CARD';
+
+      card:
+        CardOption;
+
+      currentLanguage:
+        CardLanguage;
+    }
+  | {
+      type:
+        'LOAD_DRAFT';
+
+      draft:
+        EditorDraft;
     };
 
 export const editorColorOptions = [
@@ -277,7 +511,9 @@ const clampFinite = (
   fallback: number,
 ): number =>
   clamp(
-    Number.isFinite(value)
+    Number.isFinite(
+      value,
+    )
       ? value
       : fallback,
     min,
@@ -294,12 +530,36 @@ const clampPosition = (
     50,
   );
 
+const clampStickerWidth = (
+  value: number,
+): number =>
+  clampFinite(
+    value,
+    4,
+    60,
+    20,
+  );
+
+const clampStickerZIndex = (
+  value: number,
+): number =>
+  Math.round(
+    clampFinite(
+      value,
+      1,
+      1000,
+      1,
+    ),
+  );
+
 function normalizePhotoFrameSize(
   value: unknown,
 ): EditorPhotoFrameSize {
   if (
-    value === 'small' ||
-    value === 'medium'
+    value ===
+      'small' ||
+    value ===
+      'medium'
   ) {
     return value;
   }
@@ -308,16 +568,214 @@ function normalizePhotoFrameSize(
 }
 
 const createDefaultTextStyle = (
-  color = '#fef3c7',
+  color =
+    '#fef3c7',
 ): EditorTextStyle => ({
   color,
-  align: 'left',
-  size: 30,
-  family: 'sans',
-  bold: false,
-  italic: false,
-  underline: false,
+
+  align:
+    'left',
+
+  size:
+    30,
+
+  family:
+    'sans',
+
+  bold:
+    false,
+
+  italic:
+    false,
+
+  underline:
+    false,
 });
+
+function normalizeSticker(
+  rawSticker: unknown,
+  fallbackZIndex: number,
+): EditorSticker | null {
+  if (
+    !rawSticker ||
+    typeof rawSticker !==
+      'object' ||
+    Array.isArray(
+      rawSticker,
+    )
+  ) {
+    return null;
+  }
+
+  const candidate =
+    rawSticker as Partial<
+      EditorSticker
+    >;
+
+  if (
+    typeof candidate.id !==
+      'string' ||
+    candidate.id.length ===
+      0 ||
+    candidate.id.length >
+      120 ||
+    typeof candidate.assetId !==
+      'string' ||
+    candidate.assetId.length ===
+      0 ||
+    candidate.assetId.length >
+      120 ||
+    typeof candidate.src !==
+      'string' ||
+    candidate.src.length ===
+      0 ||
+    candidate.src.length >
+      500
+  ) {
+    return null;
+  }
+
+  /*
+   * Draftassets mogen alleen lokale publieke
+   * paden gebruiken.
+   *
+   * Hiermee voorkomen we dat willekeurige
+   * externe URLs onderdeel van drafts worden.
+   */
+  if (
+    !candidate.src.startsWith(
+      '/stickers/',
+    )
+  ) {
+    return null;
+  }
+
+  return {
+    id:
+      candidate.id,
+
+    assetId:
+      candidate.assetId,
+
+    src:
+      candidate.src,
+
+    x:
+      clampPosition(
+        Number(
+          candidate.x ??
+            50,
+        ),
+      ),
+
+    y:
+      clampPosition(
+        Number(
+          candidate.y ??
+            50,
+        ),
+      ),
+
+    width:
+      clampStickerWidth(
+        Number(
+          candidate.width ??
+            20,
+        ),
+      ),
+
+    scale:
+      clampFinite(
+        Number(
+          candidate.scale ??
+            1,
+        ),
+        STICKER_SCALE_MIN,
+        STICKER_SCALE_MAX,
+        1,
+      ),
+
+    rotation:
+      clampFinite(
+        Number(
+          candidate.rotation ??
+            0,
+        ),
+        STICKER_ROTATION_MIN,
+        STICKER_ROTATION_MAX,
+        0,
+      ),
+
+    zIndex:
+      clampStickerZIndex(
+        Number(
+          candidate.zIndex ??
+            fallbackZIndex,
+        ),
+      ),
+
+    label:
+      typeof candidate.label ===
+        'string'
+        ? candidate.label.slice(
+            0,
+            120,
+          )
+        : undefined,
+  };
+}
+
+function normalizeStickers(
+  rawStickers: unknown,
+): EditorSticker[] {
+  if (
+    !Array.isArray(
+      rawStickers,
+    )
+  ) {
+    return [];
+  }
+
+  const normalized:
+    EditorSticker[] = [];
+
+  const usedIds =
+    new Set<string>();
+
+  for (
+    const rawSticker of
+    rawStickers.slice(
+      0,
+      MAX_STICKERS_PER_SIDE,
+    )
+  ) {
+    const sticker =
+      normalizeSticker(
+        rawSticker,
+        normalized.length +
+          1,
+      );
+
+    if (
+      !sticker ||
+      usedIds.has(
+        sticker.id,
+      )
+    ) {
+      continue;
+    }
+
+    usedIds.add(
+      sticker.id,
+    );
+
+    normalized.push(
+      sticker,
+    );
+  }
+
+  return normalized;
+}
 
 const createSideState = (
   card: CardOption,
@@ -401,6 +859,9 @@ const createSideState = (
 
     photo:
       null,
+
+    stickers:
+      [],
   };
 };
 
@@ -408,7 +869,8 @@ function getSideState(
   draft: EditorDraft,
   side: EditorSide,
 ): EditorSideState {
-  return side === 'front'
+  return side ===
+    'front'
     ? draft.front
     : draft.inside;
 }
@@ -420,7 +882,8 @@ function setSideState(
     Partial<EditorSideState>,
 ): EditorDraft {
   if (
-    side === 'front'
+    side ===
+    'front'
   ) {
     return {
       ...draft,
@@ -449,13 +912,16 @@ function pushHistory(
   const trimmedHistory =
     state.history.slice(
       0,
-      state.historyIndex + 1,
+      state.historyIndex +
+        1,
     );
 
   const nextHistory = [
     ...trimmedHistory,
     nextDraft,
-  ].slice(-30);
+  ].slice(
+    -30,
+  );
 
   return {
     draft:
@@ -465,7 +931,8 @@ function pushHistory(
       nextHistory,
 
     historyIndex:
-      nextHistory.length - 1,
+      nextHistory.length -
+      1,
   };
 }
 
@@ -473,7 +940,8 @@ function withSideTextPositionUpdate(
   state: EditorRuntimeState,
   layer: EditorTextLayer,
   position: EditorPosition,
-  recordHistory = true,
+  recordHistory =
+    true,
 ): EditorRuntimeState {
   const currentState =
     getSideState(
@@ -485,7 +953,9 @@ function withSideTextPositionUpdate(
     ...currentState.textPositions,
   };
 
-  nextTextPositions[layer] = {
+  nextTextPositions[
+    layer
+  ] = {
     x:
       clampPosition(
         position.x,
@@ -527,14 +997,19 @@ function normalizeTextStyle(
 ): EditorTextStyle {
   const safeStyle =
     style &&
-    typeof style === 'object'
-      ? style as Partial<EditorTextStyle>
+    typeof style ===
+      'object'
+      ? style as Partial<
+          EditorTextStyle
+        >
       : {};
 
   const familyValue:
     EditorTextFontFamily =
-    safeStyle.family === 'serif' ||
-    safeStyle.family === 'mono'
+    safeStyle.family ===
+      'serif' ||
+    safeStyle.family ===
+      'mono'
       ? safeStyle.family
       : 'sans';
 
@@ -595,25 +1070,35 @@ function normalizePhoto(
 ): EditorPhotoLayer | null {
   if (
     !rawPhoto ||
-    typeof rawPhoto !== 'object' ||
-    Array.isArray(rawPhoto)
+    typeof rawPhoto !==
+      'object' ||
+    Array.isArray(
+      rawPhoto,
+    )
   ) {
     return null;
   }
 
   const candidate =
-    rawPhoto as Partial<EditorPhotoLayer>;
+    rawPhoto as Partial<
+      EditorPhotoLayer
+    >;
 
   const hasStoredSource =
     typeof candidate.src ===
       'string' &&
-    candidate.src.length > 0;
+    candidate.src.length >
+      0;
 
   const hasTransform =
-    candidate.scale !== undefined ||
-    candidate.x !== undefined ||
-    candidate.y !== undefined ||
-    candidate.rotation !== undefined ||
+    candidate.scale !==
+      undefined ||
+    candidate.x !==
+      undefined ||
+    candidate.y !==
+      undefined ||
+    candidate.rotation !==
+      undefined ||
     candidate.frameSize !==
       undefined;
 
@@ -627,12 +1112,14 @@ function normalizePhoto(
   }
 
   const isLegacyCirclePhoto =
-    storageVersion < 7;
+    storageVersion <
+    7;
 
   const legacyX =
     clampFinite(
       Number(
-        candidate.x ?? 0,
+        candidate.x ??
+          0,
       ),
       -1000,
       1000,
@@ -642,7 +1129,8 @@ function normalizePhoto(
   const legacyY =
     clampFinite(
       Number(
-        candidate.y ?? 0,
+        candidate.y ??
+          0,
       ),
       -1000,
       1000,
@@ -650,17 +1138,25 @@ function normalizePhoto(
     );
 
   const migratedX =
-    storageVersion < 4
-      ? 50 + legacyX / 4
+    storageVersion <
+    4
+      ? 50 +
+        legacyX /
+          4
       : Number(
-          candidate.x ?? 50,
+          candidate.x ??
+            50,
         );
 
   const migratedY =
-    storageVersion < 4
-      ? 50 + legacyY / 3.6
+    storageVersion <
+    4
+      ? 50 +
+        legacyY /
+          3.6
       : Number(
-          candidate.y ?? 50,
+          candidate.y ??
+            50,
         );
 
   return {
@@ -670,7 +1166,8 @@ function normalizePhoto(
     width:
       clampFinite(
         Number(
-          candidate.width ?? 768,
+          candidate.width ??
+            768,
         ),
         1,
         12000,
@@ -680,7 +1177,8 @@ function normalizePhoto(
     height:
       clampFinite(
         Number(
-          candidate.height ?? 768,
+          candidate.height ??
+            768,
         ),
         1,
         12000,
@@ -692,7 +1190,8 @@ function normalizePhoto(
         ? 1
         : clampFinite(
             Number(
-              candidate.scale ?? 1,
+              candidate.scale ??
+                1,
             ),
             PHOTO_SCALE_MIN,
             PHOTO_SCALE_MAX,
@@ -718,7 +1217,8 @@ function normalizePhoto(
         ? 0
         : clampFinite(
             Number(
-              candidate.rotation ?? 0,
+              candidate.rotation ??
+                0,
             ),
             -30,
             30,
@@ -757,7 +1257,9 @@ function normalizeSideState(
   }
 
   const candidate =
-    rawSideState as Partial<EditorSideState>;
+    rawSideState as Partial<
+      EditorSideState
+    >;
 
   const migrateDefaultTextColor =
     storageVersion <
@@ -770,18 +1272,27 @@ function normalizeSideState(
     EditorPosition
   > = {
     recipient: {
-      x: 50,
-      y: 14,
+      x:
+        50,
+
+      y:
+        14,
     },
 
     message: {
-      x: 50,
-      y: 70,
+      x:
+        50,
+
+      y:
+        70,
     },
 
     sender: {
-      x: 50,
-      y: 92,
+      x:
+        50,
+
+      y:
+        92,
     },
   };
 
@@ -808,7 +1319,9 @@ function normalizeSideState(
     layer: EditorTextLayer,
   ): EditorTextStyle =>
     normalizeTextStyle(
-      candidateStyles[layer] ??
+      candidateStyles[
+        layer
+      ] ??
         candidate.textStyle,
 
       fallback.textStyles[
@@ -842,7 +1355,8 @@ function normalizeSideState(
         x:
           Number(
             position?.x ??
-              fallback.textPositions[
+              fallback
+                .textPositions[
                 layer
               ].x,
           ),
@@ -850,7 +1364,8 @@ function normalizeSideState(
         y:
           Number(
             position?.y ??
-              fallback.textPositions[
+              fallback
+                .textPositions[
                 layer
               ].y,
           ),
@@ -870,12 +1385,15 @@ function normalizeSideState(
         storageVersion <
           DRAFT_STORAGE_VERSION &&
         wasDefaultPosition
-          ? fallback.textPositions[
+          ? fallback
+              .textPositions[
               layer
             ]
           : savedPosition;
 
-      positions[layer] = {
+      positions[
+        layer
+      ] = {
         x:
           clampPosition(
             normalizedPosition.x,
@@ -942,6 +1460,16 @@ function normalizeSideState(
         candidate.photo,
         storageVersion,
       ),
+
+    /*
+     * Versie 7 en ouder bevatten nog geen
+     * stickers. normalizeStickers geeft dan
+     * automatisch een lege array terug.
+     */
+    stickers:
+      normalizeStickers(
+        candidate.stickers,
+      ),
   };
 }
 
@@ -983,7 +1511,9 @@ function normalizeDraft(
   }
 
   const candidate =
-    rawDraft as Partial<EditorDraft>;
+    rawDraft as Partial<
+      EditorDraft
+    >;
 
   return {
     side:
@@ -1068,9 +1598,13 @@ function withSideFieldUpdate(
   value: string,
 ): EditorRuntimeState {
   const updates:
-    Partial<EditorSideState> = {};
+    Partial<
+      EditorSideState
+    > = {};
 
-  updates[field] =
+  updates[
+    field
+  ] =
     value;
 
   const nextDraft =
@@ -1089,7 +1623,8 @@ function withSideFieldUpdate(
 function withSideTextStyleUpdate(
   state: EditorRuntimeState,
   layer: EditorTextLayer,
-  style: Partial<EditorTextStyle>,
+  style:
+    Partial<EditorTextStyle>,
 ): EditorRuntimeState {
   const currentState =
     getSideState(
@@ -1101,7 +1636,9 @@ function withSideTextStyleUpdate(
     ...currentState.textStyles,
   };
 
-  nextTextStyles[layer] = {
+  nextTextStyles[
+    layer
+  ] = {
     ...currentState.textStyles[
       layer
     ],
@@ -1143,7 +1680,8 @@ function withSidePhotoUpdate(
           scale:
             clampFinite(
               Number(
-                photo.scale ?? 1,
+                photo.scale ??
+                  1,
               ),
               PHOTO_SCALE_MIN,
               PHOTO_SCALE_MAX,
@@ -1153,21 +1691,24 @@ function withSidePhotoUpdate(
           x:
             clampPosition(
               Number(
-                photo.x ?? 50,
+                photo.x ??
+                  50,
               ),
             ),
 
           y:
             clampPosition(
               Number(
-                photo.y ?? 50,
+                photo.y ??
+                  50,
               ),
             ),
 
           rotation:
             clampFinite(
               Number(
-                photo.rotation ?? 0,
+                photo.rotation ??
+                  0,
               ),
               -30,
               30,
@@ -1188,11 +1729,110 @@ function withSidePhotoUpdate(
   );
 }
 
+function updateStickerCollection(
+  state: EditorRuntimeState,
+  stickers: EditorSticker[],
+  recordHistory =
+    true,
+): EditorRuntimeState {
+  const nextDraft =
+    setSideState(
+      state.draft,
+      state.draft.side,
+      {
+        stickers,
+      },
+    );
+
+  return recordHistory
+    ? pushHistory(
+        state,
+        nextDraft,
+      )
+    : {
+        ...state,
+
+        draft:
+          nextDraft,
+      };
+}
+
+function getHighestStickerZIndex(
+  stickers: EditorSticker[],
+): number {
+  return stickers.reduce(
+    (
+      highest,
+      sticker,
+    ) =>
+      Math.max(
+        highest,
+        sticker.zIndex,
+      ),
+    0,
+  );
+}
+
+function getLowestStickerZIndex(
+  stickers: EditorSticker[],
+): number {
+  if (
+    stickers.length ===
+    0
+  ) {
+    return 1;
+  }
+
+  return stickers.reduce(
+    (
+      lowest,
+      sticker,
+    ) =>
+      Math.min(
+        lowest,
+        sticker.zIndex,
+      ),
+    stickers[
+      0
+    ].zIndex,
+  );
+}
+
+function normalizeStickerOrdering(
+  stickers: EditorSticker[],
+): EditorSticker[] {
+  return [
+    ...stickers,
+  ]
+    .sort(
+      (
+        first,
+        second,
+      ) =>
+        first.zIndex -
+        second.zIndex,
+    )
+    .map(
+      (
+        sticker,
+        index,
+      ) => ({
+        ...sticker,
+
+        zIndex:
+          index +
+          1,
+      }),
+    );
+}
+
 export function editorReducer(
   state: EditorRuntimeState,
   action: EditorAction,
 ): EditorRuntimeState {
-  switch (action.type) {
+  switch (
+    action.type
+  ) {
     case 'SET_SIDE': {
       return pushHistory(
         state,
@@ -1239,7 +1879,8 @@ export function editorReducer(
 
       const nextTextStyle:
         EditorTextStyle = {
-          ...currentState.textStyles[
+          ...currentState
+            .textStyles[
             action.layer
           ],
         };
@@ -1311,7 +1952,8 @@ export function editorReducer(
         );
 
       const currentStyle =
-        currentState.textStyles[
+        currentState
+          .textStyles[
           action.layer
         ];
 
@@ -1389,7 +2031,9 @@ export function editorReducer(
           state.draft.side,
         );
 
-      if (!currentState.photo) {
+      if (
+        !currentState.photo
+      ) {
         return state;
       }
 
@@ -1401,8 +2045,11 @@ export function editorReducer(
           scale:
             clampFinite(
               Number(
-                action.changes.scale ??
-                  currentState.photo.scale,
+                action.changes
+                  .scale ??
+                  currentState
+                    .photo
+                    .scale,
               ),
               PHOTO_SCALE_MIN,
               PHOTO_SCALE_MAX,
@@ -1413,7 +2060,8 @@ export function editorReducer(
             clampPosition(
               Number(
                 action.changes.x ??
-                  currentState.photo.x,
+                  currentState
+                    .photo.x,
               ),
             ),
 
@@ -1421,15 +2069,19 @@ export function editorReducer(
             clampPosition(
               Number(
                 action.changes.y ??
-                  currentState.photo.y,
+                  currentState
+                    .photo.y,
               ),
             ),
 
           rotation:
             clampFinite(
               Number(
-                action.changes.rotation ??
-                  currentState.photo.rotation,
+                action.changes
+                  .rotation ??
+                  currentState
+                    .photo
+                    .rotation,
               ),
               -30,
               30,
@@ -1438,8 +2090,11 @@ export function editorReducer(
 
           frameSize:
             normalizePhotoFrameSize(
-              action.changes.frameSize ??
-                currentState.photo.frameSize,
+              action.changes
+                .frameSize ??
+                currentState
+                  .photo
+                  .frameSize,
             ),
         };
 
@@ -1474,7 +2129,9 @@ export function editorReducer(
           state.draft.side,
         );
 
-      if (!currentState.photo) {
+      if (
+        !currentState.photo
+      ) {
         return state;
       }
 
@@ -1516,15 +2173,526 @@ export function editorReducer(
       );
     }
 
+    case 'ADD_STICKER': {
+      const currentState =
+        getSideState(
+          state.draft,
+          state.draft.side,
+        );
+
+      if (
+        currentState.stickers.length >=
+        MAX_STICKERS_PER_SIDE
+      ) {
+        return state;
+      }
+
+      if (
+        currentState.stickers.some(
+          (sticker) =>
+            sticker.id ===
+            action.sticker.id,
+        )
+      ) {
+        return state;
+      }
+
+      const normalizedSticker =
+        normalizeSticker(
+          {
+            ...action.sticker,
+
+            zIndex:
+              getHighestStickerZIndex(
+                currentState.stickers,
+              ) +
+              1,
+          },
+          currentState.stickers.length +
+            1,
+        );
+
+      if (
+        !normalizedSticker
+      ) {
+        return state;
+      }
+
+      return updateStickerCollection(
+        state,
+        [
+          ...currentState.stickers,
+          normalizedSticker,
+        ],
+      );
+    }
+
+    case 'UPDATE_STICKER': {
+      const currentState =
+        getSideState(
+          state.draft,
+          state.draft.side,
+        );
+
+      const stickerIndex =
+        currentState.stickers.findIndex(
+          (sticker) =>
+            sticker.id ===
+            action.stickerId,
+        );
+
+      if (
+        stickerIndex <
+        0
+      ) {
+        return state;
+      }
+
+      const currentSticker =
+        currentState.stickers[
+          stickerIndex
+        ];
+
+      const updatedSticker:
+        EditorSticker = {
+          ...currentSticker,
+          ...action.changes,
+
+          x:
+            clampPosition(
+              Number(
+                action.changes.x ??
+                  currentSticker.x,
+              ),
+            ),
+
+          y:
+            clampPosition(
+              Number(
+                action.changes.y ??
+                  currentSticker.y,
+              ),
+            ),
+
+          width:
+            clampStickerWidth(
+              Number(
+                action.changes.width ??
+                  currentSticker.width,
+              ),
+            ),
+
+          scale:
+            clampFinite(
+              Number(
+                action.changes.scale ??
+                  currentSticker.scale,
+              ),
+              STICKER_SCALE_MIN,
+              STICKER_SCALE_MAX,
+              1,
+            ),
+
+          rotation:
+            clampFinite(
+              Number(
+                action.changes.rotation ??
+                  currentSticker.rotation,
+              ),
+              STICKER_ROTATION_MIN,
+              STICKER_ROTATION_MAX,
+              0,
+            ),
+
+          zIndex:
+            clampStickerZIndex(
+              Number(
+                action.changes.zIndex ??
+                  currentSticker.zIndex,
+              ),
+            ),
+        };
+
+      const nextStickers = [
+        ...currentState.stickers,
+      ];
+
+      nextStickers[
+        stickerIndex
+      ] =
+        updatedSticker;
+
+      return updateStickerCollection(
+        state,
+        nextStickers,
+        action.recordHistory !==
+          false,
+      );
+    }
+
+    case 'REMOVE_STICKER': {
+      const currentState =
+        getSideState(
+          state.draft,
+          state.draft.side,
+        );
+
+      const nextStickers =
+        currentState.stickers.filter(
+          (sticker) =>
+            sticker.id !==
+            action.stickerId,
+        );
+
+      if (
+        nextStickers.length ===
+        currentState.stickers.length
+      ) {
+        return state;
+      }
+
+      return updateStickerCollection(
+        state,
+        normalizeStickerOrdering(
+          nextStickers,
+        ),
+      );
+    }
+
+    case 'DUPLICATE_STICKER': {
+      const currentState =
+        getSideState(
+          state.draft,
+          state.draft.side,
+        );
+
+      if (
+        currentState.stickers.length >=
+          MAX_STICKERS_PER_SIDE ||
+        currentState.stickers.some(
+          (sticker) =>
+            sticker.id ===
+            action.newStickerId,
+        )
+      ) {
+        return state;
+      }
+
+      const sourceSticker =
+        currentState.stickers.find(
+          (sticker) =>
+            sticker.id ===
+            action.stickerId,
+        );
+
+      if (
+        !sourceSticker
+      ) {
+        return state;
+      }
+
+      const duplicate:
+        EditorSticker = {
+          ...sourceSticker,
+
+          id:
+            action.newStickerId,
+
+          x:
+            clampPosition(
+              sourceSticker.x +
+                5,
+            ),
+
+          y:
+            clampPosition(
+              sourceSticker.y +
+                5,
+            ),
+
+          zIndex:
+            getHighestStickerZIndex(
+              currentState.stickers,
+            ) +
+            1,
+        };
+
+      return updateStickerCollection(
+        state,
+        [
+          ...currentState.stickers,
+          duplicate,
+        ],
+      );
+    }
+
+    case 'BRING_STICKER_FORWARD': {
+      const currentState =
+        getSideState(
+          state.draft,
+          state.draft.side,
+        );
+
+      const ordered =
+        normalizeStickerOrdering(
+          currentState.stickers,
+        );
+
+      const index =
+        ordered.findIndex(
+          (sticker) =>
+            sticker.id ===
+            action.stickerId,
+        );
+
+      if (
+        index <
+          0 ||
+        index ===
+          ordered.length -
+            1
+      ) {
+        return state;
+      }
+
+      const current =
+        ordered[
+          index
+        ];
+
+      const next =
+        ordered[
+          index +
+            1
+        ];
+
+      ordered[
+        index
+      ] = {
+        ...next,
+
+        zIndex:
+          current.zIndex,
+      };
+
+      ordered[
+        index +
+          1
+      ] = {
+        ...current,
+
+        zIndex:
+          next.zIndex,
+      };
+
+      return updateStickerCollection(
+        state,
+        ordered,
+      );
+    }
+
+    case 'SEND_STICKER_BACKWARD': {
+      const currentState =
+        getSideState(
+          state.draft,
+          state.draft.side,
+        );
+
+      const ordered =
+        normalizeStickerOrdering(
+          currentState.stickers,
+        );
+
+      const index =
+        ordered.findIndex(
+          (sticker) =>
+            sticker.id ===
+            action.stickerId,
+        );
+
+      if (
+        index <=
+        0
+      ) {
+        return state;
+      }
+
+      const current =
+        ordered[
+          index
+        ];
+
+      const previous =
+        ordered[
+          index -
+            1
+        ];
+
+      ordered[
+        index
+      ] = {
+        ...previous,
+
+        zIndex:
+          current.zIndex,
+      };
+
+      ordered[
+        index -
+          1
+      ] = {
+        ...current,
+
+        zIndex:
+          previous.zIndex,
+      };
+
+      return updateStickerCollection(
+        state,
+        ordered,
+      );
+    }
+
+    case 'BRING_STICKER_TO_FRONT': {
+      const currentState =
+        getSideState(
+          state.draft,
+          state.draft.side,
+        );
+
+      const target =
+        currentState.stickers.find(
+          (sticker) =>
+            sticker.id ===
+            action.stickerId,
+        );
+
+      if (
+        !target
+      ) {
+        return state;
+      }
+
+      const highest =
+        getHighestStickerZIndex(
+          currentState.stickers,
+        );
+
+      if (
+        target.zIndex ===
+        highest
+      ) {
+        return state;
+      }
+
+      const nextStickers =
+        currentState.stickers.map(
+          (sticker) =>
+            sticker.id ===
+            action.stickerId
+              ? {
+                  ...sticker,
+
+                  zIndex:
+                    highest +
+                    1,
+                }
+              : sticker,
+        );
+
+      return updateStickerCollection(
+        state,
+        normalizeStickerOrdering(
+          nextStickers,
+        ),
+      );
+    }
+
+    case 'SEND_STICKER_TO_BACK': {
+      const currentState =
+        getSideState(
+          state.draft,
+          state.draft.side,
+        );
+
+      const target =
+        currentState.stickers.find(
+          (sticker) =>
+            sticker.id ===
+            action.stickerId,
+        );
+
+      if (
+        !target
+      ) {
+        return state;
+      }
+
+      const lowest =
+        getLowestStickerZIndex(
+          currentState.stickers,
+        );
+
+      if (
+        target.zIndex ===
+        lowest
+      ) {
+        return state;
+      }
+
+      const nextStickers =
+        currentState.stickers.map(
+          (sticker) =>
+            sticker.id ===
+            action.stickerId
+              ? {
+                  ...sticker,
+
+                  zIndex:
+                    0,
+                }
+              : sticker,
+        );
+
+      return updateStickerCollection(
+        state,
+        normalizeStickerOrdering(
+          nextStickers,
+        ),
+      );
+    }
+
+    case 'CLEAR_STICKERS': {
+      const currentState =
+        getSideState(
+          state.draft,
+          state.draft.side,
+        );
+
+      if (
+        currentState.stickers.length ===
+        0
+      ) {
+        return state;
+      }
+
+      return updateStickerCollection(
+        state,
+        [],
+      );
+    }
+
     case 'UNDO': {
       if (
-        state.historyIndex <= 0
+        state.historyIndex <=
+        0
       ) {
         return state;
       }
 
       const nextIndex =
-        state.historyIndex - 1;
+        state.historyIndex -
+        1;
 
       return {
         draft:
@@ -1543,13 +2711,15 @@ export function editorReducer(
     case 'REDO': {
       if (
         state.historyIndex >=
-        state.history.length - 1
+        state.history.length -
+          1
       ) {
         return state;
       }
 
       const nextIndex =
-        state.historyIndex + 1;
+        state.historyIndex +
+        1;
 
       return {
         draft:
@@ -1650,7 +2820,9 @@ export function loadDraftFromStorage(
       key,
     );
 
-  if (!saved) {
+  if (
+    !saved
+  ) {
     return null;
   }
 
@@ -1669,15 +2841,23 @@ export function loadDraftFromStorage(
     }
 
     const record =
-      parsed as Partial<StoredEditorDraft>;
+      parsed as Partial<
+        StoredEditorDraft
+      >;
 
     const supportedVersion =
       record.version ===
         DRAFT_STORAGE_VERSION ||
-      record.version === 6 ||
-      record.version === 5 ||
-      record.version === 4 ||
-      record.version === 3;
+      record.version ===
+        7 ||
+      record.version ===
+        6 ||
+      record.version ===
+        5 ||
+      record.version ===
+        4 ||
+      record.version ===
+        3;
 
     if (
       !supportedVersion ||
@@ -1724,7 +2904,8 @@ export function saveDraftToStorage(
           scale:
             clampFinite(
               Number(
-                photo.scale ?? 1,
+                photo.scale ??
+                  1,
               ),
               PHOTO_SCALE_MIN,
               PHOTO_SCALE_MAX,
@@ -1734,21 +2915,24 @@ export function saveDraftToStorage(
           x:
             clampPosition(
               Number(
-                photo.x ?? 50,
+                photo.x ??
+                  50,
               ),
             ),
 
           y:
             clampPosition(
               Number(
-                photo.y ?? 50,
+                photo.y ??
+                  50,
               ),
             ),
 
           rotation:
             clampFinite(
               Number(
-                photo.rotation ?? 0,
+                photo.rotation ??
+                  0,
               ),
               -30,
               30,
@@ -1780,6 +2964,11 @@ export function saveDraftToStorage(
         front: {
           ...draft.front,
 
+          stickers:
+            normalizeStickers(
+              draft.front.stickers,
+            ),
+
           photo:
             toStoredPhoto(
               draft.front.photo,
@@ -1788,6 +2977,11 @@ export function saveDraftToStorage(
 
         inside: {
           ...draft.inside,
+
+          stickers:
+            normalizeStickers(
+              draft.inside.stickers,
+            ),
 
           photo:
             toStoredPhoto(
@@ -1828,4 +3022,105 @@ export function getTextStyleForSide(
   ).textStyles[
     layer
   ];
+}
+
+export function getStickerById(
+  side:
+    EditorSideState,
+  stickerId:
+    string | null,
+): EditorSticker | null {
+  if (
+    !stickerId
+  ) {
+    return null;
+  }
+
+  return (
+    side.stickers.find(
+      (sticker) =>
+        sticker.id ===
+        stickerId,
+    ) ??
+    null
+  );
+}
+
+export function createStickerInstance(
+  asset: {
+    id: string;
+    src: string;
+    label?: string;
+    defaultWidth?: number;
+    defaultScale?: number;
+    defaultRotation?: number;
+  },
+  existingStickers:
+    EditorSticker[] = [],
+): EditorSticker {
+  const randomPart =
+    typeof crypto !==
+      'undefined' &&
+    typeof crypto.randomUUID ===
+      'function'
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random()
+          .toString(36)
+          .slice(2)}`;
+
+  return {
+    id:
+      `sticker-${randomPart}`,
+
+    assetId:
+      asset.id,
+
+    src:
+      asset.src,
+
+    x:
+      50,
+
+    y:
+      50,
+
+    width:
+      clampStickerWidth(
+        Number(
+          asset.defaultWidth ??
+            20,
+        ),
+      ),
+
+    scale:
+      clampFinite(
+        Number(
+          asset.defaultScale ??
+            1,
+        ),
+        STICKER_SCALE_MIN,
+        STICKER_SCALE_MAX,
+        1,
+      ),
+
+    rotation:
+      clampFinite(
+        Number(
+          asset.defaultRotation ??
+            0,
+        ),
+        STICKER_ROTATION_MIN,
+        STICKER_ROTATION_MAX,
+        0,
+      ),
+
+    zIndex:
+      getHighestStickerZIndex(
+        existingStickers,
+      ) +
+      1,
+
+    label:
+      asset.label,
+  };
 }

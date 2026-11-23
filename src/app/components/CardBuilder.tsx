@@ -15,6 +15,7 @@ import type {
 
 import {
   createEditorRuntimeState,
+  createStickerInstance,
   editorColorOptions,
   editorReducer,
   loadDraftFromStorage,
@@ -23,6 +24,7 @@ import {
   type EditorPhotoFrameSize,
   type EditorPhotoLayer,
   type EditorPreviewMode,
+  type EditorStickerChanges,
   type EditorTextLayer,
 } from '../../lib/card-editor';
 
@@ -34,11 +36,16 @@ import {
   getCardComposition,
 } from '../../lib/card-composition';
 
+import type {
+  StickerAsset,
+} from '../data/stickers';
+
 import CheckoutModal from './CheckoutModal';
 import OpenCardPreview from './OpenCardPreview';
 import useDialogAccessibility from '../hooks/useDialogAccessibility';
 import TextControls from './editor/TextControls';
 import PhotoControls from './editor/PhotoControls';
+import StickerControls from './editor/StickerControls';
 import HistoryControls from './editor/HistoryControls';
 import PreviewControls from './editor/PreviewControls';
 import ResetControls from './editor/ResetControls';
@@ -49,6 +56,11 @@ interface CardBuilderProps {
   currentLanguage: CardLanguage;
   onClose: () => void;
 }
+
+type SelectedEditorLayer =
+  | 'photo'
+  | 'text'
+  | 'sticker';
 
 const MAX_IMAGE_SIZE_BYTES =
   8 * 1024 * 1024;
@@ -68,9 +80,18 @@ function revokeOwnedPhotoUrl(
   ownedUrls: Set<string>,
   files: Map<string, File>,
 ) {
-  if (ownedUrls.delete(url)) {
-    URL.revokeObjectURL(url);
-    files.delete(url);
+  if (
+    ownedUrls.delete(
+      url,
+    )
+  ) {
+    URL.revokeObjectURL(
+      url,
+    );
+
+    files.delete(
+      url,
+    );
   }
 }
 
@@ -91,10 +112,12 @@ async function compressPhotoForOrder(
   let scale =
     Math.min(
       1,
-      1800 / longestSide,
+      1800 /
+        longestSide,
     );
 
-  let blob: Blob | null =
+  let blob:
+    Blob | null =
     null;
 
   for (
@@ -130,7 +153,9 @@ async function compressPhotoForOrder(
         '2d',
       );
 
-    if (!context) {
+    if (
+      !context
+    ) {
       image.close();
 
       throw new Error(
@@ -160,12 +185,15 @@ async function compressPhotoForOrder(
       await new Promise<
         Blob | null
       >(
-        (resolve) => {
+        (
+          resolve,
+        ) => {
           canvas.toBlob(
             resolve,
             'image/jpeg',
             0.86 -
-              attempt * 0.08,
+              attempt *
+                0.08,
           );
         },
       );
@@ -178,7 +206,8 @@ async function compressPhotoForOrder(
       break;
     }
 
-    scale *= 0.82;
+    scale *=
+      0.82;
   }
 
   image.close();
@@ -210,28 +239,65 @@ export default function CardBuilder({
   currentLanguage,
   onClose,
 }: CardBuilderProps) {
-  const initialState = () => {
-    const savedDraft =
-      loadDraftFromStorage(
-        card,
-        currentLanguage,
-      );
+  const initialState =
+    () => {
+      const savedDraft =
+        loadDraftFromStorage(
+          card,
+          currentLanguage,
+        );
 
-    if (savedDraft) {
+      if (
+        savedDraft
+      ) {
+        const normalizedDraft = {
+          ...savedDraft,
+
+          side:
+            'inside' as const,
+
+          previewMode:
+            savedDraft.previewMode ===
+            'full'
+              ? 'clean' as const
+              : savedDraft.previewMode,
+        };
+
+        return {
+          draft:
+            normalizedDraft,
+
+          history: [
+            normalizedDraft,
+          ],
+
+          historyIndex:
+            0,
+        };
+      }
+
+      const runtime =
+        createEditorRuntimeState(
+          card,
+          currentLanguage,
+        );
+
       const normalizedDraft = {
-        ...savedDraft,
+        ...runtime.draft,
 
         side:
           'inside' as const,
 
         previewMode:
-          savedDraft.previewMode ===
+          runtime.draft.previewMode ===
           'full'
             ? 'clean' as const
-            : savedDraft.previewMode,
+            : runtime.draft.previewMode,
       };
 
       return {
+        ...runtime,
+
         draft:
           normalizedDraft,
 
@@ -242,106 +308,84 @@ export default function CardBuilder({
         historyIndex:
           0,
       };
-    }
-
-    const runtime =
-      createEditorRuntimeState(
-        card,
-        currentLanguage,
-      );
-
-    const normalizedDraft = {
-      ...runtime.draft,
-
-      side:
-        'inside' as const,
-
-      previewMode:
-        runtime.draft.previewMode ===
-        'full'
-          ? 'clean' as const
-          : runtime.draft.previewMode,
     };
-
-    return {
-      ...runtime,
-
-      draft:
-        normalizedDraft,
-
-      history: [
-        normalizedDraft,
-      ],
-
-      historyIndex:
-        0,
-    };
-  };
 
   const [
     editorState,
     dispatch,
-  ] = useReducer(
-    editorReducer,
-    {
-      card,
-      currentLanguage,
-    },
-    initialState,
-  );
+  ] =
+    useReducer(
+      editorReducer,
+      {
+        card,
+        currentLanguage,
+      },
+      initialState,
+    );
 
   const [
     isCardOpen,
     setIsCardOpen,
-  ] = useState(
-    false,
-  );
+  ] =
+    useState(
+      false,
+    );
 
   const [
     activeTextLayer,
     setActiveTextLayer,
-  ] = useState<EditorTextLayer>(
-    'message',
-  );
+  ] =
+    useState<EditorTextLayer>(
+      'message',
+    );
 
   const [
     selectedLayer,
     setSelectedLayer,
-  ] = useState<
-    'photo' | 'text'
-  >(
-    'text',
-  );
+  ] =
+    useState<SelectedEditorLayer>(
+      'text',
+    );
+
+  const [
+    selectedStickerId,
+    setSelectedStickerId,
+  ] =
+    useState<string | null>(
+      null,
+    );
 
   const [
     isCheckoutOpen,
     setIsCheckoutOpen,
-  ] = useState(
-    false,
-  );
+  ] =
+    useState(
+      false,
+    );
 
   const [
     isCheckoutSubmitting,
     setIsCheckoutSubmitting,
-  ] = useState(
-    false,
-  );
+  ] =
+    useState(
+      false,
+    );
 
   const [
     checkoutError,
     setCheckoutError,
-  ] = useState<
-    string | null
-  >(
-    null,
-  );
+  ] =
+    useState<string | null>(
+      null,
+    );
 
   const [
     hasUnsavedChanges,
     setHasUnsavedChanges,
-  ] = useState(
-    false,
-  );
+  ] =
+    useState(
+      false,
+    );
 
   const ownedPhotoUrlsRef =
     useRef(
@@ -387,6 +431,18 @@ export default function CardBuilder({
     activeSideData.textStyles[
       activeTextLayer
     ];
+
+  const selectedSticker =
+    selectedStickerId
+      ? activeSideData.stickers.find(
+          (
+            sticker,
+          ) =>
+            sticker.id ===
+            selectedStickerId,
+        ) ??
+        null
+      : null;
 
   const commitAction = (
     action: EditorAction,
@@ -782,6 +838,39 @@ export default function CardBuilder({
 
   useEffect(
     () => {
+      if (
+        selectedStickerId &&
+        !activeSideData.stickers.some(
+          (
+            sticker,
+          ) =>
+            sticker.id ===
+            selectedStickerId,
+        )
+      ) {
+        setSelectedStickerId(
+          null,
+        );
+
+        if (
+          selectedLayer ===
+          'sticker'
+        ) {
+          setSelectedLayer(
+            'text',
+          );
+        }
+      }
+    },
+    [
+      activeSideData.stickers,
+      selectedLayer,
+      selectedStickerId,
+    ],
+  );
+
+  useEffect(
+    () => {
       const referencedUrls =
         new Set<string>();
 
@@ -880,7 +969,9 @@ export default function CardBuilder({
           BeforeUnloadEvent,
       ) => {
         event.preventDefault();
-        event.returnValue = '';
+
+        event.returnValue =
+          '';
       };
 
       window.addEventListener(
@@ -908,7 +999,9 @@ export default function CardBuilder({
         0
       ];
 
-    if (!file) {
+    if (
+      !file
+    ) {
       return;
     }
 
@@ -975,36 +1068,40 @@ export default function CardBuilder({
 
         const photo:
           EditorPhotoLayer = {
-            src:
-              nextUrl,
+          src:
+            nextUrl,
 
-            width:
-              previewImage.naturalWidth,
+          width:
+            previewImage.naturalWidth,
 
-            height:
-              previewImage.naturalHeight,
+          height:
+            previewImage.naturalHeight,
 
-            scale:
-              1,
+          scale:
+            1,
 
-            x:
-              50,
+          x:
+            50,
 
-            y:
-              50,
+          y:
+            50,
 
-            rotation:
-              0,
+          rotation:
+            0,
 
-            frameSize:
-              'large',
+          frameSize:
+            'large',
 
-            requiresReselection:
-              false,
-          };
+          requiresReselection:
+            false,
+        };
 
         setSelectedLayer(
           'photo',
+        );
+
+        setSelectedStickerId(
+          null,
         );
 
         commitAction({
@@ -1052,7 +1149,8 @@ export default function CardBuilder({
       ];
 
     const movement =
-      direction === 'up'
+      direction ===
+      'up'
         ? -3
         : 3;
 
@@ -1111,6 +1209,157 @@ export default function CardBuilder({
       });
     };
 
+  const handleAddSticker = (
+    asset:
+      StickerAsset,
+  ) => {
+    const sticker =
+      createStickerInstance(
+        {
+          id:
+            asset.id,
+
+          src:
+            asset.src,
+
+          label:
+            asset.label[
+              currentLanguage
+            ],
+
+          defaultWidth:
+            asset.defaultWidth,
+
+          defaultScale:
+            asset.defaultScale,
+
+          defaultRotation:
+            asset.defaultRotation,
+        },
+        activeSideData.stickers,
+      );
+
+    commitAction({
+      type:
+        'ADD_STICKER',
+
+      sticker,
+    });
+
+    setSelectedLayer(
+      'sticker',
+    );
+
+    setSelectedStickerId(
+      sticker.id,
+    );
+  };
+
+  const handleSelectSticker = (
+    stickerId: string,
+  ) => {
+    setSelectedLayer(
+      'sticker',
+    );
+
+    setSelectedStickerId(
+      stickerId,
+    );
+  };
+
+  const handleStickerChange = (
+    stickerId: string,
+    changes:
+      EditorStickerChanges,
+    recordHistory: boolean,
+  ) => {
+    dispatch({
+      type:
+        'UPDATE_STICKER',
+
+      stickerId,
+
+      changes,
+
+      recordHistory:
+        false,
+    });
+
+    setSelectedLayer(
+      'sticker',
+    );
+
+    setSelectedStickerId(
+      stickerId,
+    );
+
+    setHasUnsavedChanges(
+      true,
+    );
+
+    if (
+      recordHistory
+    ) {
+      dispatch({
+        type:
+          'COMMIT_DRAFT',
+      });
+    }
+  };
+
+  const handleRemoveSticker = (
+    stickerId: string,
+  ) => {
+    commitAction({
+      type:
+        'REMOVE_STICKER',
+
+      stickerId,
+    });
+
+    setSelectedStickerId(
+      null,
+    );
+
+    setSelectedLayer(
+      'text',
+    );
+  };
+
+  const handleDuplicateSticker = (
+    stickerId: string,
+  ) => {
+    const randomPart =
+      typeof crypto !==
+        'undefined' &&
+      typeof crypto.randomUUID ===
+        'function'
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random()
+            .toString(36)
+            .slice(2)}`;
+
+    const newStickerId =
+      `sticker-${randomPart}`;
+
+    commitAction({
+      type:
+        'DUPLICATE_STICKER',
+
+      stickerId,
+
+      newStickerId,
+    });
+
+    setSelectedLayer(
+      'sticker',
+    );
+
+    setSelectedStickerId(
+      newStickerId,
+    );
+  };
+
   const handleResetCard =
     () => {
       if (
@@ -1129,6 +1378,14 @@ export default function CardBuilder({
 
         currentLanguage,
       });
+
+      setSelectedLayer(
+        'text',
+      );
+
+      setSelectedStickerId(
+        null,
+      );
 
       setIsCardOpen(
         false,
@@ -1189,7 +1446,9 @@ export default function CardBuilder({
         const photo =
           draft.inside.photo;
 
-        if (photo) {
+        if (
+          photo
+        ) {
           if (
             photo.requiresReselection ||
             !photo.src
@@ -1204,7 +1463,9 @@ export default function CardBuilder({
               photo.src,
             );
 
-          if (!sourceFile) {
+          if (
+            !sourceFile
+          ) {
             throw new Error(
               text.reselectPhoto,
             );
@@ -1255,7 +1516,8 @@ export default function CardBuilder({
             result &&
             typeof result ===
               'object' &&
-            'error' in result &&
+            'error' in
+              result &&
             typeof result.error ===
               'string'
               ? result.error
@@ -1297,12 +1559,15 @@ export default function CardBuilder({
         window.location.assign(
           checkoutUrl.toString(),
         );
-      } catch (error) {
+      } catch (
+        error
+      ) {
         checkoutSubmittingRef.current =
           false;
 
         setCheckoutError(
-          error instanceof Error
+          error instanceof
+            Error
             ? error.message
             : 'Checkout could not be started. Please try again later.',
         );
@@ -1364,6 +1629,9 @@ export default function CardBuilder({
         selectedLayer={
           selectedLayer
         }
+        selectedStickerId={
+          selectedStickerId
+        }
         onOpen={
           handleOpenCard
         }
@@ -1385,6 +1653,10 @@ export default function CardBuilder({
 
           setSelectedLayer(
             'text',
+          );
+
+          setSelectedStickerId(
+            null,
           );
         }}
         onTextPositionChange={(
@@ -1417,11 +1689,15 @@ export default function CardBuilder({
             });
           }
         }}
-        onPhotoSelect={() =>
+        onPhotoSelect={() => {
           setSelectedLayer(
             'photo',
-          )
-        }
+          );
+
+          setSelectedStickerId(
+            null,
+          );
+        }}
         onPhotoPositionChange={(
           position,
           recordHistory,
@@ -1450,6 +1726,15 @@ export default function CardBuilder({
             });
           }
         }}
+        onStickerSelect={
+          handleSelectSticker
+        }
+        onStickerChange={
+          handleStickerChange
+        }
+        onStickerRemove={
+          handleRemoveSticker
+        }
       />
     );
 
@@ -1624,6 +1909,10 @@ export default function CardBuilder({
 
                       setSelectedLayer(
                         'text',
+                      );
+
+                      setSelectedStickerId(
+                        null,
                       );
                     }}
                     onValueChange={(
@@ -1816,6 +2105,100 @@ export default function CardBuilder({
                     }}
                   />
 
+                  <StickerControls
+                    language={
+                      currentLanguage
+                    }
+                    stickers={
+                      activeSideData.stickers
+                    }
+                    selectedStickerId={
+                      selectedStickerId
+                    }
+                    onAddSticker={
+                      handleAddSticker
+                    }
+                    onSelectSticker={
+                      handleSelectSticker
+                    }
+                    onScaleChange={(
+                      stickerId,
+                      scale,
+                    ) =>
+                      commitAction({
+                        type:
+                          'UPDATE_STICKER',
+
+                        stickerId,
+
+                        changes: {
+                          scale,
+                        },
+                      })
+                    }
+                    onRotationChange={(
+                      stickerId,
+                      rotation,
+                    ) =>
+                      commitAction({
+                        type:
+                          'UPDATE_STICKER',
+
+                        stickerId,
+
+                        changes: {
+                          rotation,
+                        },
+                      })
+                    }
+                    onBringForward={(
+                      stickerId,
+                    ) =>
+                      commitAction({
+                        type:
+                          'BRING_STICKER_FORWARD',
+
+                        stickerId,
+                      })
+                    }
+                    onSendBackward={(
+                      stickerId,
+                    ) =>
+                      commitAction({
+                        type:
+                          'SEND_STICKER_BACKWARD',
+
+                        stickerId,
+                      })
+                    }
+                    onBringToFront={(
+                      stickerId,
+                    ) =>
+                      commitAction({
+                        type:
+                          'BRING_STICKER_TO_FRONT',
+
+                        stickerId,
+                      })
+                    }
+                    onSendToBack={(
+                      stickerId,
+                    ) =>
+                      commitAction({
+                        type:
+                          'SEND_STICKER_TO_BACK',
+
+                        stickerId,
+                      })
+                    }
+                    onDuplicate={
+                      handleDuplicateSticker
+                    }
+                    onRemove={
+                      handleRemoveSticker
+                    }
+                  />
+
                   <section
                     aria-label={
                       text.giftSection
@@ -1910,7 +2293,7 @@ export default function CardBuilder({
                     />
 
                     <ResetControls
-                      onResetActiveSide={() =>
+                      onResetActiveSide={() => {
                         commitAction({
                           type:
                             'RESET_ACTIVE_SIDE',
@@ -1918,8 +2301,16 @@ export default function CardBuilder({
                           card,
 
                           currentLanguage,
-                        })
-                      }
+                        });
+
+                        setSelectedLayer(
+                          'text',
+                        );
+
+                        setSelectedStickerId(
+                          null,
+                        );
+                      }}
                       onResetCard={
                         handleResetCard
                       }
@@ -1938,6 +2329,10 @@ export default function CardBuilder({
                   type="button"
                   onClick={() => {
                     setCheckoutError(
+                      null,
+                    );
+
+                    setSelectedStickerId(
                       null,
                     );
 
@@ -1983,6 +2378,11 @@ export default function CardBuilder({
             false,
           )
         }
+        onEdit={() =>
+          setIsCheckoutOpen(
+            false,
+          )
+        }
         selectedOccasion={
           card
         }
@@ -2012,11 +2412,6 @@ export default function CardBuilder({
         }
         onPay={
           handleCheckout
-        }
-        onEdit={() =>
-          setIsCheckoutOpen(
-            false,
-          )
         }
       />
     </>

@@ -13,6 +13,8 @@ import type {
 import type {
   EditorPosition,
   EditorSideState,
+  EditorSticker,
+  EditorStickerChanges,
   EditorTextLayer,
 } from '../../lib/card-editor';
 
@@ -28,6 +30,11 @@ import {
 
 import CardArtworkLayer from './CardArtworkLayer';
 
+type SelectedEditorLayer =
+  | 'photo'
+  | 'text'
+  | 'sticker';
+
 interface CardCompositionProps {
   card: CardOption;
   language: CardLanguage;
@@ -36,7 +43,8 @@ interface CardCompositionProps {
   interactive?: boolean;
   showEditGuides?: boolean;
   activeTextLayer?: EditorTextLayer;
-  selectedLayer?: 'photo' | 'text';
+  selectedLayer?: SelectedEditorLayer;
+  selectedStickerId?: string | null;
 
   onTextSelect?: (
     layer: EditorTextLayer,
@@ -49,11 +57,41 @@ interface CardCompositionProps {
   ) => void;
 
   onPhotoSelect?: () => void;
+
+  onStickerSelect?: (
+    stickerId: string,
+  ) => void;
+
+  onStickerChange?: (
+    stickerId: string,
+    changes: EditorStickerChanges,
+    recordHistory: boolean,
+  ) => void;
+
+  onStickerRemove?: (
+    stickerId: string,
+  ) => void;
 }
 
 interface TextDragState {
   pointerId: number;
   layer: EditorTextLayer;
+
+  startClientX: number;
+  startClientY: number;
+
+  startX: number;
+  startY: number;
+
+  currentX: number;
+  currentY: number;
+
+  moved: boolean;
+}
+
+interface StickerDragState {
+  pointerId: number;
+  stickerId: string;
 
   startClientX: number;
   startClientY: number;
@@ -100,11 +138,20 @@ export default function CardComposition({
   showEditGuides = false,
   activeTextLayer = 'message',
   selectedLayer = 'text',
+  selectedStickerId = null,
   onTextSelect,
   onTextPositionChange,
+  onStickerSelect,
+  onStickerChange,
+  onStickerRemove,
 }: CardCompositionProps) {
   const textDragRef =
     useRef<TextDragState | null>(
+      null,
+    );
+
+  const stickerDragRef =
+    useRef<StickerDragState | null>(
       null,
     );
 
@@ -126,6 +173,28 @@ export default function CardComposition({
           'portrait'
         ? '1200 / 1464'
         : '1200 / 968';
+
+  /*
+   * Oudere drafts en bestaande bestellingen
+   * kunnen nog geen stickers-array bevatten.
+   */
+  const stickers =
+    Array.isArray(
+      side.stickers,
+    )
+      ? side.stickers
+      : [];
+
+  const orderedStickers = [
+    ...stickers,
+  ].sort(
+    (
+      first,
+      second,
+    ) =>
+      first.zIndex -
+      second.zIndex,
+  );
 
   const handleTextPointerDown = (
     event:
@@ -213,8 +282,10 @@ export default function CardComposition({
         .getBoundingClientRect();
 
     if (
-      bounds.width <= 0 ||
-      bounds.height <= 0
+      bounds.width <=
+        0 ||
+      bounds.height <=
+        0
     ) {
       return;
     }
@@ -267,11 +338,13 @@ export default function CardComposition({
       Math.abs(
         event.clientX -
           drag.startClientX,
-      ) > 2 ||
+      ) >
+        2 ||
       Math.abs(
         event.clientY -
           drag.startClientY,
-      ) > 2
+      ) >
+        2
     ) {
       drag.moved =
         true;
@@ -338,6 +411,226 @@ export default function CardComposition({
       null;
   };
 
+  const handleStickerPointerDown = (
+    event:
+      PointerEvent<HTMLButtonElement>,
+    sticker: EditorSticker,
+  ) => {
+    if (
+      !interactive ||
+      !showEditGuides ||
+      !onStickerChange
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    onStickerSelect?.(
+      sticker.id,
+    );
+
+    event.currentTarget.setPointerCapture(
+      event.pointerId,
+    );
+
+    stickerDragRef.current = {
+      pointerId:
+        event.pointerId,
+
+      stickerId:
+        sticker.id,
+
+      startClientX:
+        event.clientX,
+
+      startClientY:
+        event.clientY,
+
+      startX:
+        sticker.x,
+
+      startY:
+        sticker.y,
+
+      currentX:
+        sticker.x,
+
+      currentY:
+        sticker.y,
+
+      moved:
+        false,
+    };
+  };
+
+  const handleStickerPointerMove = (
+    event:
+      PointerEvent<HTMLButtonElement>,
+  ) => {
+    const drag =
+      stickerDragRef.current;
+
+    if (
+      !drag ||
+      drag.pointerId !==
+        event.pointerId ||
+      !onStickerChange
+    ) {
+      return;
+    }
+
+    const canvas =
+      event.currentTarget.closest(
+        '[data-card-composition-canvas]',
+      );
+
+    if (
+      !(canvas instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    const bounds =
+      canvas.getBoundingClientRect();
+
+    if (
+      bounds.width <=
+        0 ||
+      bounds.height <=
+        0
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const deltaX =
+      (
+        (
+          event.clientX -
+          drag.startClientX
+        ) /
+        bounds.width
+      ) *
+      100;
+
+    const deltaY =
+      (
+        (
+          event.clientY -
+          drag.startClientY
+        ) /
+        bounds.height
+      ) *
+      100;
+
+    /*
+     * Een kleine veiligheidsmarge voorkomt
+     * dat de sticker volledig buiten de kaart
+     * wordt gesleept.
+     */
+    const nextX =
+      clampPosition(
+        drag.startX +
+          deltaX,
+        2,
+        98,
+      );
+
+    const nextY =
+      clampPosition(
+        drag.startY +
+          deltaY,
+        2,
+        98,
+      );
+
+    drag.currentX =
+      nextX;
+
+    drag.currentY =
+      nextY;
+
+    if (
+      Math.abs(
+        event.clientX -
+          drag.startClientX,
+      ) >
+        2 ||
+      Math.abs(
+        event.clientY -
+          drag.startClientY,
+      ) >
+        2
+    ) {
+      drag.moved =
+        true;
+    }
+
+    onStickerChange(
+      drag.stickerId,
+      {
+        x:
+          nextX,
+
+        y:
+          nextY,
+      },
+      false,
+    );
+  };
+
+  const finishStickerDrag = (
+    event:
+      PointerEvent<HTMLButtonElement>,
+  ) => {
+    const drag =
+      stickerDragRef.current;
+
+    if (
+      !drag ||
+      drag.pointerId !==
+        event.pointerId
+    ) {
+      return;
+    }
+
+    if (
+      event.currentTarget
+        .hasPointerCapture(
+          event.pointerId,
+        )
+    ) {
+      event.currentTarget
+        .releasePointerCapture(
+          event.pointerId,
+        );
+    }
+
+    if (
+      drag.moved &&
+      onStickerChange
+    ) {
+      onStickerChange(
+        drag.stickerId,
+        {
+          x:
+            drag.currentX,
+
+          y:
+            drag.currentY,
+        },
+        true,
+      );
+    }
+
+    stickerDragRef.current =
+      null;
+  };
+
   const renderTextLayer = (
     layer: EditorTextLayer,
   ) => {
@@ -352,24 +645,34 @@ export default function CardComposition({
       ];
 
     const value =
-      side[layer];
+      side[
+        layer
+      ];
 
     const layerLabel =
-      layer === 'recipient'
-        ? language === 'nl'
+      layer ===
+      'recipient'
+        ? language ===
+          'nl'
           ? 'Ontvanger'
-          : language === 'so'
+          : language ===
+              'so'
             ? 'Qaataha'
             : 'Recipient'
-        : layer === 'sender'
-          ? language === 'nl'
+        : layer ===
+            'sender'
+          ? language ===
+            'nl'
             ? 'Verzender'
-            : language === 'so'
+            : language ===
+                'so'
               ? 'Diraha'
               : 'Sender'
-          : language === 'nl'
+          : language ===
+              'nl'
             ? 'Bericht'
-            : language === 'so'
+            : language ===
+                'so'
               ? 'Fariin'
               : 'Message';
 
@@ -377,6 +680,12 @@ export default function CardComposition({
       layout.textHeights[
         layer
       ];
+
+    const isActiveText =
+      selectedLayer ===
+        'text' &&
+      activeTextLayer ===
+        layer;
 
     const textStyle = {
       left:
@@ -466,10 +775,6 @@ export default function CardComposition({
           : undefined,
     };
 
-    /*
-     * No visible selection ring around the text.
-     * The text itself remains draggable.
-     */
     const classes =
       `absolute z-20 max-w-[86%] -translate-x-1/2 -translate-y-1/2 overflow-hidden whitespace-pre-wrap break-words leading-tight ${
         interactive
@@ -481,7 +786,9 @@ export default function CardComposition({
           : ''
       }`;
 
-    if (!interactive) {
+    if (
+      !interactive
+    ) {
       return (
         <span
           key={
@@ -512,6 +819,9 @@ export default function CardComposition({
           layer
         }
         aria-label={`${layerLabel}: ${value || layerLabel}`}
+        aria-pressed={
+          isActiveText
+        }
         tabIndex={
           showEditGuides
             ? 0
@@ -563,8 +873,269 @@ export default function CardComposition({
     );
   };
 
+  const renderSticker = (
+    sticker: EditorSticker,
+  ) => {
+    const isSelected =
+      interactive &&
+      showEditGuides &&
+      selectedLayer ===
+        'sticker' &&
+      selectedStickerId ===
+        sticker.id;
+
+    const accessibleLabel =
+      sticker.label ||
+      (
+        language ===
+        'nl'
+          ? 'Sticker'
+          : language ===
+              'so'
+            ? 'Qurxin'
+            : 'Sticker'
+      );
+
+    /*
+     * De buitenste laag bepaalt uitsluitend
+     * positie, breedte en laagvolgorde.
+     *
+     * Rotatie en schaal worden op het
+     * binnenste element uitgevoerd, zodat
+     * translate(-50%, -50%) stabiel blijft.
+     */
+    const wrapperStyle = {
+      left:
+        `${sticker.x}%`,
+
+      top:
+        `${sticker.y}%`,
+
+      width:
+        `${sticker.width}%`,
+
+      zIndex:
+        30 +
+        sticker.zIndex,
+    };
+
+    const imageStyle = {
+      transform:
+        `rotate(${sticker.rotation}deg) scale(${sticker.scale})`,
+
+      transformOrigin:
+        'center center',
+    };
+
+    if (
+      !interactive
+    ) {
+      return (
+        <div
+          key={
+            sticker.id
+          }
+          aria-hidden="true"
+          className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
+          style={
+            wrapperStyle
+          }
+        >
+          <img
+            src={
+              sticker.src
+            }
+            alt=""
+            draggable={
+              false
+            }
+            className="block h-auto w-full select-none object-contain"
+            style={
+              imageStyle
+            }
+          />
+        </div>
+      );
+    }
+
+    return (
+      <button
+        key={
+          sticker.id
+        }
+        type="button"
+        data-editor-layer="sticker"
+        data-sticker-id={
+          sticker.id
+        }
+        aria-label={
+          accessibleLabel
+        }
+        aria-pressed={
+          isSelected
+        }
+        tabIndex={
+          showEditGuides
+            ? 0
+            : -1
+        }
+        onFocus={() =>
+          onStickerSelect?.(
+            sticker.id,
+          )
+        }
+        onClick={(
+          event,
+        ) => {
+          event.stopPropagation();
+
+          onStickerSelect?.(
+            sticker.id,
+          );
+        }}
+        onPointerDown={(
+          event,
+        ) =>
+          handleStickerPointerDown(
+            event,
+            sticker,
+          )
+        }
+        onPointerMove={
+          handleStickerPointerMove
+        }
+        onPointerUp={
+          finishStickerDrag
+        }
+        onPointerCancel={
+          finishStickerDrag
+        }
+        className={`absolute -translate-x-1/2 -translate-y-1/2 border-0 bg-transparent p-0 ${
+          interactive &&
+          showEditGuides
+            ? 'touch-none cursor-grab active:cursor-grabbing'
+            : 'cursor-default'
+        } focus-visible:outline-none`}
+        style={
+          wrapperStyle
+        }
+      >
+        <span
+          className={`relative block w-full rounded-md ${
+            isSelected
+              ? 'ring-2 ring-[#285347] ring-offset-2 ring-offset-white/80'
+              : ''
+          }`}
+          style={
+            imageStyle
+          }
+        >
+          <img
+            src={
+              sticker.src
+            }
+            alt=""
+            aria-hidden="true"
+            draggable={
+              false
+            }
+            className="pointer-events-none block h-auto w-full select-none object-contain"
+          />
+
+          {isSelected && (
+            <>
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute -left-1 -top-1 h-2.5 w-2.5 rounded-full border border-white bg-[#285347] shadow-sm"
+              />
+
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full border border-white bg-[#285347] shadow-sm"
+              />
+
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute -bottom-1 -left-1 h-2.5 w-2.5 rounded-full border border-white bg-[#285347] shadow-sm"
+              />
+
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute -bottom-1 -right-1 h-2.5 w-2.5 rounded-full border border-white bg-[#285347] shadow-sm"
+              />
+            </>
+          )}
+        </span>
+
+        {isSelected &&
+          onStickerRemove && (
+            <span
+              className="absolute -right-3 -top-3 z-50"
+              style={{
+                transform:
+                  `rotate(${-sticker.rotation}deg) scale(${1 / Math.max(sticker.scale, 0.25)})`,
+              }}
+            >
+              <span
+                role="button"
+                aria-label={
+                  language ===
+                  'nl'
+                    ? 'Sticker verwijderen'
+                    : language ===
+                        'so'
+                      ? 'Ka saar qurxinta'
+                      : 'Remove sticker'
+                }
+                tabIndex={
+                  0
+                }
+                onPointerDown={(
+                  event,
+                ) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                }}
+                onClick={(
+                  event,
+                ) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+
+                  onStickerRemove(
+                    sticker.id,
+                  );
+                }}
+                onKeyDown={(
+                  event,
+                ) => {
+                  if (
+                    event.key ===
+                      'Enter' ||
+                    event.key ===
+                      ' '
+                  ) {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    onStickerRemove(
+                      sticker.id,
+                    );
+                  }
+                }}
+                className="flex h-7 w-7 items-center justify-center rounded-full border border-white bg-[#263e36] text-sm font-bold leading-none text-white shadow-lg transition hover:bg-[#173f35] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
+              >
+                ×
+              </span>
+            </span>
+          )}
+      </button>
+    );
+  };
+
   return (
     <div
+      data-card-composition-canvas="true"
       className="relative w-full overflow-hidden rounded-[1.7rem] border border-stone-200 text-white shadow-xl"
       style={{
         aspectRatio,
@@ -637,6 +1208,10 @@ export default function CardComposition({
         <span className="pointer-events-none absolute left-[6%] top-[5%] z-20 px-2.5 py-1 text-[10px] font-black tracking-[0.18em] text-amber-100 [text-shadow:0_2px_8px_#000,0_1px_2px_#000] sm:text-xs">
           HADIYADPAY
         </span>
+      )}
+
+      {orderedStickers.map(
+        renderSticker,
       )}
 
       {(
