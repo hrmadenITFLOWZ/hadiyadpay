@@ -401,15 +401,15 @@ function parseStickers(
    * stickers. Een ontbrekend veld wordt
    * daarom veilig als lege array behandeld.
    */
-  if (
+    if (
     value ===
-      unde*ined ||
+      undefined ||
     value ===
       null
- *) {
+  ) {
     return [];
   }
-
+  
   if (
    *!Array.isArray(
       value,
