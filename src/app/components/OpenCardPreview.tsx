@@ -848,7 +848,7 @@ export default function OpenCardPreview({
             side={{
               ...inside,
 
-              photo: inside.photo,
+              photo: null,
 
               stickers: inside.stickers ?? [],
             }}
