@@ -718,7 +718,7 @@ export default function OpenCardPreview({
       )}
 
       <div
-        className={`relative z-0 mx-auto grid aspect-[4/3] max-h-full w-full max-w-5xl grid-cols-2 overflow-hidden border bg-[#fffdf9] shadow-[0_20px_55px_rgba(38,42,39,0.18)] transition-shadow duration-700 ${
+        className={`relative z-0 mx-auto flex h-full max-h-full w-full max-w-5xl snap-x snap-mandatory items-center overflow-x-auto overflow-y-hidden border bg-[#fffdf9] shadow-[0_20px_55px_rgba(38,42,39,0.18)] transition-shadow duration-700 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:grid md:aspect-[4/3] md:h-auto md:grid-cols-2 md:overflow-hidden ${
           revealEffectActive && isWeddingHennaCard
             ? "border-[#c7a368] shadow-[0_32px_90px_rgba(111,63,59,0.32)]"
             : "border-[#d9d0c2]"
@@ -726,7 +726,7 @@ export default function OpenCardPreview({
       >
         <section
           aria-label={text.insideLeft}
-          className="relative min-h-0 min-w-0 overflow-hidden border-r border-[#ded5c8] bg-[#fffdf9]"
+          className="relative aspect-[2/3] h-full max-h-full w-auto shrink-0 snap-center overflow-hidden border-r border-[#ded5c8] bg-[#fffdf9] md:aspect-auto md:h-auto md:w-auto md:min-h-0 md:min-w-0 md:shrink"
         >
           <div
             aria-hidden="true"
@@ -840,7 +840,7 @@ export default function OpenCardPreview({
           )}
         </section>
 
-        <section className="relative min-h-0 min-w-0 overflow-hidden bg9]">
+        <section className="relative aspect-[2/3] h-full max-h-full w-auto shrink-0 snap-center overflow-hidden bg-[#fffdf9] md:aspect-auto md:h-auto md:w-auto md:min-h-0 md:min-w-0 md:shrink">
           <CardComposition
             card={card}
             language={language}
