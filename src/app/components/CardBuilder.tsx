@@ -951,7 +951,7 @@ export default function CardBuilder({
       return;
     }
 
-    setActiveTool(activeTool ?? "text");
+    setActiveTool("text");
 
     if (draft.side !== "inside") {
       commitAction({
@@ -1293,7 +1293,7 @@ export default function CardBuilder({
           onContinue={handleContinueFromTopBar}
         />
 
-        <div className="min-h-0 flex-1 overflow-hidden">
+        <main className="relative min-h-0 flex-1 overflow-hidden">
           <div
             ref={dialogRef}
             tabIndex={-1}
@@ -1301,10 +1301,10 @@ export default function CardBuilder({
             aria-modal={!isCheckoutOpen}
             aria-hidden={isCheckoutOpen}
             aria-labelledby="card-editor-heading"
-            className="mx-auto flex h-full min-h-0 w-full max-w-[1680px] flex-col overflow-hidden p-2 sm:p-3"
+            className="relative mx-auto h-full min-h-0 w-full max-w-[1740px] overflow-hidden p-2 sm:p-3 lg:p-4"
           >
             {activePage === "inside" ? (
-              <div className="grid h-full min-h-0 w-full flex-1 grid-rows-[minmax(0,1fr)_auto_minmax(0,0fr)] gap-2 lg:grid-cols-[minmax(0,1fr)_92px_390px] lg:grid-rows-1 lg:gap-3">
+              <div className="relative flex h-full min-h-0 w-full overflow-hidden">
                 <section
                   aria-label={
                     currentLanguage === "nl"
@@ -1313,14 +1313,14 @@ export default function CardBuilder({
                         ? "Gudaha Hadiyadda"
                         : "Inside your Hadiyad"
                   }
-                  className="min-w-0"
+                  className="relative min-w-0 flex-1 overflow-hidden rounded-[1.25rem] bg-[#e6e3df] shadow-inner sm:rounded-[1.5rem]"
                 >
-                  <div className="flex h-full min-h-0 items-center justify-center overflow-hidden rounded-[1.4rem] bg-[#e6e3df] p-2 shadow-inner sm:p-3">
+                  <div className="flex h-full min-h-0 w-full items-center justify-center overflow-hidden p-1.5 sm:p-3 lg:p-4">
                     {renderInsidePreview()}
                   </div>
                 </section>
 
-                <div className="order-2 min-h-0 lg:order-none lg:h-full">
+                <div className="absolute bottom-2 right-2 top-2 z-30 sm:bottom-3 sm:right-3 sm:top-3 lg:bottom-4 lg:right-[402px] lg:top-4">
                   <EditorToolRail
                     language={currentLanguage}
                     activeTool={activeTool}
@@ -1335,10 +1335,10 @@ export default function CardBuilder({
 
                 <aside
                   aria-label={text.toolPanel}
-                  className="order-3 min-h-0 min-w-0 overflow-hidden lg:order-none lg:h-full"
+                  className="absolute bottom-2 right-[72px] top-2 z-20 w-[min(78vw,330px)] overflow-hidden sm:bottom-3 sm:right-[91px] sm:top-3 sm:w-[350px] lg:bottom-4 lg:right-4 lg:top-4 lg:w-[380px]"
                 >
                   {activeTool && (
-                    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[1.4rem] border border-[#ded5c8] bg-[#fffdf9] shadow-[0_12px_30px_rgba(38,62,54,0.12)]">
+                    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[1.25rem] border border-[#ded5c8] bg-[#fffdf9] shadow-[0_16px_38px_rgba(38,62,54,0.18)] sm:rounded-[1.5rem]">
                       <div className="flex items-center justify-between border-b border-[#eee8df] px-4 py-3 lg:hidden">
                         <span className="text-xs font-bold uppercase tracking-[0.12em] text-[#285347]">
                           {text.toolPanel}
@@ -1467,7 +1467,7 @@ export default function CardBuilder({
               </section>
             )}
           </div>
-        </div>
+        </main>
 
         <EditorPageNavigation
           card={card}
