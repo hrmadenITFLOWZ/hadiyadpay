@@ -719,10 +719,7 @@ export default function CardBuilder({
   };
 
   const handleSelectSticker = (stickerId: string) => {
-    setActiveTool("stickers");
-
     setSelectedLayer("sticker");
-
     setSelectedStickerId(stickerId);
   };
 
@@ -741,10 +738,7 @@ export default function CardBuilder({
       recordHistory: false,
     });
 
-    setActiveTool("stickers");
-
     setSelectedLayer("sticker");
-
     setSelectedStickerId(stickerId);
 
     setHasUnsavedChanges(true);
