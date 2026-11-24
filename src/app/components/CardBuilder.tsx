@@ -1023,10 +1023,7 @@ export default function CardBuilder({
         }
       }}
       onPhotoSelect={() => {
-        setActiveTool("photo");
-
         setSelectedLayer("photo");
-
         setSelectedStickerId(null);
       }}
       onPhotoPositionChange={(position, recordHistory) => {
