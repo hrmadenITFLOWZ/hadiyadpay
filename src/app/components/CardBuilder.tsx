@@ -52,6 +52,7 @@ import {
   type EditorTool,
 } from "./editor/EditorToolRail";
 
+import EditorStage from "./editor/EditorStage";
 interface CardBuilderProps {
   card: CardOption;
   currentLanguage: CardLanguage;
