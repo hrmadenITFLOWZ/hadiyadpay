@@ -1320,7 +1320,7 @@ export default function CardBuilder({
                   </div>
                 </section>
 
-                <div className="absolute bottom-2 right-2 top-2 z-30 sm:bottom-3 sm:right-3 sm:top-3 lg:bottom-4 lg:right-[402px] lg:top-4">
+                <div className="absolute bottom-2 right-2 top-2 z-50 sm:bottom-3 sm:right-3 sm:top-3 lg:bottom-4 lg:right-[402px] lg:top-4">
                   <EditorToolRail
                     language={currentLanguage}
                     activeTool={activeTool}
@@ -1335,7 +1335,7 @@ export default function CardBuilder({
 
                 <aside
                   aria-label={text.toolPanel}
-                  className="absolute bottom-2 right-[72px] top-2 z-20 w-[min(78vw,330px)] overflow-hidden sm:bottom-3 sm:right-[91px] sm:top-3 sm:w-[350px] lg:bottom-4 lg:right-4 lg:top-4 lg:w-[380px]"
+                  className="absolute bottom-2 right-[72px] top-2 z-40 w-[min(78vw,330px)] overflow-hidden sm:bottom-3 sm:right-[91px] sm:top-3 sm:w-[350px] lg:bottom-4 lg:right-4 lg:top-4 lg:w-[380px]"
                 >
                   {activeTool && (
                     <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[1.25rem] border border-[#ded5c8] bg-[#fffdf9] shadow-[0_16px_38px_rgba(38,62,54,0.18)] sm:rounded-[1.5rem]">

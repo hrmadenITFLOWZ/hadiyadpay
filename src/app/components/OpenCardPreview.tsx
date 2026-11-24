@@ -718,7 +718,7 @@ export default function OpenCardPreview({
       )}
 
       <div
-        className={`relative z-50 mx-auto grid aspect-[4/3] max-h-full w-full max-w-5xl grid-cols-2 overflow-hidden border bg-[#fffdf9] shadow-[0_20px_55px_rgba(38,42,39,0.18)] transition-shadow duration-700 ${
+        className={`relative z-0 mx-auto grid aspect-[4/3] max-h-full w-full max-w-5xl grid-cols-2 overflow-hidden border bg-[#fffdf9] shadow-[0_20px_55px_rgba(38,42,39,0.18)] transition-shadow duration-700 ${
           revealEffectActive && isWeddingHennaCard
             ? "border-[#c7a368] shadow-[0_32px_90px_rgba(111,63,59,0.32)]"
             : "border-[#d9d0c2]"
