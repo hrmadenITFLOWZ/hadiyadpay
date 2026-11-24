@@ -1273,7 +1273,7 @@ export default function CardBuilder({
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-[#eeeae3]">
+      <div className="fixed inset-0 z-50 flex h-[100dvh] flex-col overflow-hidden bg-[#eeeae3]">
         <EditorTopBar
           language={currentLanguage}
           canUndo={editorState.historyIndex > 0}
@@ -1293,7 +1293,7 @@ export default function CardBuilder({
           onContinue={handleContinueFromTopBar}
         />
 
-        <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="min-h-0 flex-1 overflow-hidden">
           <div
             ref={dialogRef}
             tabIndex={-1}
@@ -1301,33 +1301,10 @@ export default function CardBuilder({
             aria-modal={!isCheckoutOpen}
             aria-hidden={isCheckoutOpen}
             aria-labelledby="card-editor-heading"
-            className="mx-auto flex min-h-full w-full max-w-[1680px] flex-col px-2 py-3 sm:px-4 sm:py-5"
+            className="mx-auto flex h-full min-h-0 w-full max-w-[1680px] flex-col overflow-hidden p-2 sm:p-3"
           >
-            <div className="mb-3 flex items-center justify-between gap-3 px-1 sm:mb-4">
-              <div className="min-w-0">
-                <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[#285347]">
-                  My Hadiyad
-                </span>
-
-                <h2
-                  id="card-editor-heading"
-                  className="mt-0.5 truncate font-serif text-lg text-[#173f35] sm:text-xl"
-                >
-                  {pageTitle}
-                </h2>
-
-                <p className="mt-0.5 hidden max-w-xl text-xs leading-5 text-stone-500 sm:block">
-                  {pageDescription}
-                </p>
-              </div>
-
-              <span className="shrink-0 rounded-full border border-[#d8bd8d] bg-[#fffaf0] px-3 py-1 text-[9px] font-bold uppercase tracking-[0.1em] text-[#806442]">
-                {card.badge[currentLanguage]}
-              </span>
-            </div>
-
             {activePage === "inside" ? (
-              <div className="flex min-h-0 w-full flex-1 flex-col gap-3 lg:grid lg:grid-cols-[minmax(0,1fr)_92px_360px] lg:items-start lg:gap-3 xl:grid-cols-[minmax(0,1fr)_92px_390px]">
+              <div className="grid h-full min-h-0 w-full flex-1 grid-rows-[minmax(0,1fr)_auto_minmax(0,0fr)] gap-2 lg:grid-cols-[minmax(0,1fr)_92px_390px] lg:grid-rows-1 lg:gap-3">
                 <section
                   aria-label={
                     currentLanguage === "nl"
@@ -1338,12 +1315,12 @@ export default function CardBuilder({
                   }
                   className="min-w-0"
                 >
-                  <div className="flex min-h-[420px] items-center justify-center rounded-[1.4rem] bg-[#e6e3df] p-2 shadow-inner sm:min-h-[520px] sm:p-4 lg:min-h-[650px]">
+                  <div className="flex h-full min-h-0 items-center justify-center overflow-hidden rounded-[1.4rem] bg-[#e6e3df] p-2 shadow-inner sm:p-3">
                     {renderInsidePreview()}
                   </div>
                 </section>
 
-                <div className="order-2 lg:order-none lg:sticky lg:top-4">
+                <div className="order-2 min-h-0 lg:order-none lg:h-full">
                   <EditorToolRail
                     language={currentLanguage}
                     activeTool={activeTool}
@@ -1358,10 +1335,10 @@ export default function CardBuilder({
 
                 <aside
                   aria-label={text.toolPanel}
-                  className="order-3 min-w-0 lg:order-none lg:sticky lg:top-4"
+                  className="order-3 min-h-0 min-w-0 overflow-hidden lg:order-none lg:h-full"
                 >
                   {activeTool && (
-                    <div className="overflow-hidden rounded-[1.4rem] border border-[#ded5c8] bg-[#fffdf9] shadow-[0_12px_30px_rgba(38,62,54,0.12)]">
+                    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[1.4rem] border border-[#ded5c8] bg-[#fffdf9] shadow-[0_12px_30px_rgba(38,62,54,0.12)]">
                       <div className="flex items-center justify-between border-b border-[#eee8df] px-4 py-3 lg:hidden">
                         <span className="text-xs font-bold uppercase tracking-[0.12em] text-[#285347]">
                           {text.toolPanel}
@@ -1373,11 +1350,11 @@ export default function CardBuilder({
                           aria-label={text.closePanel}
                           className="flex h-9 w-9 items-center justify-center rounded-full bg-stone-100 text-lg text-stone-600 transition hover:bg-stone-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
                         >
-                          Ã—
+                          ×
                         </button>
                       </div>
 
-                      <div className="max-h-none overflow-y-visible p-3.5 sm:p-4 lg:max-h-[calc(100vh-180px)] lg:overflow-y-auto">
+                      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-3.5 sm:p-4">
                         <div className="space-y-4">
                           <PreviewControls
                             activeMode={draft.previewMode}
@@ -1407,7 +1384,7 @@ export default function CardBuilder({
                                 aria-hidden="true"
                                 className="text-stone-400"
                               >
-                                â†“
+                                ↓
                               </span>
                             </summary>
 
@@ -1460,7 +1437,7 @@ export default function CardBuilder({
                       ? "Muuqaalka Hadiyadda"
                       : "Your Hadiyad preview"
                 }
-                className="flex min-h-[420px] flex-1 items-center justify-center rounded-[1.75rem] bg-[#e6e3df] p-3 shadow-inner sm:min-h-[560px] sm:p-5 lg:min-h-[650px]"
+                className="flex h-full min-h-0 flex-1 items-center justify-center overflow-hidden rounded-[1.4rem] bg-[#e6e3df] p-2 shadow-inner sm:p-3"
               >
                 {activePage === "front" ? (
                   <OpenCardPreview
