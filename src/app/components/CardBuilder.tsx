@@ -996,11 +996,7 @@ export default function CardBuilder({
       }}
       onTextSelect={(layer) => {
         setActiveTextLayer(layer);
-
-        setActiveTool("text");
-
         setSelectedLayer("text");
-
         setSelectedStickerId(null);
       }}
       onTextPositionChange={(layer, position, recordHistory) => {
