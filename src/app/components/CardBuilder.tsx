@@ -984,9 +984,8 @@ export default function CardBuilder({
       selectedStickerId={selectedStickerId}
       onClose={() => handlePageChange("front")}
       onRequestPhoto={() => {
-        setActiveTool("photo");
-
-        photoInputRef.current?.click();
+        setSelectedLayer("photo");
+        setSelectedStickerId(null);
       }}
       onTextSelect={(layer) => {
         setActiveTextLayer(layer);
