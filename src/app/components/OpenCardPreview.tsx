@@ -718,7 +718,7 @@ export default function OpenCardPreview({
       )}
 
       <div
-        className={`relative z-0 mx-auto flex h-full max-h-full w-full max-w-5xl snap-x snap-mandatory items-center overflow-x-auto overflow-y-hidden border bg-[#fffdf9] shadow-[0_20px_55px_rgba(38,42,39,0.18)] transition-shadow duration-700 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:grid md:aspect-[4/3] md:h-auto md:grid-cols-2 md:overflow-hidden ${
+        className={`relative z-0 mx-auto flex h-full max-h-full w-full max-w-5xl snap-x snap-mandatory items-center overflow-x-auto overflow-y-hidden border bg-[#fffdf9] shadow-[0_20px_55px_rgba(38,42,39,0.18)] transition-shadow duration-700 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:grid md:aspect-[4/3] md:h-auto md:grid-cols-2 md:items-stretch md:overflow-hidden ${
           revealEffectActive && isWeddingHennaCard
             ? "border-[#c7a368] shadow-[0_32px_90px_rgba(111,63,59,0.32)]"
             : "border-[#d9d0c2]"
