@@ -1305,7 +1305,7 @@ export default function CardBuilder({
           >
             {activePage === "inside" ? (
               <div
-                className={`grid h-full min-h-0 w-full items-stretch gap-2 overflow-hidden transition-[grid-template-columns] duration-300 sm:gap-3 ${activeTool ? "grid-cols-[minmax(0,1fr)_56px_minmax(180px,52vw)] lg:grid-cols-[minmax(0,1fr)_92px_360px] xl:grid-cols-[minmax(0,1fr)_92px_390px]" : "grid-cols-[minmax(0,1fr)_56px] lg:grid-cols-[minmax(0,1fr)_92px]"}`}
+                className={`grid h-full min-h-0 w-full grid-cols-[minmax(0,1fr)_64px] items-stretch gap-2 overflow-hidden sm:grid-cols-[minmax(0,1fr)_76px] sm:gap-3 lg:transition-[grid-template-columns] lg:duration-300 ${activeTool ? "lg:grid-cols-[minmax(0,1fr)_92px_360px] xl:grid-cols-[minmax(0,1fr)_92px_390px]" : "lg:grid-cols-[minmax(0,1fr)_92px]"}`}
               >
                 <section
                   aria-label={
@@ -1337,10 +1337,10 @@ export default function CardBuilder({
 
                 <aside
                   aria-label={text.toolPanel}
-                  className={`relative z-20 h-full min-h-0 min-w-0 overflow-hidden transition-opacity duration-200 ${activeTool ? "opacity-100" : "pointer-events-none hidden opacity-0"}`}
+                  className={`fixed inset-x-2 bottom-[118px] z-[70] max-h-[52dvh] min-h-0 overflow-hidden transition-all duration-300 sm:inset-x-4 sm:bottom-[138px] lg:relative lg:inset-auto lg:bottom-auto lg:z-20 lg:h-full lg:max-h-none lg:min-w-0 ${activeTool ? "translate-y-0 opacity-100 lg:block" : "pointer-events-none translate-y-[calc(100%+32px)] opacity-0 lg:hidden lg:translate-y-0"}`}
                 >
                   {activeTool && (
-                    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-[1.25rem] border border-[#ded5c8] bg-[#fffdf9] shadow-[0_12px_30px_rgba(38,62,54,0.14)] sm:rounded-[1.5rem]">
+                    <div className="flex h-full max-h-[52dvh] min-h-0 w-full flex-col overflow-hidden rounded-t-[1.5rem] border border-[#ded5c8] bg-[#fffdf9] shadow-[0_-12px_36px_rgba(38,62,54,0.18)] lg:max-h-none lg:rounded-[1.5rem] lg:shadow-[0_12px_30px_rgba(38,62,54,0.14)]">
                       <div className="flex items-center justify-between border-b border-[#eee8df] px-4 py-3 lg:hidden">
                         <span className="text-xs font-bold uppercase tracking-[0.12em] text-[#285347]">
                           {text.toolPanel}
