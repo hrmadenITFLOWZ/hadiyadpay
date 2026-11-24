@@ -198,7 +198,7 @@ export default function CardBuilder({
 
   const [activePage, setActivePage] = useState<EditorPage>("front");
 
-  const [activeTool, setActiveTool] = useState<EditorTool | null>("text");
+  const [activeTool, setActiveTool] = useState<EditorTool | null>(null);
 
   const [activeTextLayer, setActiveTextLayer] =
     useState<EditorTextLayer>("message");
@@ -951,7 +951,7 @@ export default function CardBuilder({
       return;
     }
 
-    setActiveTool("text");
+    setActiveTool(null);
 
     if (draft.side !== "inside") {
       commitAction({
