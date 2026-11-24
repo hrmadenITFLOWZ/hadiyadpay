@@ -4,8 +4,9 @@ import { useRef, type PointerEvent } from "react";
 
 import type { CardLanguage, CardOption } from "../../lib/card-types";
 
-import type {
-  EditorPosition,
+import {
+  PHOTO_FRAME_SIZES,
+  type EditorPosition,
   EditorSideState,
   EditorSticker,
   EditorStickerChanges,
@@ -111,6 +112,7 @@ export default function CardComposition({
   selectedStickerId = null,
   onTextSelect,
   onTextPositionChange,
+  onPhotoSelect,
   onStickerSelect,
   onStickerChange,
   onStickerRemove,
@@ -722,6 +724,49 @@ export default function CardComposition({
         <span className="pointer-events-none absolute left-[6%] top-[5%] z-20 px-2.5 py-1 text-[10px] font-black tracking-[0.18em] text-amber-100 [text-shadow:0_2px_8px_#000,0_1px_2px_#000] sm:text-xs">
           MY HADIYAD
         </span>
+      )}
+
+      {side.photo?.src && !side.photo.requiresReselection && (
+        <button
+          type="button"
+          data-editor-layer="photo"
+          aria-label={
+            language === "nl" ? "Foto" : language === "so" ? "Sawir" : "Photo"
+          }
+          aria-pressed={interactive && selectedLayer === "photo"}
+          tabIndex={interactive && showEditGuides ? 0 : -1}
+          disabled={!interactive}
+          onFocus={onPhotoSelect}
+          onClick={onPhotoSelect}
+          className={`absolute z-10 overflow-hidden border-0 bg-transparent p-0 ${
+            interactive ? "cursor-pointer" : "cursor-default"
+          } ${
+            interactive && selectedLayer === "photo" && showEditGuides
+              ? "ring-2 ring-[#285347] ring-offset-2 ring-offset-[#fffdf9]"
+              : ""
+          } focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]`}
+          style={{
+            left: `${(100 - PHOTO_FRAME_SIZES[side.photo.frameSize]) / 2}%`,
+            top: `${(100 - PHOTO_FRAME_SIZES[side.photo.frameSize]) / 2}%`,
+            width: `${PHOTO_FRAME_SIZES[side.photo.frameSize]}%`,
+            height: `${PHOTO_FRAME_SIZES[side.photo.frameSize]}%`,
+          }}
+        >
+          <img
+            src={side.photo.src}
+            alt=""
+            draggable={false}
+            className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover"
+            style={{
+              objectPosition: `${side.photo.x}% ${side.photo.y}%`,
+              transform: `scale(${Math.max(
+                1,
+                side.photo.scale,
+              )}) rotate(${side.photo.rotation}deg)`,
+              transformOrigin: `${side.photo.x}% ${side.photo.y}%`,
+            }}
+          />
+        </button>
       )}
 
       {orderedStickers.map(renderSticker)}
