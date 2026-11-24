@@ -726,7 +726,7 @@ export default function OpenCardPreview({
       >
         <section
           aria-label={text.insideLeft}
-          className="relative aspect-[2/3] h-full max-h-full w-auto shrink-0 snap-center overflow-hidden border-r border-[#ded5c8] bg-[#fffdf9] md:aspect-auto md:h-auto md:w-auto md:min-h-0 md:min-w-0 md:shrink"
+          className="relative h-full min-h-0 w-[calc(100%-12px)] min-w-[calc(100%-12px)] shrink-0 snap-center overflow-hidden border-r border-[#ded5c8] bg-[#fffdf9] md:h-auto md:w-auto md:min-w-0 md:shrink"
         >
           <div
             aria-hidden="true"
@@ -840,7 +840,7 @@ export default function OpenCardPreview({
           )}
         </section>
 
-        <section className="relative aspect-[2/3] h-full max-h-full w-auto shrink-0 snap-center overflow-hidden bg-[#fffdf9] md:aspect-auto md:h-auto md:w-auto md:min-h-0 md:min-w-0 md:shrink">
+        <section className="relative h-full min-h-0 w-[calc(100%-12px)] min-w-[calc(100%-12px)] shrink-0 snap-center overflow-hidden bg-[#fffdf9] md:h-auto md:w-auto md:min-w-0 md:shrink">
           <CardComposition
             card={card}
             language={language}
