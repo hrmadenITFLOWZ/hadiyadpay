@@ -1304,7 +1304,9 @@ export default function CardBuilder({
             className="relative mx-auto h-full min-h-0 w-full max-w-[1740px] overflow-hidden p-2 sm:p-3 lg:p-4"
           >
             {activePage === "inside" ? (
-              <div className="relative flex h-full min-h-0 w-full overflow-hidden">
+              <div
+                className={`grid h-full min-h-0 w-full items-stretch gap-2 overflow-hidden transition-[grid-template-columns] duration-300 sm:gap-3 ${activeTool ? "grid-cols-[minmax(0,1fr)_56px_minmax(180px,52vw)] lg:grid-cols-[minmax(0,1fr)_92px_360px] xl:grid-cols-[minmax(0,1fr)_92px_390px]" : "grid-cols-[minmax(0,1fr)_56px] lg:grid-cols-[minmax(0,1fr)_92px]"}`}
+              >
                 <section
                   aria-label={
                     currentLanguage === "nl"
@@ -1313,14 +1315,14 @@ export default function CardBuilder({
                         ? "Gudaha Hadiyadda"
                         : "Inside your Hadiyad"
                   }
-                  className="relative min-w-0 flex-1 overflow-hidden rounded-[1.25rem] bg-[#e6e3df] shadow-inner sm:rounded-[1.5rem]"
+                  className="relative h-full min-h-0 min-w-0 overflow-hidden rounded-[1.25rem] bg-[#e6e3df] shadow-inner sm:rounded-[1.5rem]"
                 >
                   <div className="flex h-full min-h-0 w-full items-center justify-center overflow-hidden p-1.5 sm:p-3 lg:p-4">
                     {renderInsidePreview()}
                   </div>
                 </section>
 
-                <div className="absolute bottom-4 left-1/2 top-4 z-50 -translate-x-1/2">
+                <div className="relative z-30 h-full min-h-0">
                   <EditorToolRail
                     language={currentLanguage}
                     activeTool={activeTool}
@@ -1335,10 +1337,10 @@ export default function CardBuilder({
 
                 <aside
                   aria-label={text.toolPanel}
-                  className="absolute bottom-4 left-[calc(50%+42px)] top-4 z-40 w-[min(72vw,360px)] overflow-hidden sm:left-[calc(50%+50px)] sm:w-[370px] lg:left-[calc(50%+58px)] lg:w-[390px]"
+                  className={`relative z-20 h-full min-h-0 min-w-0 overflow-hidden transition-opacity duration-200 ${activeTool ? "opacity-100" : "pointer-events-none hidden opacity-0"}`}
                 >
                   {activeTool && (
-                    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[1.25rem] border border-[#ded5c8] bg-[#fffdf9] shadow-[0_16px_38px_rgba(38,62,54,0.18)] sm:rounded-[1.5rem]">
+                    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-[1.25rem] border border-[#ded5c8] bg-[#fffdf9] shadow-[0_12px_30px_rgba(38,62,54,0.14)] sm:rounded-[1.5rem]">
                       <div className="flex items-center justify-between border-b border-[#eee8df] px-4 py-3 lg:hidden">
                         <span className="text-xs font-bold uppercase tracking-[0.12em] text-[#285347]">
                           {text.toolPanel}
