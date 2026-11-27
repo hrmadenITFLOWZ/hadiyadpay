@@ -27,6 +27,7 @@ interface OpenCardPreviewProps {
   activeTextLayer?: EditorTextLayer;
   selectedLayer?: SelectedEditorLayer;
   selectedStickerId?: string | null;
+  activeInsidePage?: "left" | "right";
 
   onOpen?: () => void;
 
@@ -168,6 +169,7 @@ export default function OpenCardPreview({
   activeTextLayer = "message",
   selectedLayer = "text",
   selectedStickerId = null,
+  activeInsidePage = "left",
   onOpen,
   onClose,
   onRequestPhoto,
@@ -180,6 +182,7 @@ export default function OpenCardPreview({
   onStickerRemove,
 }: OpenCardPreviewProps) {
   const photoDragRef = useRef<PhotoDragState | null>(null);
+  const insideTrackRef = useRef<HTMLDivElement>(null);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -262,6 +265,25 @@ export default function OpenCardPreview({
     : PHOTO_FRAME_SIZES.large;
 
   const frameInsetPercent = (100 - framePercent) / 2;
+
+  useEffect(() => {
+    const track = insideTrackRef.current;
+
+    if (!track || !isOpen) {
+      return;
+    }
+
+    const mobile = window.matchMedia("(max-width: 767px)").matches;
+
+    if (!mobile) {
+      return;
+    }
+
+    track.scrollTo({
+      left: activeInsidePage === "right" ? track.clientWidth : 0,
+      behavior: "smooth",
+    });
+  }, [activeInsidePage, isOpen]);
 
   const clearRevealTimers = () => {
     if (fadeTimerRef.current !== null) {
@@ -718,6 +740,7 @@ export default function OpenCardPreview({
       )}
 
       <div
+        ref={insideTrackRef}
         className={`relative z-0 mx-auto flex h-full max-h-full w-full max-w-5xl snap-x snap-mandatory scroll-smooth items-stretch overflow-x-auto overflow-y-hidden overscroll-x-contain touch-pan-x border bg-[#fffdf9] shadow-[0_20px_55px_rgba(38,42,39,0.18)] transition-shadow duration-700 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:grid md:aspect-[4/3] md:h-auto md:grid-cols-2 md:items-stretch md:overflow-hidden ${
           revealEffectActive && isWeddingHennaCard
             ? "border-[#c7a368] shadow-[0_32px_90px_rgba(111,63,59,0.32)]"

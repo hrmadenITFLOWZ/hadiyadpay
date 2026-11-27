@@ -53,6 +53,11 @@ import {
 } from "./editor/EditorToolRail";
 
 import EditorStage from "./editor/EditorStage";
+
+import {
+  type EditorStagePosition,
+  isInsideStage,
+} from "./editor/editor-stage-types";
 interface CardBuilderProps {
   card: CardOption;
   currentLanguage: CardLanguage;
@@ -198,6 +203,9 @@ export default function CardBuilder({
   );
 
   const [activePage, setActivePage] = useState<EditorPage>("front");
+
+  const [activeStagePosition, setActiveStagePosition] =
+    useState<EditorStagePosition>("front");
 
   const [activeTool, setActiveTool] = useState<EditorTool | null>(null);
 
@@ -914,6 +922,13 @@ export default function CardBuilder({
   const handleToolSelect = (tool: EditorTool) => {
     setActivePage("inside");
 
+    if (
+      activeStagePosition !== "inside-left" &&
+      activeStagePosition !== "inside-right"
+    ) {
+      setActiveStagePosition("inside-left");
+    }
+
     setActiveTool(tool);
 
     if (tool === "text") {
@@ -937,21 +952,52 @@ export default function CardBuilder({
 
   const handlePageChange = (page: EditorPage) => {
     setActivePage(page);
-
     setSelectedStickerId(null);
 
-    if (page !== "inside") {
+    if (page === "front") {
+      setActiveStagePosition("front");
       setActiveTool(null);
-
       return;
     }
 
+    if (page === "back") {
+      setActiveStagePosition("back");
+      setActiveTool(null);
+      return;
+    }
+
+    setActiveStagePosition("inside-left");
     setActiveTool(null);
 
     if (draft.side !== "inside") {
       commitAction({
         type: "SET_SIDE",
+        side: "inside",
+      });
+    }
+  };
 
+  const handleStagePositionChange = (position: EditorStagePosition) => {
+    setActiveStagePosition(position);
+    setSelectedStickerId(null);
+
+    if (position === "front") {
+      setActivePage("front");
+      setActiveTool(null);
+      return;
+    }
+
+    if (position === "back") {
+      setActivePage("back");
+      setActiveTool(null);
+      return;
+    }
+
+    setActivePage("inside");
+
+    if (draft.side !== "inside") {
+      commitAction({
+        type: "SET_SIDE",
         side: "inside",
       });
     }
@@ -982,6 +1028,9 @@ export default function CardBuilder({
       activeTextLayer={activeTextLayer}
       selectedLayer={selectedLayer}
       selectedStickerId={selectedStickerId}
+      activeInsidePage={
+        activeStagePosition === "inside-right" ? "right" : "left"
+      }
       onClose={() => handlePageChange("front")}
       onRequestPhoto={() => {
         setSelectedLayer("photo");
@@ -1288,173 +1337,115 @@ export default function CardBuilder({
             aria-modal={!isCheckoutOpen}
             aria-hidden={isCheckoutOpen}
             aria-labelledby="card-editor-heading"
-            className="relative mx-auto h-full min-h-0 w-full max-w-[1740px] overflow-hidden p-2 sm:p-3 lg:p-4"
+            className="h-full min-h-0 w-full overflow-hidden"
           >
-            {activePage === "inside" ? (
-              <div
-                className={`grid h-full min-h-0 w-full grid-cols-[minmax(0,1fr)_64px] items-stretch gap-2 overflow-hidden sm:grid-cols-[minmax(0,1fr)_76px] sm:gap-3 lg:transition-[grid-template-columns] lg:duration-300 ${activeTool ? "lg:grid-cols-[minmax(0,1fr)_92px_360px] xl:grid-cols-[minmax(0,1fr)_92px_390px]" : "lg:grid-cols-[minmax(0,1fr)_92px]"}`}
-              >
-                <section
-                  aria-label={
-                    currentLanguage === "nl"
-                      ? "Binnenkant van je Hadiyad"
-                      : currentLanguage === "so"
-                        ? "Gudaha Hadiyadda"
-                        : "Inside your Hadiyad"
-                  }
-                  className="relative h-full min-h-0 min-w-0 overflow-hidden rounded-[1.25rem] bg-[#e6e3df] shadow-inner sm:rounded-[1.5rem]"
-                >
-                  <div className="flex h-full min-h-0 w-full items-center justify-center overflow-hidden p-1.5 sm:p-3 lg:p-4">
-                    {renderInsidePreview()}
-                  </div>
-                </section>
+            <h2 id="card-editor-heading" className="sr-only">
+              {pageTitle}
+            </h2>
 
-                <div className="relative z-30 h-full min-h-0">
-                  <EditorToolRail
-                    language={currentLanguage}
-                    activeTool={activeTool}
-                    hasPhoto={Boolean(
-                      activeSideData.photo &&
-                      !activeSideData.photo.requiresReselection,
+            <EditorStage
+              activePosition={activeStagePosition}
+              front={
+                <OpenCardPreview
+                  card={card}
+                  language={currentLanguage}
+                  inside={draft.inside}
+                  isOpen={false}
+                  onOpen={() => handleStagePositionChange("inside-left")}
+                />
+              }
+              inside={renderInsidePreview()}
+              back={
+                <div className="flex aspect-[2/3] h-[92%] max-h-[46rem] items-center justify-center overflow-hidden border border-[#ded5c8] bg-[#fffdf9] shadow-xl">
+                  <div className="px-8 text-center">
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-[#d8bd8d] bg-[#faf5eb] font-serif text-base font-bold text-[#9a7441]">
+                      MH
+                    </div>
+
+                    <p className="mt-4 font-serif text-xl text-[#173f35]">
+                      My Hadiyad
+                    </p>
+
+                    <p className="mx-auto mt-2 max-w-xs text-xs leading-5 text-stone-400">
+                      {text.backDescription}
+                    </p>
+                  </div>
+                </div>
+              }
+              toolRail={
+                <EditorToolRail
+                  language={currentLanguage}
+                  activeTool={activeTool}
+                  hasPhoto={Boolean(
+                    activeSideData.photo &&
+                    !activeSideData.photo.requiresReselection,
+                  )}
+                  stickerCount={activeSideData.stickers.length}
+                  onToolSelect={handleToolSelect}
+                />
+              }
+              toolPanel={
+                <div className="space-y-4 p-3.5 sm:p-4">
+                  <PreviewControls
+                    activeMode={draft.previewMode}
+                    onSelect={(mode: EditorPreviewMode) =>
+                      commitAction({
+                        type: "SET_PREVIEW_MODE",
+                        mode,
+                      })
+                    }
+                    labels={{
+                      edit: text.editing,
+                      clean: text.preview,
+                      full: text.full,
+                    }}
+                  />
+
+                  {renderActiveToolPanel()}
+
+                  <details className="rounded-2xl border border-stone-200 bg-white">
+                    <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-semibold text-stone-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]">
+                      <span>{text.moreOptions}</span>
+                      <span aria-hidden="true" className="text-stone-400">
+                        ↓
+                      </span>
+                    </summary>
+
+                    <div className="border-t border-stone-100 p-3">
+                      <ResetControls
+                        onResetActiveSide={() => {
+                          commitAction({
+                            type: "RESET_ACTIVE_SIDE",
+                            card,
+                            currentLanguage,
+                          });
+
+                          setActiveTool(null);
+                          setSelectedLayer("text");
+                          setSelectedStickerId(null);
+                        }}
+                        onResetCard={handleResetCard}
+                        labels={{
+                          activeSide: text.resetSide,
+                          card: text.resetCard,
+                        }}
+                      />
+                    </div>
+                  </details>
+
+                  <EditorStatus
+                    currentLanguage={currentLanguage}
+                    shareNotice={null}
+                    photoRequiresReselection={Boolean(
+                      activeSideData.photo?.requiresReselection,
                     )}
-                    stickerCount={activeSideData.stickers.length}
-                    onToolSelect={handleToolSelect}
                   />
                 </div>
-
-                <aside
-                  aria-label={text.toolPanel}
-                  className={`fixed inset-x-2 bottom-[118px] z-[70] max-h-[52dvh] min-h-0 overflow-hidden transition-all duration-300 sm:inset-x-4 sm:bottom-[138px] lg:relative lg:inset-auto lg:bottom-auto lg:z-20 lg:h-full lg:max-h-none lg:min-w-0 ${activeTool ? "translate-y-0 opacity-100 lg:block" : "pointer-events-none translate-y-[calc(100%+32px)] opacity-0 lg:hidden lg:translate-y-0"}`}
-                >
-                  {activeTool && (
-                    <div className="flex h-full max-h-[52dvh] min-h-0 w-full flex-col overflow-hidden rounded-t-[1.5rem] border border-[#ded5c8] bg-[#fffdf9] shadow-[0_-12px_36px_rgba(38,62,54,0.18)] lg:max-h-none lg:rounded-[1.5rem] lg:shadow-[0_12px_30px_rgba(38,62,54,0.14)]">
-                      <div className="flex items-center justify-between border-b border-[#eee8df] px-4 py-3 lg:hidden">
-                        <span className="text-xs font-bold uppercase tracking-[0.12em] text-[#285347]">
-                          {text.toolPanel}
-                        </span>
-
-                        <button
-                          type="button"
-                          onClick={() => setActiveTool(null)}
-                          aria-label={text.closePanel}
-                          className="flex h-9 w-9 items-center justify-center rounded-full bg-stone-100 text-lg text-stone-600 transition hover:bg-stone-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]"
-                        >
-                          ×
-                        </button>
-                      </div>
-
-                      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-3.5 sm:p-4">
-                        <div className="space-y-4">
-                          <PreviewControls
-                            activeMode={draft.previewMode}
-                            onSelect={(mode: EditorPreviewMode) =>
-                              commitAction({
-                                type: "SET_PREVIEW_MODE",
-
-                                mode,
-                              })
-                            }
-                            labels={{
-                              edit: text.editing,
-
-                              clean: text.preview,
-
-                              full: text.full,
-                            }}
-                          />
-
-                          {renderActiveToolPanel()}
-
-                          <details className="rounded-2xl border border-stone-200 bg-white">
-                            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-semibold text-stone-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285347]">
-                              <span>{text.moreOptions}</span>
-
-                              <span
-                                aria-hidden="true"
-                                className="text-stone-400"
-                              >
-                                ↓
-                              </span>
-                            </summary>
-
-                            <div className="border-t border-stone-100 p-3">
-                              <ResetControls
-                                onResetActiveSide={() => {
-                                  commitAction({
-                                    type: "RESET_ACTIVE_SIDE",
-
-                                    card,
-
-                                    currentLanguage,
-                                  });
-
-                                  setActiveTool("text");
-
-                                  setSelectedLayer("text");
-
-                                  setSelectedStickerId(null);
-                                }}
-                                onResetCard={handleResetCard}
-                                labels={{
-                                  activeSide: text.resetSide,
-
-                                  card: text.resetCard,
-                                }}
-                              />
-                            </div>
-                          </details>
-
-                          <EditorStatus
-                            currentLanguage={currentLanguage}
-                            shareNotice={null}
-                            photoRequiresReselection={Boolean(
-                              activeSideData.photo?.requiresReselection,
-                            )}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </aside>
-              </div>
-            ) : (
-              <section
-                aria-label={
-                  currentLanguage === "nl"
-                    ? "Voorbeeld van je Hadiyad"
-                    : currentLanguage === "so"
-                      ? "Muuqaalka Hadiyadda"
-                      : "Your Hadiyad preview"
-                }
-                className="flex h-full min-h-0 flex-1 items-center justify-center overflow-hidden rounded-[1.4rem] bg-[#e6e3df] p-2 shadow-inner sm:p-3"
-              >
-                {activePage === "front" ? (
-                  <OpenCardPreview
-                    card={card}
-                    language={currentLanguage}
-                    inside={draft.inside}
-                    isOpen={false}
-                    onOpen={() => handlePageChange("inside")}
-                  />
-                ) : (
-                  <div className="flex aspect-[2/3] w-full max-w-[30rem] items-center justify-center overflow-hidden rounded-[1.6rem] border border-[#ded5c8] bg-[#fffdf9] shadow-xl">
-                    <div className="px-8 text-center">
-                      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[#d8bd8d] bg-[#faf5eb] font-serif text-lg font-bold text-[#9a7441]">
-                        MH
-                      </div>
-
-                      <p className="mt-4 font-serif text-2xl text-[#173f35]">
-                        My Hadiyad
-                      </p>
-
-                      <p className="mx-auto mt-2 max-w-xs text-xs leading-5 text-stone-400">
-                        {text.backDescription}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </section>
-            )}
+              }
+              isToolPanelOpen={Boolean(activeTool)}
+              closePanelLabel={text.closePanel}
+              onCloseToolPanel={() => setActiveTool(null)}
+            />
           </div>
         </main>
 
